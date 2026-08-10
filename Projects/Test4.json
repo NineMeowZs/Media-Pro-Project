@@ -1,0 +1,39 @@
+{
+  "tracks": {
+    "main": [
+      {
+        "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/OBS/2026-07-22 14-43-17.mkv",
+        "name": "2026-07-22 14-43-17.mkv",
+        "start": 0,
+        "end": 29.533333333333335,
+        "speed": 2.1904166666666667,
+        "volume": 0.5916666666666667,
+        "tl": 0.0,
+        "fps": 60.0,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 29.533333333333335,
+        "brightness": 0.592
+      }
+    ],
+    "subtitle": [],
+    "audio_0": [],
+    "audio_1": [],
+    "layer_0": []
+  },
+  "assets": [
+    {
+      "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/OBS/2026-07-22 14-43-17.mkv",
+      "name": "2026-07-22 14-43-17.mkv",
+      "type": "video"
+    },
+    {
+      "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/OBS/2026-07-10 23-56-27.mkv",
+      "name": "2026-07-10 23-56-27.mkv",
+      "type": "video"
+    }
+  ],
+  "muted": {},
+  "segments": [],
+  "version": 5
+}

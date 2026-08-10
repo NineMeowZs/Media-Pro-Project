@@ -1,0 +1,496 @@
+{
+  "tracks": {
+    "main": [
+      {
+        "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/CardSpotlight - \u0e2d\u0e2d\u0e40\u0e14\u0e2d\u0e23\u0e4c\u0e21\u0e48\u0e27\u0e07\u0e2a\u0e32\u0e21\u0e31\u0e0d.mp4",
+        "name": "CardSpotlight - \u0e2d\u0e2d\u0e40\u0e14\u0e2d\u0e23\u0e4c\u0e21\u0e48\u0e27\u0e07\u0e2a\u0e32\u0e21\u0e31\u0e0d.mp4",
+        "start": 0,
+        "end": 107.72074444444445,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 0.0,
+        "fps": 60.02557848395445,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 107.72074444444445
+      },
+      {
+        "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/NineMeow_v_Oxob_2026-6-28-0-17-21.mp4",
+        "name": "NineMeow_v_Oxob_2026-6-28-0-17-21.mp4",
+        "start": 0,
+        "end": 33.71666666666667,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 107.712,
+        "fps": 60.0,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 33.71666666666667
+      }
+    ],
+    "subtitle": [
+      {
+        "path": "",
+        "name": "\u0e01\u0e32\u0e23\u0e2a\u0e1b\u0e2d\u0e23\u0e4c\u0e41\u0e25\u0e30\u0e27\u0e31\u0e14\u0e14\u0e35\u0e1e\u0e1a\u0e01\u0e31\u0e1a\u0e2b\u0e31\u0e27",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 0.0,
+        "fps": 30,
+        "sub_text": "\u0e01\u0e32\u0e23\u0e2a\u0e1b\u0e2d\u0e23\u0e4c\u0e41\u0e25\u0e30\u0e27\u0e31\u0e14\u0e14\u0e35\u0e1e\u0e1a\u0e01\u0e31\u0e1a\u0e2b\u0e31\u0e27"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e35\u0e40\u0e2d\u0e49\u0e22\u0e2b\u0e31\u0e27\u0e41\u0e25\u0e1a\u0e31\u0e22\u0e18\u0e23\u0e23\u0e21\u0e14\u0e32\u0e1a\u0e31\u0e22\u0e2b",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 5.0,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e35\u0e40\u0e2d\u0e49\u0e22\u0e2b\u0e31\u0e27\u0e41\u0e25\u0e1a\u0e31\u0e22\u0e18\u0e23\u0e23\u0e21\u0e14\u0e32\u0e1a\u0e31\u0e22\u0e2b\u0e19\u0e36\u0e48\u0e07"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e35\u0e48\u0e2a\u0e21\u0e32\u0e23\u0e16\u0e1e\u0e1a\u0e40\u0e08\u0e2d\u0e44\u0e14\u0e49\u0e01\u0e25\u0e48\u0e2d\u0e07\u0e14\u0e35",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 10.0,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e35\u0e48\u0e2a\u0e21\u0e32\u0e23\u0e16\u0e1e\u0e1a\u0e40\u0e08\u0e2d\u0e44\u0e14\u0e49\u0e01\u0e25\u0e48\u0e2d\u0e07\u0e14\u0e35"
+      },
+      {
+        "path": "",
+        "name": "\u0e2a\u0e34\u0e1a\u0e35\u0e2a\u0e34\u0e1a\u0e43\u0e19\u0e01\u0e31\u0e1a\u0e42\u0e01\u0e23\u0e07\u0e41\u0e2b\u0e48\u0e07\u0e14\u0e32\u0e27",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 15.0,
+        "fps": 30,
+        "sub_text": "\u0e2a\u0e34\u0e1a\u0e35\u0e2a\u0e34\u0e1a\u0e43\u0e19\u0e01\u0e31\u0e1a\u0e42\u0e01\u0e23\u0e07\u0e41\u0e2b\u0e48\u0e07\u0e14\u0e32\u0e27"
+      },
+      {
+        "path": "",
+        "name": "\u0e0a\u0e31\u0e48\u0e27\u0e23\u0e49\u0e32\u0e22\u0e19\u0e31\u0e1a\u0e01\u0e31\u0e1a\u0e40\u0e17\u0e47\u0e01\u0e40\u0e2a\u0e23\u0e47\u0e08\u0e07",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 20.0,
+        "fps": 30,
+        "sub_text": "\u0e0a\u0e31\u0e48\u0e27\u0e23\u0e49\u0e32\u0e22\u0e19\u0e31\u0e1a\u0e01\u0e31\u0e1a\u0e40\u0e17\u0e47\u0e01\u0e40\u0e2a\u0e23\u0e47\u0e08\u0e07\u0e48\u0e32\u0e22\u0e44\u0e21\u0e48\u0e21\u0e35"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e2d\u0e23\u0e4c\u0e15\u0e42\u0e0b\u0e25\u0e4c\u0e0a\u0e32",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 25.0,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e2d\u0e23\u0e4c\u0e15\u0e42\u0e0b\u0e25\u0e4c\u0e0a\u0e32"
+      },
+      {
+        "path": "",
+        "name": "\u0e2b\u0e23\u0e2d",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 30.0,
+        "fps": 30,
+        "sub_text": "\u0e2b\u0e23\u0e2d"
+      },
+      {
+        "path": "",
+        "name": "\u0e19\u0e35\u0e49\u0e0a\u0e38\u0e1a\u0e0a\u0e38\u0e1a\u0e40\u0e2b\u0e21\u0e37\u0e2d\u0e19\u0e01\u0e31\u0e19\u0e01\u0e31\u0e19\u0e01\u0e47\u0e44",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 35.0,
+        "fps": 30,
+        "sub_text": "\u0e19\u0e35\u0e49\u0e0a\u0e38\u0e1a\u0e0a\u0e38\u0e1a\u0e40\u0e2b\u0e21\u0e37\u0e2d\u0e19\u0e01\u0e31\u0e19\u0e01\u0e31\u0e19\u0e01\u0e47\u0e44\u0e14\u0e49\u0e19\u0e2d\u0e19\u0e04\u0e23\u0e31\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e40\u0e23\u0e32\u0e01\u0e47\u0e43\u0e2a\u0e48\u0e43\u0e19\u0e1e\u0e35\u0e40\u0e21\u0e48\u0e19\u0e40\u0e21\u0e48\u0e19\u0e43\u0e2a\u0e48",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 40.0,
+        "fps": 30,
+        "sub_text": "\u0e40\u0e23\u0e32\u0e01\u0e47\u0e43\u0e2a\u0e48\u0e43\u0e19\u0e1e\u0e35\u0e40\u0e21\u0e48\u0e19\u0e40\u0e21\u0e48\u0e19\u0e43\u0e2a\u0e48"
+      },
+      {
+        "path": "",
+        "name": "\u0e2b\u0e23\u0e2d",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 45.0,
+        "fps": 30,
+        "sub_text": "\u0e2b\u0e23\u0e2d"
+      },
+      {
+        "path": "",
+        "name": "\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 50.0,
+        "fps": 30,
+        "sub_text": "\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48"
+      },
+      {
+        "path": "",
+        "name": "\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 55.0,
+        "fps": 30,
+        "sub_text": "\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e13\u0e08\u0e30\u0e04\u0e2d\u0e40\u0e1b\u0e47\u0e19\u0e15\u0e31\u0e27\u0e19\u0e35\u0e49\u0e21\u0e32\u0e08\u0e31\u0e27\u0e40\u0e1e",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 60.0,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e13\u0e08\u0e30\u0e04\u0e2d\u0e40\u0e1b\u0e47\u0e19\u0e15\u0e31\u0e27\u0e19\u0e35\u0e49\u0e21\u0e32\u0e08\u0e31\u0e27\u0e40\u0e1e\u0e34\u0e48\u0e21"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e2d\u0e42\u0e06\u0e1f\u0e4c\u0e21\u0e30\u0e41\u0e14\u0e21\u0e01\u0e47\u0e14\u0e35\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 65.0,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e2d\u0e42\u0e06\u0e1f\u0e4c\u0e21\u0e30\u0e41\u0e14\u0e21\u0e01\u0e47\u0e14\u0e35\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30"
+      },
+      {
+        "path": "",
+        "name": "\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 70.0,
+        "fps": 30,
+        "sub_text": "\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30"
+      },
+      {
+        "path": "",
+        "name": "\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 75.0,
+        "fps": 30,
+        "sub_text": "\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30"
+      },
+      {
+        "path": "",
+        "name": "\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 80.0,
+        "fps": 30,
+        "sub_text": "\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30"
+      },
+      {
+        "path": "",
+        "name": "\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 85.0,
+        "fps": 30,
+        "sub_text": "\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48"
+      },
+      {
+        "path": "",
+        "name": "\u0e09\u0e31\u0e19\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49\u0e23\u0e31\u0e1a\u0e04\u0e38\u0e13",
+        "start": 0,
+        "end": 17.712000000000003,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 90.0,
+        "fps": 30,
+        "sub_text": "\u0e09\u0e31\u0e19\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49\u0e23\u0e31\u0e1a\u0e04\u0e38\u0e13"
+      }
+    ],
+    "audio_0": [
+      {
+        "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e2d\u0e31\u0e14/1SoundEffect SFX/Breaking the ROCK!!.mp3",
+        "name": "Breaking the ROCK!!.mp3",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 141.4286666666667,
+        "fps": 30,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 5.0
+      }
+    ],
+    "audio_1": [
+      {
+        "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e2d\u0e31\u0e14/1SoundEffect SFX/Breaking the ROCK!!.mp3",
+        "name": "Breaking the ROCK!!.mp3",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 146.4286666666667,
+        "fps": 30,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 5.0
+      }
+    ],
+    "layer_0": [
+      {
+        "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/20260528_210717.jpg",
+        "name": "20260528_210717.jpg",
+        "start": 0,
+        "end": 0.04,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 90.0,
+        "fps": 25.0,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 999999.0
+      },
+      {
+        "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/Screenshot_20260630_202654_YouTube.jpg",
+        "name": "Screenshot_20260630_202654_YouTube.jpg",
+        "start": 0,
+        "end": 0.04,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 130.29119565657007,
+        "fps": 25.0,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 999999.0
+      },
+      {
+        "path": "",
+        "name": "\u0e22\u0e31\u0e07\u0e44\u0e07\u0e01\u0e47\u0e14\u0e33",
+        "start": 0,
+        "end": 5.0,
+        "speed": 4.0,
+        "volume": 1.0,
+        "tl": 130.9,
+        "fps": 30,
+        "custom_x": 0.5,
+        "custom_y": 0.2,
+        "font_name": "Tahoma",
+        "font_size": 36,
+        "font_color": "#ffffff",
+        "decoration": "shadow",
+        "source_dur": 999999.0
+      }
+    ],
+    "layer_1": [
+      {
+        "path": "",
+        "name": "\u0e22\u0e31\u0e07\u0e44\u0e07\u0e01\u0e47\u0e14\u0e33",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 110.93295894666957,
+        "fps": 30,
+        "custom_x": 0.5,
+        "custom_y": 0.2,
+        "font_name": "Tahoma",
+        "font_size": 36,
+        "font_color": "#ffffff",
+        "decoration": "shadow",
+        "source_dur": 999999.0
+      },
+      {
+        "path": "",
+        "name": "\u0e22\u0e31\u0e07\u0e44\u0e07\u0e01\u0e47\u0e14\u0e33",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 130.9,
+        "fps": 30,
+        "custom_x": 0.5,
+        "custom_y": 0.2,
+        "font_name": "Tahoma",
+        "font_size": 36,
+        "font_color": "#ffffff",
+        "decoration": "shadow",
+        "source_dur": 999999.0
+      }
+    ],
+    "layer_2": [],
+    "audio_2": [
+      {
+        "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e2d\u0e31\u0e14/1SoundEffect SFX/Breaking the ROCK!!.mp3",
+        "name": "Breaking the ROCK!!.mp3",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 151.4286666666667,
+        "fps": 30,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 5.0
+      }
+    ]
+  },
+  "assets": [
+    {
+      "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/CardSpotlight - \u0e2d\u0e2d\u0e40\u0e14\u0e2d\u0e23\u0e4c\u0e21\u0e48\u0e27\u0e07\u0e2a\u0e32\u0e21\u0e31\u0e0d.mp4",
+      "name": "CardSpotlight - \u0e2d\u0e2d\u0e40\u0e14\u0e2d\u0e23\u0e4c\u0e21\u0e48\u0e27\u0e07\u0e2a\u0e32\u0e21\u0e31\u0e0d.mp4",
+      "type": "video"
+    },
+    {
+      "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/NineMeow_v_Oxob_2026-6-28-0-17-21.mp4",
+      "name": "NineMeow_v_Oxob_2026-6-28-0-17-21.mp4",
+      "type": "video"
+    },
+    {
+      "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/20260528_210717.jpg",
+      "name": "20260528_210717.jpg",
+      "type": "image"
+    },
+    {
+      "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/Screenshot_20260630_202654_YouTube.jpg",
+      "name": "Screenshot_20260630_202654_YouTube.jpg",
+      "type": "image"
+    },
+    {
+      "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e2d\u0e31\u0e14/1SoundEffect SFX/Breaking the ROCK!!.mp3",
+      "name": "Breaking the ROCK!!.mp3",
+      "type": "audio"
+    }
+  ],
+  "muted": {},
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 5.0,
+      "text": "\u0e01\u0e32\u0e23\u0e2a\u0e1b\u0e2d\u0e23\u0e4c\u0e41\u0e25\u0e30\u0e27\u0e31\u0e14\u0e14\u0e35\u0e1e\u0e1a\u0e01\u0e31\u0e1a\u0e2b\u0e31\u0e27"
+    },
+    {
+      "start": 5.0,
+      "end": 10.0,
+      "text": "\u0e0b\u0e35\u0e40\u0e2d\u0e49\u0e22\u0e2b\u0e31\u0e27\u0e41\u0e25\u0e1a\u0e31\u0e22\u0e18\u0e23\u0e23\u0e21\u0e14\u0e32\u0e1a\u0e31\u0e22\u0e2b\u0e19\u0e36\u0e48\u0e07"
+    },
+    {
+      "start": 10.0,
+      "end": 15.0,
+      "text": "\u0e17\u0e35\u0e48\u0e2a\u0e21\u0e32\u0e23\u0e16\u0e1e\u0e1a\u0e40\u0e08\u0e2d\u0e44\u0e14\u0e49\u0e01\u0e25\u0e48\u0e2d\u0e07\u0e14\u0e35"
+    },
+    {
+      "start": 15.0,
+      "end": 20.0,
+      "text": "\u0e2a\u0e34\u0e1a\u0e35\u0e2a\u0e34\u0e1a\u0e43\u0e19\u0e01\u0e31\u0e1a\u0e42\u0e01\u0e23\u0e07\u0e41\u0e2b\u0e48\u0e07\u0e14\u0e32\u0e27"
+    },
+    {
+      "start": 20.0,
+      "end": 25.0,
+      "text": "\u0e0a\u0e31\u0e48\u0e27\u0e23\u0e49\u0e32\u0e22\u0e19\u0e31\u0e1a\u0e01\u0e31\u0e1a\u0e40\u0e17\u0e47\u0e01\u0e40\u0e2a\u0e23\u0e47\u0e08\u0e07\u0e48\u0e32\u0e22\u0e44\u0e21\u0e48\u0e21\u0e35"
+    },
+    {
+      "start": 25.0,
+      "end": 30.0,
+      "text": "\u0e04\u0e2d\u0e23\u0e4c\u0e15\u0e42\u0e0b\u0e25\u0e4c\u0e0a\u0e32"
+    },
+    {
+      "start": 30.0,
+      "end": 35.0,
+      "text": "\u0e2b\u0e23\u0e2d"
+    },
+    {
+      "start": 35.0,
+      "end": 40.0,
+      "text": "\u0e19\u0e35\u0e49\u0e0a\u0e38\u0e1a\u0e0a\u0e38\u0e1a\u0e40\u0e2b\u0e21\u0e37\u0e2d\u0e19\u0e01\u0e31\u0e19\u0e01\u0e31\u0e19\u0e01\u0e47\u0e44\u0e14\u0e49\u0e19\u0e2d\u0e19\u0e04\u0e23\u0e31\u0e1a"
+    },
+    {
+      "start": 40.0,
+      "end": 45.0,
+      "text": "\u0e40\u0e23\u0e32\u0e01\u0e47\u0e43\u0e2a\u0e48\u0e43\u0e19\u0e1e\u0e35\u0e40\u0e21\u0e48\u0e19\u0e40\u0e21\u0e48\u0e19\u0e43\u0e2a\u0e48"
+    },
+    {
+      "start": 45.0,
+      "end": 50.0,
+      "text": "\u0e2b\u0e23\u0e2d"
+    },
+    {
+      "start": 50.0,
+      "end": 55.0,
+      "text": "\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48"
+    },
+    {
+      "start": 55.0,
+      "end": 60.0,
+      "text": "\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a\u0e48\u0e43\u0e2a"
+    },
+    {
+      "start": 60.0,
+      "end": 65.0,
+      "text": "\u0e04\u0e38\u0e13\u0e08\u0e30\u0e04\u0e2d\u0e40\u0e1b\u0e47\u0e19\u0e15\u0e31\u0e27\u0e19\u0e35\u0e49\u0e21\u0e32\u0e08\u0e31\u0e27\u0e40\u0e1e\u0e34\u0e48\u0e21"
+    },
+    {
+      "start": 65.0,
+      "end": 70.0,
+      "text": "\u0e04\u0e2d\u0e42\u0e06\u0e1f\u0e4c\u0e21\u0e30\u0e41\u0e14\u0e21\u0e01\u0e47\u0e14\u0e35\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30"
+    },
+    {
+      "start": 70.0,
+      "end": 75.0,
+      "text": "\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30"
+    },
+    {
+      "start": 75.0,
+      "end": 80.0,
+      "text": "\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30"
+    },
+    {
+      "start": 80.0,
+      "end": 85.0,
+      "text": "\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30"
+    },
+    {
+      "start": 85.0,
+      "end": 90.0,
+      "text": "\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30\u0e2d\u0e48"
+    },
+    {
+      "start": 90.0,
+      "end": 107.712,
+      "text": "\u0e09\u0e31\u0e19\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49\u0e23\u0e31\u0e1a\u0e04\u0e38\u0e13"
+    }
+  ],
+  "version": 5
+}

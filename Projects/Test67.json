@@ -1,0 +1,1726 @@
+{
+  "tracks": {
+    "main": [
+      {
+        "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/\u0e23\u0e2d\u0e22\u0e31\u0e25 \u0e41\u0e04\u0e25\u0e19\u0e2a\u0e27\u0e30\u0e17\u0e35\u0e48\u0e09\u0e31\u0e19\u0e0a\u0e2d\u0e1a.mp4",
+        "name": "\u0e23\u0e2d\u0e22\u0e31\u0e25 \u0e41\u0e04\u0e25\u0e19\u0e2a\u0e27\u0e30\u0e17\u0e35\u0e48\u0e09\u0e31\u0e19\u0e0a\u0e2d\u0e1a.mp4",
+        "start": 0,
+        "end": 150.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 0.0,
+        "fps": 29.0,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 150.0
+      }
+    ],
+    "subtitle": [
+      {
+        "path": "",
+        "name": "\u0e22\u0e31\u0e07\u0e14\u0e35\u0e44\u0e21\u0e48\u0e21\u0e35\u0e2d\u0e30\u0e44\u0e23\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e19\u0e35\u0e49\u0e44\u0e21",
+        "start": 0,
+        "end": 2.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 0.0,
+        "fps": 30,
+        "sub_text": "\u0e22\u0e31\u0e07\u0e14\u0e35\u0e44\u0e21\u0e48\u0e21\u0e35\u0e2d\u0e30\u0e44\u0e23\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e19\u0e35\u0e49\u0e44\u0e21\u0e48\u0e08\u0e31\u0e14"
+      },
+      {
+        "path": "",
+        "name": "\u0e2d\u0e30\u0e44\u0e23\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30",
+        "start": 0,
+        "end": 2.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 2.0,
+        "fps": 30,
+        "sub_text": "\u0e2d\u0e30\u0e44\u0e23\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30"
+      },
+      {
+        "path": "",
+        "name": "\u0e42\u0e2d\u0e49\u0e42\u0e23\u0e22\u0e31\u0e27\u0e42\u0e23\u0e22\u0e31\u0e27\u0e14\u0e32\u0e27\u0e25\u0e48\u0e32\u0e2a\u0e38\u0e14\u0e23\u0e39",
+        "start": 0,
+        "end": 2.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 10.0,
+        "fps": 30,
+        "sub_text": "\u0e42\u0e2d\u0e49\u0e42\u0e23\u0e22\u0e31\u0e27\u0e42\u0e23\u0e22\u0e31\u0e27\u0e14\u0e32\u0e27\u0e25\u0e48\u0e32\u0e2a\u0e38\u0e14\u0e23\u0e39\u0e49"
+      },
+      {
+        "path": "",
+        "name": "\u0e23\u0e36\u0e40\u0e1b\u0e25\u0e48\u0e32",
+        "start": 0,
+        "end": 2.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 12.0,
+        "fps": 30,
+        "sub_text": "\u0e23\u0e36\u0e40\u0e1b\u0e25\u0e48\u0e32"
+      },
+      {
+        "path": "",
+        "name": "\u0e1c\u0e21\u0e21\u0e36\u0e07\u0e17\u0e31\u0e01\u0e44\u0e1b\u0e2b\u0e32\u0e04\u0e19\u0e2b\u0e19\u0e36\u0e48\u0e07\u0e1a\u0e2d\u0e01\u0e27\u0e48",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 14.0,
+        "fps": 30,
+        "sub_text": "\u0e1c\u0e21\u0e21\u0e36\u0e07\u0e17\u0e31\u0e01\u0e44\u0e1b\u0e2b\u0e32\u0e04\u0e19\u0e2b\u0e19\u0e36\u0e48\u0e07\u0e1a\u0e2d\u0e01\u0e27\u0e48\u0e32"
+      },
+      {
+        "path": "",
+        "name": "\u0e42\u0e23\u0e22\u0e31\u0e27\u0e2d\u0e2d\u0e01\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e04\u0e23\u0e31\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 15.5,
+        "fps": 30,
+        "sub_text": "\u0e42\u0e23\u0e22\u0e31\u0e27\u0e2d\u0e2d\u0e01\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e04\u0e23\u0e31\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e44\u0e2d\u0e49\u0e40\u0e02\u0e35\u0e22\u0e27\u0e1a\u0e2d\u0e01\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e40\u0e25\u0e48\u0e19\u0e14\u0e49\u0e27\u0e22",
+        "start": 0,
+        "end": 2.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 17.0,
+        "fps": 30,
+        "sub_text": "\u0e44\u0e2d\u0e49\u0e40\u0e02\u0e35\u0e22\u0e27\u0e1a\u0e2d\u0e01\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e40\u0e25\u0e48\u0e19\u0e14\u0e49\u0e27\u0e22\u0e04\u0e37\u0e2d\u0e42\u0e23"
+      },
+      {
+        "path": "",
+        "name": "\u0e22\u0e31\u0e27\u0e04\u0e38\u0e13\u0e15\u0e31\u0e27\u0e21\u0e31\u0e19\u0e40\u0e1b\u0e47\u0e19\u0e41\u0e04\u0e48\u0e19\u0e17\u0e35\u0e48",
+        "start": 0,
+        "end": 2.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 19.5,
+        "fps": 30,
+        "sub_text": "\u0e22\u0e31\u0e27\u0e04\u0e38\u0e13\u0e15\u0e31\u0e27\u0e21\u0e31\u0e19\u0e40\u0e1b\u0e47\u0e19\u0e41\u0e04\u0e48\u0e19\u0e17\u0e35\u0e48"
+      },
+      {
+        "path": "",
+        "name": "\u0e40\u0e23\u0e32\u0e40\u0e22\u0e32\u0e21\u0e32\u0e43\u0e01\u0e25\u0e49\u0e17\u0e35\u0e48\u0e21\u0e14\u0e32\u0e27\u0e15\u0e25\u0e2d\u0e14",
+        "start": 0,
+        "end": 0.4210526315789487,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 22.0,
+        "fps": 30,
+        "sub_text": "\u0e40\u0e23\u0e32\u0e40\u0e22\u0e32\u0e21\u0e32\u0e43\u0e01\u0e25\u0e49\u0e17\u0e35\u0e48\u0e21\u0e14\u0e32\u0e27\u0e15\u0e25\u0e2d\u0e14"
+      },
+      {
+        "path": "",
+        "name": "\u0e40\u0e25\u0e22\u0e41\u0e1a\u0e1a\u0e14\u0e32\u0e27\u0e21\u0e14\u0e32\u0e27\u0e17\u0e35\u0e48\u0e1c\u0e48\u0e32\u0e22\u0e27\u0e48\u0e32",
+        "start": 0,
+        "end": 0.4210526315789451,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 22.42105263157895,
+        "fps": 30,
+        "sub_text": "\u0e40\u0e25\u0e22\u0e41\u0e1a\u0e1a\u0e14\u0e32\u0e27\u0e21\u0e14\u0e32\u0e27\u0e17\u0e35\u0e48\u0e1c\u0e48\u0e32\u0e22\u0e27\u0e48\u0e32"
+      },
+      {
+        "path": "",
+        "name": "\u0e40\u0e25\u0e22\u0e17\u0e35\u0e48\u0e41\u0e01\u0e19\u0e40\u0e23\u0e34\u0e07\u0e04\u0e39\u0e14\u0e02\u0e22\u0e30\u0e08\u0e35",
+        "start": 0,
+        "end": 0.4210526315789487,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 22.842105263157894,
+        "fps": 30,
+        "sub_text": "\u0e40\u0e25\u0e22\u0e17\u0e35\u0e48\u0e41\u0e01\u0e19\u0e40\u0e23\u0e34\u0e07\u0e04\u0e39\u0e14\u0e02\u0e22\u0e30\u0e08\u0e35"
+      },
+      {
+        "path": "",
+        "name": "\u0e01\u0e01\u0e32\u0e23\u0e01\u0e47\u0e07\u0e39\u0e40\u0e01\u0e48\u0e07\u0e44\u0e07\u0e2b\u0e23\u0e37\u0e2d\u0e40\u0e01\u0e47\u0e1a",
+        "start": 0,
+        "end": 0.4210526315789451,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 23.263157894736842,
+        "fps": 30,
+        "sub_text": "\u0e01\u0e01\u0e32\u0e23\u0e01\u0e47\u0e07\u0e39\u0e40\u0e01\u0e48\u0e07\u0e44\u0e07\u0e2b\u0e23\u0e37\u0e2d\u0e40\u0e01\u0e47\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e34\u0e14\u0e40\u0e15\u0e2d\u0e23\u0e4c\u0e25\u0e31\u0e15\u0e40\u0e15\u0e49\u0e2d\u0e23\u0e4c\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32",
+        "start": 0,
+        "end": 0.4210526315789487,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 23.684210526315788,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e34\u0e14\u0e40\u0e15\u0e2d\u0e23\u0e4c\u0e25\u0e31\u0e15\u0e40\u0e15\u0e49\u0e2d\u0e23\u0e4c\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789487,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 24.105263157894736,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789451,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 24.526315789473685,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789487,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 24.94736842105263,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789487,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 25.36842105263158,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789451,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 25.789473684210527,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789487,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 26.210526315789473,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789487,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 26.63157894736842,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789451,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 27.05263157894737,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789487,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 27.473684210526315,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789487,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 27.894736842105264,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789451,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 28.315789473684212,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789451,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 28.736842105263158,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789487,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 29.157894736842103,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22",
+        "start": 0,
+        "end": 0.4210526315789487,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 29.57894736842105,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e41\u0e15\u0e48\u0e2b\u0e32\u0e27\u0e48\u0e32\u0e40\u0e25\u0e48\u0e19\u0e44\u0e2b\u0e21\u0e04\u0e38\u0e49\u0e14\u0e40\u0e25\u0e48\u0e19\u0e19",
+        "start": 0,
+        "end": 2.1000000000000014,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 30.0,
+        "fps": 30,
+        "sub_text": "\u0e41\u0e15\u0e48\u0e2b\u0e32\u0e27\u0e48\u0e32\u0e40\u0e25\u0e48\u0e19\u0e44\u0e2b\u0e21\u0e04\u0e38\u0e49\u0e14\u0e40\u0e25\u0e48\u0e19\u0e19\u0e35\u0e48\u0e04\u0e38\u0e49\u0e14"
+      },
+      {
+        "path": "",
+        "name": "\u0e0a\u0e2d\u0e1a\u0e40\u0e25\u0e22\u0e41\u0e1a\u0e1a\u0e41\u0e04\u0e48\u0e21\u0e31\u0e19\u0e40\u0e25\u0e48\u0e19\u0e2a\u0e38\u0e02\u0e1c\u0e21",
+        "start": 0,
+        "end": 2.0999999999999943,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 32.1,
+        "fps": 30,
+        "sub_text": "\u0e0a\u0e2d\u0e1a\u0e40\u0e25\u0e22\u0e41\u0e1a\u0e1a\u0e41\u0e04\u0e48\u0e21\u0e31\u0e19\u0e40\u0e25\u0e48\u0e19\u0e2a\u0e38\u0e02\u0e1c\u0e21"
+      },
+      {
+        "path": "",
+        "name": "\u0e40\u0e1b\u0e47\u0e19\u0e04\u0e19\u0e43\u0e19\u0e25\u0e31\u0e01\u0e29\u0e13\u0e4c\u0e40\u0e01\u0e21\u0e35\u0e22\u0e19\u0e43\u0e19\u0e01\u0e32",
+        "start": 0,
+        "end": 2.1000000000000014,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 34.199999999999996,
+        "fps": 30,
+        "sub_text": "\u0e40\u0e1b\u0e47\u0e19\u0e04\u0e19\u0e43\u0e19\u0e25\u0e31\u0e01\u0e29\u0e13\u0e4c\u0e40\u0e01\u0e21\u0e35\u0e22\u0e19\u0e43\u0e19\u0e01\u0e32\u0e23\u0e1a\u0e38\u0e01\u0e21\u0e32\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e2d\u0e22\u0e48\u0e32\u0e17\u0e35\u0e48\u0e1c\u0e21\u0e1a\u0e2d\u0e01\u0e44\u0e1b\u0e40\u0e15\u0e2d\u0e23\u0e4c\u0e1c\u0e21\u0e40\u0e01\u0e35",
+        "start": 0,
+        "end": 1.7057142857142864,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 36.3,
+        "fps": 30,
+        "sub_text": "\u0e2d\u0e22\u0e48\u0e32\u0e17\u0e35\u0e48\u0e1c\u0e21\u0e1a\u0e2d\u0e01\u0e44\u0e1b\u0e40\u0e15\u0e2d\u0e23\u0e4c\u0e1c\u0e21\u0e40\u0e01\u0e35\u0e22\u0e19\u0e40\u0e14\u0e47\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e19\u0e42\u0e17\u0e19\u0e43\u0e0a\u0e48\u0e21\u0e30\u0e0b\u0e36\u0e48\u0e07\u0e17\u0e35\u0e48\u0e44\u0e21\u0e48\u0e2d\u0e48\u0e32\u0e07",
+        "start": 0,
+        "end": 1.7057142857142864,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 38.005714285714284,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e19\u0e42\u0e17\u0e19\u0e43\u0e0a\u0e48\u0e21\u0e30\u0e0b\u0e36\u0e48\u0e07\u0e17\u0e35\u0e48\u0e44\u0e21\u0e48\u0e2d\u0e48\u0e32\u0e07"
+      },
+      {
+        "path": "",
+        "name": "\u0e40\u0e01\u0e35\u0e22\u0e19\u0e40\u0e14\u0e47\u0e01\u0e04\u0e19\u0e42\u0e17\u0e19\u0e1a\u0e38\u0e4a\u0e01\u0e41\u0e04\u0e48\u0e19\u0e35\u0e48",
+        "start": 0,
+        "end": 1.7057142857142793,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 39.71142857142857,
+        "fps": 30,
+        "sub_text": "\u0e40\u0e01\u0e35\u0e22\u0e19\u0e40\u0e14\u0e47\u0e01\u0e04\u0e19\u0e42\u0e17\u0e19\u0e1a\u0e38\u0e4a\u0e01\u0e41\u0e04\u0e48\u0e19\u0e35\u0e48\u0e21\u0e31\u0e19"
+      },
+      {
+        "path": "",
+        "name": "\u0e15\u0e31\u0e27\u0e02\u0e49\u0e32\u0e21\u0e2d\u0e32\u0e04\u0e32\u0e23\u0e42\u0e17\u0e19\u0e04\u0e37\u0e2d\u0e41\u0e25\u0e30\u0e04\u0e37\u0e2d",
+        "start": 0,
+        "end": 1.7057142857142864,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 41.41714285714285,
+        "fps": 30,
+        "sub_text": "\u0e15\u0e31\u0e27\u0e02\u0e49\u0e32\u0e21\u0e2d\u0e32\u0e04\u0e32\u0e23\u0e42\u0e17\u0e19\u0e04\u0e37\u0e2d\u0e41\u0e25\u0e30\u0e04\u0e37\u0e2d\u0e2a\u0e34\u0e48\u0e07"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e35\u0e48\u0e40\u0e23\u0e35\u0e22\u0e01\u0e27\u0e48\u0e32\u0e01\u0e32\u0e23\u0e1a\u0e38\u0e01\u0e41\u0e2d\u0e47\u0e01\u0e42\u0e01\u0e0b",
+        "start": 0,
+        "end": 1.7057142857142864,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 43.122857142857136,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e35\u0e48\u0e40\u0e23\u0e35\u0e22\u0e01\u0e27\u0e48\u0e32\u0e01\u0e32\u0e23\u0e1a\u0e38\u0e01\u0e41\u0e2d\u0e47\u0e01\u0e42\u0e01\u0e0b\u0e4c\u0e0b\u0e36\u0e48\u0e07"
+      },
+      {
+        "path": "",
+        "name": "\u0e23\u0e48\u0e2d\u0e22\u0e40\u0e01\u0e34\u0e49\u0e27\u0e41\u0e21\u0e48\u0e07\u0e15\u0e2d\u0e1a\u0e42\u0e08\u0e23\u0e17\u0e35\u0e48\u0e40\u0e02",
+        "start": 0,
+        "end": 1.7057142857142864,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 44.82857142857142,
+        "fps": 30,
+        "sub_text": "\u0e23\u0e48\u0e2d\u0e22\u0e40\u0e01\u0e34\u0e49\u0e27\u0e41\u0e21\u0e48\u0e07\u0e15\u0e2d\u0e1a\u0e42\u0e08\u0e23\u0e17\u0e35\u0e48\u0e40\u0e02\u0e35\u0e22\u0e19"
+      },
+      {
+        "path": "",
+        "name": "\u0e21\u0e31\u0e19\u0e40\u0e01\u0e35\u0e48\u0e22\u0e19\u0e40\u0e01\u0e35\u0e48\u0e22\u0e19\u0e40\u0e01\u0e35\u0e48\u0e22\u0e19\u0e40\u0e22\u0e35",
+        "start": 0,
+        "end": 1.7057142857142864,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 46.53428571428571,
+        "fps": 30,
+        "sub_text": "\u0e21\u0e31\u0e19\u0e40\u0e01\u0e35\u0e48\u0e22\u0e19\u0e40\u0e01\u0e35\u0e48\u0e22\u0e19\u0e40\u0e01\u0e35\u0e48\u0e22\u0e19\u0e40\u0e22\u0e35\u0e48\u0e22\u0e19\u0e40\u0e22\u0e35\u0e48\u0e22\u0e19\u0e40\u0e22\u0e35\u0e48\u0e22\u0e19"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e37\u0e2d\u0e40\u0e14\u0e47\u0e01\u0e40\u0e1b\u0e47\u0e19\u0e01\u0e32\u0e23\u0e40\u0e21\u0e37\u0e48\u0e2d\u0e01\u0e32\u0e23\u0e04\u0e38",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 48.239999999999995,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e37\u0e2d\u0e40\u0e14\u0e47\u0e01\u0e40\u0e1b\u0e47\u0e19\u0e01\u0e32\u0e23\u0e40\u0e21\u0e37\u0e48\u0e2d\u0e01\u0e32\u0e23\u0e04\u0e38\u0e14\u0e04\u0e38\u0e14\u0e40\u0e2e\u0e35\u0e22"
+      },
+      {
+        "path": "",
+        "name": "\u0e41\u0e1a\u0e1a\u0e40\u0e2e\u0e35\u0e22\u0e40\u0e2e\u0e35\u0e22\u0e41\u0e15\u0e48\u0e01\u0e32\u0e23\u0e01\u0e31\u0e1a\u0e01\u0e32\u0e23\u0e40",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 48.85894736842105,
+        "fps": 30,
+        "sub_text": "\u0e41\u0e1a\u0e1a\u0e40\u0e2e\u0e35\u0e22\u0e40\u0e2e\u0e35\u0e22\u0e41\u0e15\u0e48\u0e01\u0e32\u0e23\u0e01\u0e31\u0e1a\u0e01\u0e32\u0e23\u0e40\u0e01\u0e34\u0e14"
+      },
+      {
+        "path": "",
+        "name": "\u0e40\u0e2b\u0e21\u0e37\u0e2d\u0e19\u0e41\u0e04\u0e48\u0e19\u0e35\u0e49\u0e2a\u0e33\u0e1a\u0e38\u0e2a\u0e19\u0e38\u0e01\u0e21\u0e32\u0e01\u0e15",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 49.4778947368421,
+        "fps": 30,
+        "sub_text": "\u0e40\u0e2b\u0e21\u0e37\u0e2d\u0e19\u0e41\u0e04\u0e48\u0e19\u0e35\u0e49\u0e2a\u0e33\u0e1a\u0e38\u0e2a\u0e19\u0e38\u0e01\u0e21\u0e32\u0e01\u0e15\u0e35\u0e42\u0e04\u0e15\u0e23"
+      },
+      {
+        "path": "",
+        "name": "\u0e41\u0e23\u0e07\u0e15\u0e35\u0e42\u0e04\u0e15\u0e23\u0e41\u0e21\u0e48\u0e41\u0e23\u0e07\u0e44\u0e21\u0e48\u0e40\u0e17\u0e48\u0e32\u0e44\u0e23",
+        "start": 0,
+        "end": 0.6189473684210469,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 50.09684210526316,
+        "fps": 30,
+        "sub_text": "\u0e41\u0e23\u0e07\u0e15\u0e35\u0e42\u0e04\u0e15\u0e23\u0e41\u0e21\u0e48\u0e41\u0e23\u0e07\u0e44\u0e21\u0e48\u0e40\u0e17\u0e48\u0e32\u0e44\u0e23\u0e41\u0e15\u0e48\u0e21\u0e31\u0e19\u0e21\u0e31\u0e19"
+      },
+      {
+        "path": "",
+        "name": "\u0e21\u0e32\u0e01\u0e40\u0e25\u0e22\u0e27\u0e48\u0e32\u0e44\u0e21\u0e48\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 50.715789473684204,
+        "fps": 30,
+        "sub_text": "\u0e21\u0e32\u0e01\u0e40\u0e25\u0e22\u0e27\u0e48\u0e32\u0e44\u0e21\u0e48\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 51.33473684210526,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 51.95368421052631,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 52.572631578947366,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 53.19157894736842,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.6189473684210469,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 53.810526315789474,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 54.42947368421052,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 55.048421052631575,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 55.66736842105263,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 56.28631578947368,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 56.90526315789474,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 57.52421052631579,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.6189473684210469,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 58.143157894736845,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 58.76210526315789,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04",
+        "start": 0,
+        "end": 0.618947368421054,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 59.381052631578946,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04"
+      },
+      {
+        "path": "",
+        "name": "\u0e44\u0e21\u0e48\u0e04\u0e48\u0e30\u0e16\u0e49\u0e32\u0e07\u0e01\u0e27\u0e48\u0e32\u0e08\u0e37\u0e49\u0e2d\u0e01\u0e47\u0e15\u0e30",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 60.0,
+        "fps": 30,
+        "sub_text": "\u0e44\u0e21\u0e48\u0e04\u0e48\u0e30\u0e16\u0e49\u0e32\u0e07\u0e01\u0e27\u0e48\u0e32\u0e08\u0e37\u0e49\u0e2d\u0e01\u0e47\u0e15\u0e30"
+      },
+      {
+        "path": "",
+        "name": "\u0e2d\u0e39\u0e44\u0e1b\u0e14\u0e39\u0e44\u0e14\u0e49\u0e44\u0e1b\u0e14\u0e39\u0e0a\u0e48\u0e2d\u0e07\u0e15\u0e31\u0e27\u0e40\u0e2d\u0e07\u0e44",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 61.5,
+        "fps": 30,
+        "sub_text": "\u0e2d\u0e39\u0e44\u0e1b\u0e14\u0e39\u0e44\u0e14\u0e49\u0e44\u0e1b\u0e14\u0e39\u0e0a\u0e48\u0e2d\u0e07\u0e15\u0e31\u0e27\u0e40\u0e2d\u0e07\u0e44\u0e14\u0e49\u0e27\u0e48\u0e32"
+      },
+      {
+        "path": "",
+        "name": "\u0e21\u0e35\u0e42\u0e23\u0e22\u0e2d\u0e49\u0e2d\u0e01\u0e34\u0e08\u0e34\u0e1a\u0e2d\u0e48\u0e32\u0e14\u0e39\u0e04\u0e48\u0e30",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 63.0,
+        "fps": 30,
+        "sub_text": "\u0e21\u0e35\u0e42\u0e23\u0e22\u0e2d\u0e49\u0e2d\u0e01\u0e34\u0e08\u0e34\u0e1a\u0e2d\u0e48\u0e32\u0e14\u0e39\u0e04\u0e48\u0e30"
+      },
+      {
+        "path": "",
+        "name": "\u0e42\u0e23\u0e22\u0e2d\u0e49\u0e2d\u0e01\u0e34\u0e08\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e2d\u0e49\u0e2d\u0e01\u0e34\u0e08",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 64.5,
+        "fps": 30,
+        "sub_text": "\u0e42\u0e23\u0e22\u0e2d\u0e49\u0e2d\u0e01\u0e34\u0e08\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e2d\u0e49\u0e2d\u0e01\u0e34\u0e08"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 66.0,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 67.5,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 69.0,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 70.5,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 72.0,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 73.5,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 75.0,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 76.5,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 78.0,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 79.5,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 81.0,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 82.5,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 84.0,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 85.5,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 87.0,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+      },
+      {
+        "path": "",
+        "name": "\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b",
+        "start": 0,
+        "end": 1.5,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 88.5,
+        "fps": 30,
+        "sub_text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b"
+      },
+      {
+        "path": "",
+        "name": "\u0e01\u0e35\u0e40\u0e27\u0e34\u0e23\u0e4c\u0e44\u0e19\u0e15\u0e4c\u0e2a\u0e35\u0e48\u0e41\u0e01\u0e21\u0e40\u0e01\u0e4a\u0e15",
+        "start": 0,
+        "end": 2.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 90.0,
+        "fps": 30,
+        "sub_text": "\u0e01\u0e35\u0e40\u0e27\u0e34\u0e23\u0e4c\u0e44\u0e19\u0e15\u0e4c\u0e2a\u0e35\u0e48\u0e41\u0e01\u0e21\u0e40\u0e01\u0e4a\u0e15"
+      },
+      {
+        "path": "",
+        "name": "\u0e2b\u0e49\u0e32",
+        "start": 0,
+        "end": 2.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 92.0,
+        "fps": 30,
+        "sub_text": "\u0e2b\u0e49\u0e32"
+      },
+      {
+        "path": "",
+        "name": "\u0e40\u0e2d\u0e2d\u0e15\u0e2d\u0e19\u0e19\u0e35\u0e49\u0e19\u0e32\u0e22\u0e19\u0e35\u0e49\u0e16\u0e49\u0e32\u0e44\u0e21\u0e48\u0e21\u0e35\u0e04",
+        "start": 0,
+        "end": 2.7272727272727337,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 90.0,
+        "fps": 30,
+        "sub_text": "\u0e40\u0e2d\u0e2d\u0e15\u0e2d\u0e19\u0e19\u0e35\u0e49\u0e19\u0e32\u0e22\u0e19\u0e35\u0e49\u0e16\u0e49\u0e32\u0e44\u0e21\u0e48\u0e21\u0e35\u0e04\u0e19"
+      },
+      {
+        "path": "",
+        "name": "\u0e19\u0e34\u0e27\u0e2d\u0e48\u0e2d\u0e1c\u0e21\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49\u0e2a\u0e31\u0e01\u0e08\u0e31\u0e14\u0e2d\u0e22\u0e48\u0e32",
+        "start": 0,
+        "end": 2.7272727272727195,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 92.72727272727273,
+        "fps": 30,
+        "sub_text": "\u0e19\u0e34\u0e27\u0e2d\u0e48\u0e2d\u0e1c\u0e21\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49\u0e2a\u0e31\u0e01\u0e08\u0e31\u0e14\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e19\u0e35\u0e49\u0e27\u0e48\u0e32"
+      },
+      {
+        "path": "",
+        "name": "\u0e1c\u0e21\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49\u0e08\u0e31\u0e14\u0e21\u0e32\u0e40\u0e08\u0e4a\u0e15\u0e4c\u0e25\u0e07\u0e41\u0e15\u0e48\u0e21",
+        "start": 0,
+        "end": 2.7272727272727337,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 95.45454545454545,
+        "fps": 30,
+        "sub_text": "\u0e1c\u0e21\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49\u0e08\u0e31\u0e14\u0e21\u0e32\u0e40\u0e08\u0e4a\u0e15\u0e4c\u0e25\u0e07\u0e41\u0e15\u0e48\u0e21\u0e35"
+      },
+      {
+        "path": "",
+        "name": "\u0e40\u0e25\u0e48\u0e19\u0e21\u0e32\u0e40\u0e08\u0e4a\u0e15\u0e4c\u0e04\u0e37\u0e2d\u0e16\u0e49\u0e32\u0e40\u0e1b\u0e47\u0e19\u0e17\u0e35\u0e48",
+        "start": 0,
+        "end": 2.7272727272727195,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 98.18181818181819,
+        "fps": 30,
+        "sub_text": "\u0e40\u0e25\u0e48\u0e19\u0e21\u0e32\u0e40\u0e08\u0e4a\u0e15\u0e4c\u0e04\u0e37\u0e2d\u0e16\u0e49\u0e32\u0e40\u0e1b\u0e47\u0e19\u0e17\u0e35\u0e48\u0e17\u0e35\u0e48\u0e2b\u0e49\u0e2d\u0e07"
+      },
+      {
+        "path": "",
+        "name": "\u0e1c\u0e21\u0e15\u0e2d\u0e19\u0e19\u0e35\u0e49\u0e1c\u0e21\u0e21\u0e35\u0e23\u0e2d\u0e22\u0e2d\u0e22\u0e39\u0e48\u0e2a\u0e32\u0e21\u0e40\u0e14",
+        "start": 0,
+        "end": 2.7272727272727337,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 100.9090909090909,
+        "fps": 30,
+        "sub_text": "\u0e1c\u0e21\u0e15\u0e2d\u0e19\u0e19\u0e35\u0e49\u0e1c\u0e21\u0e21\u0e35\u0e23\u0e2d\u0e22\u0e2d\u0e22\u0e39\u0e48\u0e2a\u0e32\u0e21\u0e40\u0e14\u0e47\u0e01"
+      },
+      {
+        "path": "",
+        "name": "\u0e17\u0e35\u0e48\u0e41\u0e1a\u0e1a\u0e08\u0e31\u0e14\u0e40\u0e25\u0e48\u0e19\u0e44\u0e14\u0e49\u0e40\u0e25\u0e22\u0e41\u0e1a\u0e1a\u0e44\u0e21",
+        "start": 0,
+        "end": 2.7272727272727195,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 103.63636363636364,
+        "fps": 30,
+        "sub_text": "\u0e17\u0e35\u0e48\u0e41\u0e1a\u0e1a\u0e08\u0e31\u0e14\u0e40\u0e25\u0e48\u0e19\u0e44\u0e14\u0e49\u0e40\u0e25\u0e22\u0e41\u0e1a\u0e1a\u0e44\u0e21\u0e48"
+      },
+      {
+        "path": "",
+        "name": "\u0e44\u0e14\u0e49\u0e41\u0e22\u0e48\u0e07\u0e2d\u0e30\u0e44\u0e23\u0e01\u0e31\u0e19\u0e01\u0e47\u0e04\u0e37\u0e2d\u0e21\u0e32\u0e40\u0e08\u0e4a",
+        "start": 0,
+        "end": 2.7272727272727337,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 106.36363636363636,
+        "fps": 30,
+        "sub_text": "\u0e44\u0e14\u0e49\u0e41\u0e22\u0e48\u0e07\u0e2d\u0e30\u0e44\u0e23\u0e01\u0e31\u0e19\u0e01\u0e47\u0e04\u0e37\u0e2d\u0e21\u0e32\u0e40\u0e08\u0e4a\u0e15\u0e4c"
+      },
+      {
+        "path": "",
+        "name": "\u0e08\u0e35\u0e27\u0e31\u0e19\u0e19\u0e31\u0e22\u0e41\u0e25\u0e30\u0e01\u0e47\u0e2d\u0e30\u0e44\u0e23\u0e27\u0e48\u0e32\u0e21\u0e32",
+        "start": 0,
+        "end": 2.7272727272727195,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 109.0909090909091,
+        "fps": 30,
+        "sub_text": "\u0e08\u0e35\u0e27\u0e31\u0e19\u0e19\u0e31\u0e22\u0e41\u0e25\u0e30\u0e01\u0e47\u0e2d\u0e30\u0e44\u0e23\u0e27\u0e48\u0e32\u0e21\u0e32"
+      },
+      {
+        "path": "",
+        "name": "\u0e40\u0e08\u0e4a\u0e15\u0e4c\u0e2a\u0e34\u0e48\u0e07\u0e40\u0e0b\u0e1f\u0e43\u0e0a\u0e48\u0e2a\u0e32\u0e21\u0e40\u0e14\u0e47\u0e01\u0e19\u0e35",
+        "start": 0,
+        "end": 2.7272727272727337,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 111.81818181818181,
+        "fps": 30,
+        "sub_text": "\u0e40\u0e08\u0e4a\u0e15\u0e4c\u0e2a\u0e34\u0e48\u0e07\u0e40\u0e0b\u0e1f\u0e43\u0e0a\u0e48\u0e2a\u0e32\u0e21\u0e40\u0e14\u0e47\u0e01\u0e19\u0e35\u0e49\u0e17\u0e35\u0e48"
+      },
+      {
+        "path": "",
+        "name": "\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e21\u0e32\u0e40\u0e08\u0e4a\u0e15\u0e4c\u0e17\u0e35\u0e48\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e40\u0e1b\u0e47\u0e19",
+        "start": 0,
+        "end": 2.7272727272727195,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 114.54545454545455,
+        "fps": 30,
+        "sub_text": "\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e21\u0e32\u0e40\u0e08\u0e4a\u0e15\u0e4c\u0e17\u0e35\u0e48\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e31\u0e19\u0e44\u0e2b\u0e23\u0e48\u0e44\u0e14\u0e49"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e38\u0e13\u0e2a\u0e32\u0e21",
+        "start": 0,
+        "end": 2.7272727272727337,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 117.27272727272727,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e38\u0e13\u0e2a\u0e32\u0e21"
+      },
+      {
+        "path": "",
+        "name": "\u0e43\u0e2a\u0e48\u0e02\u0e2d\u0e07\u0e25\u0e07\u0e01\u0e31\u0e19\u0e44\u0e14\u0e49\u0e41\u0e25\u0e49\u0e27\u0e01\u0e47\u0e21\u0e32\u0e08\u0e31",
+        "start": 0,
+        "end": 2.299999999999997,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 120.0,
+        "fps": 30,
+        "sub_text": "\u0e43\u0e2a\u0e48\u0e02\u0e2d\u0e07\u0e25\u0e07\u0e01\u0e31\u0e19\u0e44\u0e14\u0e49\u0e41\u0e25\u0e49\u0e27\u0e01\u0e47\u0e21\u0e32\u0e08\u0e31\u0e14"
+      },
+      {
+        "path": "",
+        "name": "\u0e41\u0e22\u0e01\u0e01\u0e31\u0e19\u0e19\u0e30\u0e41\u0e15\u0e48\u0e04\u0e34\u0e15\u0e2d\u0e25\u0e4c\u0e25\u0e31\u0e15\u0e40\u0e15\u0e2d\u0e23",
+        "start": 0,
+        "end": 2.299999999999997,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 122.3,
+        "fps": 30,
+        "sub_text": "\u0e41\u0e22\u0e01\u0e01\u0e31\u0e19\u0e19\u0e30\u0e41\u0e15\u0e48\u0e04\u0e34\u0e15\u0e2d\u0e25\u0e4c\u0e25\u0e31\u0e15\u0e40\u0e15\u0e2d\u0e23\u0e4c\u0e19\u0e35\u0e48\u0e04\u0e37\u0e2d\u0e15\u0e49\u0e2d\u0e07\u0e01\u0e35\u0e48"
+      },
+      {
+        "path": "",
+        "name": "\u0e42\u0e0b\u0e48\u0e19\u0e49\u0e2d\u0e07\u0e43\u0e0a\u0e49\u0e25\u0e07\u0e01\u0e31\u0e19\u0e19\u0e30\u0e04\u0e34\u0e15\u0e2d\u0e25\u0e4c\u0e25",
+        "start": 0,
+        "end": 2.299999999999997,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 124.6,
+        "fps": 30,
+        "sub_text": "\u0e42\u0e0b\u0e48\u0e19\u0e49\u0e2d\u0e07\u0e43\u0e0a\u0e49\u0e25\u0e07\u0e01\u0e31\u0e19\u0e19\u0e30\u0e04\u0e34\u0e15\u0e2d\u0e25\u0e4c\u0e25\u0e31\u0e15\u0e40\u0e15\u0e2d\u0e23\u0e4c\u0e22\u0e31\u0e07\u0e21\u0e35"
+      },
+      {
+        "path": "",
+        "name": "\u0e2b\u0e01\u0e43\u0e1a\u0e44\u0e21\u0e48\u0e1e\u0e2d\u0e43\u0e0a\u0e49\u0e2d\u0e48\u0e30",
+        "start": 0,
+        "end": 2.299999999999997,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 126.89999999999999,
+        "fps": 30,
+        "sub_text": "\u0e2b\u0e01\u0e43\u0e1a\u0e44\u0e21\u0e48\u0e1e\u0e2d\u0e43\u0e0a\u0e49\u0e2d\u0e48\u0e30"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e48\u0e32\u0e07\u0e2d\u0e34\u0e42\u0e25\u0e48\u0e21\u0e31\u0e19\u0e40\u0e1b\u0e47\u0e19\u0e41\u0e04\u0e48\u0e19\u0e42\u0e2d\u0e25\u0e48",
+        "start": 0,
+        "end": 2.3500000000000227,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 132.2,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e48\u0e32\u0e07\u0e2d\u0e34\u0e42\u0e25\u0e48\u0e21\u0e31\u0e19\u0e40\u0e1b\u0e47\u0e19\u0e41\u0e04\u0e48\u0e19\u0e42\u0e2d\u0e25\u0e48"
+      },
+      {
+        "path": "",
+        "name": "\u0e2d\u0e48\u0e30\u0e15\u0e48\u0e2d\u0e21\u0e31\u0e19",
+        "start": 0,
+        "end": 2.3499999999999943,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 134.55,
+        "fps": 30,
+        "sub_text": "\u0e2d\u0e48\u0e30\u0e15\u0e48\u0e2d\u0e21\u0e31\u0e19"
+      },
+      {
+        "path": "",
+        "name": "\u0e21\u0e31\u0e19\u0e40\u0e23\u0e34\u0e48\u0e21\u0e17\u0e35\u0e48\u0e08\u0e30\u0e21\u0e35\u0e04\u0e27\u0e32\u0e21\u0e41\u0e15\u0e01\u0e15\u0e48",
+        "start": 0,
+        "end": 1.6225000000000023,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 136.9,
+        "fps": 30,
+        "sub_text": "\u0e21\u0e31\u0e19\u0e40\u0e23\u0e34\u0e48\u0e21\u0e17\u0e35\u0e48\u0e08\u0e30\u0e21\u0e35\u0e04\u0e27\u0e32\u0e21\u0e41\u0e15\u0e01\u0e15\u0e48\u0e2d\u0e04\u0e37\u0e2d"
+      },
+      {
+        "path": "",
+        "name": "\u0e15\u0e2d\u0e19\u0e17\u0e35\u0e48\u0e21\u0e35\u0e0b\u0e35\u0e2d\u0e39\u0e14\u0e32\u0e23\u0e4c\u0e01\u0e48\u0e2d\u0e19\u0e01\u0e31\u0e1a\u0e21",
+        "start": 0,
+        "end": 1.6225000000000023,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 138.5225,
+        "fps": 30,
+        "sub_text": "\u0e15\u0e2d\u0e19\u0e17\u0e35\u0e48\u0e21\u0e35\u0e0b\u0e35\u0e2d\u0e39\u0e14\u0e32\u0e23\u0e4c\u0e01\u0e48\u0e2d\u0e19\u0e01\u0e31\u0e1a\u0e21\u0e35"
+      },
+      {
+        "path": "",
+        "name": "\u0e40\u0e1a\u0e35\u0e22\u0e1a\u0e2d\u0e31\u0e25\u0e40\u0e15\u0e2d\u0e23\u0e4c\u0e0b\u0e36\u0e48\u0e07\u0e21\u0e31\u0e19\u0e42\u0e07\u0e48\u0e23",
+        "start": 0,
+        "end": 1.6225000000000023,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 140.145,
+        "fps": 30,
+        "sub_text": "\u0e40\u0e1a\u0e35\u0e22\u0e1a\u0e2d\u0e31\u0e25\u0e40\u0e15\u0e2d\u0e23\u0e4c\u0e0b\u0e36\u0e48\u0e07\u0e21\u0e31\u0e19\u0e42\u0e07\u0e48\u0e23\u0e48\u0e2d\u0e07\u0e04\u0e39\u0e48\u0e42\u0e07\u0e48\u0e23\u0e48\u0e2d\u0e07"
+      },
+      {
+        "path": "",
+        "name": "\u0e2a\u0e2d\u0e07\u0e43\u0e2a\u0e40\u0e25\u0e22\u0e41\u0e15\u0e48\u0e2a\u0e38\u0e14\u0e44\u0e17\u0e22\u0e41\u0e25\u0e30\u0e21\u0e31\u0e19",
+        "start": 0,
+        "end": 1.6224999999999739,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 141.7675,
+        "fps": 30,
+        "sub_text": "\u0e2a\u0e2d\u0e07\u0e43\u0e2a\u0e40\u0e25\u0e22\u0e41\u0e15\u0e48\u0e2a\u0e38\u0e14\u0e44\u0e17\u0e22\u0e41\u0e25\u0e30\u0e21\u0e31\u0e19"
+      },
+      {
+        "path": "",
+        "name": "\u0e04\u0e37\u0e2d\u0e42\u0e2d\u0e25\u0e48\u0e2d\u0e48\u0e30\u0e14\u0e35\u0e41\u0e25\u0e30\u0e16\u0e49\u0e32\u0e21\u0e31\u0e19",
+        "start": 0,
+        "end": 1.6225000000000023,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 143.39,
+        "fps": 30,
+        "sub_text": "\u0e04\u0e37\u0e2d\u0e42\u0e2d\u0e25\u0e48\u0e2d\u0e48\u0e30\u0e14\u0e35\u0e41\u0e25\u0e30\u0e16\u0e49\u0e32\u0e21\u0e31\u0e19"
+      },
+      {
+        "path": "",
+        "name": "\u0e44\u0e21\u0e48\u0e21\u0e35\u0e42\u0e2d\u0e25\u0e48\u0e2d\u0e48\u0e30\u0e21\u0e31\u0e19\u0e21\u0e31\u0e19\u0e21\u0e31\u0e19\u0e21\u0e31\u0e19",
+        "start": 0,
+        "end": 1.6225000000000023,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 145.0125,
+        "fps": 30,
+        "sub_text": "\u0e44\u0e21\u0e48\u0e21\u0e35\u0e42\u0e2d\u0e25\u0e48\u0e2d\u0e48\u0e30\u0e21\u0e31\u0e19\u0e21\u0e31\u0e19\u0e21\u0e31\u0e19\u0e21\u0e31\u0e19"
+      },
+      {
+        "path": "",
+        "name": "\u0e44\u0e21\u0e48\u0e21\u0e35\u0e40\u0e17\u0e35\u0e48\u0e22\u0e30\u0e41\u0e25\u0e30\u0e41\u0e25\u0e30\u0e41\u0e04\u0e48\u0e19\u0e04\u0e48\u0e32",
+        "start": 0,
+        "end": 1.6225000000000023,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 146.635,
+        "fps": 30,
+        "sub_text": "\u0e44\u0e21\u0e48\u0e21\u0e35\u0e40\u0e17\u0e35\u0e48\u0e22\u0e30\u0e41\u0e25\u0e30\u0e41\u0e25\u0e30\u0e41\u0e04\u0e48\u0e19\u0e04\u0e48\u0e32\u0e07\u0e2d\u0e34"
+      },
+      {
+        "path": "",
+        "name": "\u0e42\u0e25\u0e48\u0e2d\u0e48\u0e30",
+        "start": 0,
+        "end": 1.6225000000000023,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 148.2575,
+        "fps": 30,
+        "sub_text": "\u0e42\u0e25\u0e48\u0e2d\u0e48\u0e30"
+      }
+    ],
+    "audio_0": [
+      {
+        "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e2d\u0e31\u0e14/1SoundEffect SFX/Cardfight Vanguard Soundtrack  Perdition's Ascendant.mp3",
+        "name": "Cardfight Vanguard Soundtrack  Perdition's Ascendant.mp3",
+        "start": 0,
+        "end": 5.0,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 150.0,
+        "fps": 30,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 5.0
+      }
+    ],
+    "audio_1": [],
+    "layer_0": [
+      {
+        "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/1784b95416c75e52357c50e62e015f00.jpg",
+        "name": "1784b95416c75e52357c50e62e015f00.jpg",
+        "start": 0.0,
+        "end": 0.04,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 155.0,
+        "fps": 25.0,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 999999.0
+      }
+    ]
+  },
+  "assets": [
+    {
+      "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/\u0e23\u0e2d\u0e22\u0e31\u0e25 \u0e41\u0e04\u0e25\u0e19\u0e2a\u0e27\u0e30\u0e17\u0e35\u0e48\u0e09\u0e31\u0e19\u0e0a\u0e2d\u0e1a.mp4",
+      "name": "\u0e23\u0e2d\u0e22\u0e31\u0e25 \u0e41\u0e04\u0e25\u0e19\u0e2a\u0e27\u0e30\u0e17\u0e35\u0e48\u0e09\u0e31\u0e19\u0e0a\u0e2d\u0e1a.mp4",
+      "type": "video"
+    },
+    {
+      "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e2d\u0e31\u0e14/1SoundEffect SFX/Cardfight Vanguard Soundtrack  Perdition's Ascendant.mp3",
+      "name": "Cardfight Vanguard Soundtrack  Perdition's Ascendant.mp3",
+      "type": "audio"
+    },
+    {
+      "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/1784b95416c75e52357c50e62e015f00.jpg",
+      "name": "1784b95416c75e52357c50e62e015f00.jpg",
+      "type": "image"
+    },
+    {
+      "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/\u0e19\u0e32\u0e23\u0e38\u0e04\u0e32\u0e21\u0e34.mp4",
+      "name": "\u0e19\u0e32\u0e23\u0e38\u0e04\u0e32\u0e21\u0e34.mp4",
+      "type": "video"
+    }
+  ],
+  "muted": {},
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 2.0,
+      "text": "\u0e22\u0e31\u0e07\u0e14\u0e35\u0e44\u0e21\u0e48\u0e21\u0e35\u0e2d\u0e30\u0e44\u0e23\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e19\u0e35\u0e49\u0e44\u0e21\u0e48\u0e08\u0e31\u0e14"
+    },
+    {
+      "start": 2.0,
+      "end": 4.0,
+      "text": "\u0e2d\u0e30\u0e44\u0e23\u0e2d\u0e48\u0e30\u0e2d\u0e48\u0e30"
+    },
+    {
+      "start": 10.0,
+      "end": 12.0,
+      "text": "\u0e42\u0e2d\u0e49\u0e42\u0e23\u0e22\u0e31\u0e27\u0e42\u0e23\u0e22\u0e31\u0e27\u0e14\u0e32\u0e27\u0e25\u0e48\u0e32\u0e2a\u0e38\u0e14\u0e23\u0e39\u0e49"
+    },
+    {
+      "start": 12.0,
+      "end": 14.0,
+      "text": "\u0e23\u0e36\u0e40\u0e1b\u0e25\u0e48\u0e32"
+    },
+    {
+      "start": 14.0,
+      "end": 15.5,
+      "text": "\u0e1c\u0e21\u0e21\u0e36\u0e07\u0e17\u0e31\u0e01\u0e44\u0e1b\u0e2b\u0e32\u0e04\u0e19\u0e2b\u0e19\u0e36\u0e48\u0e07\u0e1a\u0e2d\u0e01\u0e27\u0e48\u0e32"
+    },
+    {
+      "start": 15.5,
+      "end": 17.0,
+      "text": "\u0e42\u0e23\u0e22\u0e31\u0e27\u0e2d\u0e2d\u0e01\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e04\u0e23\u0e31\u0e1a"
+    },
+    {
+      "start": 17.0,
+      "end": 19.5,
+      "text": "\u0e44\u0e2d\u0e49\u0e40\u0e02\u0e35\u0e22\u0e27\u0e1a\u0e2d\u0e01\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e40\u0e25\u0e48\u0e19\u0e14\u0e49\u0e27\u0e22\u0e04\u0e37\u0e2d\u0e42\u0e23"
+    },
+    {
+      "start": 19.5,
+      "end": 22.0,
+      "text": "\u0e22\u0e31\u0e27\u0e04\u0e38\u0e13\u0e15\u0e31\u0e27\u0e21\u0e31\u0e19\u0e40\u0e1b\u0e47\u0e19\u0e41\u0e04\u0e48\u0e19\u0e17\u0e35\u0e48"
+    },
+    {
+      "start": 22.0,
+      "end": 22.42105263157895,
+      "text": "\u0e40\u0e23\u0e32\u0e40\u0e22\u0e32\u0e21\u0e32\u0e43\u0e01\u0e25\u0e49\u0e17\u0e35\u0e48\u0e21\u0e14\u0e32\u0e27\u0e15\u0e25\u0e2d\u0e14"
+    },
+    {
+      "start": 22.42105263157895,
+      "end": 22.842105263157894,
+      "text": "\u0e40\u0e25\u0e22\u0e41\u0e1a\u0e1a\u0e14\u0e32\u0e27\u0e21\u0e14\u0e32\u0e27\u0e17\u0e35\u0e48\u0e1c\u0e48\u0e32\u0e22\u0e27\u0e48\u0e32"
+    },
+    {
+      "start": 22.842105263157894,
+      "end": 23.263157894736842,
+      "text": "\u0e40\u0e25\u0e22\u0e17\u0e35\u0e48\u0e41\u0e01\u0e19\u0e40\u0e23\u0e34\u0e07\u0e04\u0e39\u0e14\u0e02\u0e22\u0e30\u0e08\u0e35"
+    },
+    {
+      "start": 23.263157894736842,
+      "end": 23.684210526315788,
+      "text": "\u0e01\u0e01\u0e32\u0e23\u0e01\u0e47\u0e07\u0e39\u0e40\u0e01\u0e48\u0e07\u0e44\u0e07\u0e2b\u0e23\u0e37\u0e2d\u0e40\u0e01\u0e47\u0e1a"
+    },
+    {
+      "start": 23.684210526315788,
+      "end": 24.105263157894736,
+      "text": "\u0e04\u0e34\u0e14\u0e40\u0e15\u0e2d\u0e23\u0e4c\u0e25\u0e31\u0e15\u0e40\u0e15\u0e49\u0e2d\u0e23\u0e4c\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 24.105263157894736,
+      "end": 24.526315789473685,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 24.526315789473685,
+      "end": 24.94736842105263,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 24.94736842105263,
+      "end": 25.36842105263158,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 25.36842105263158,
+      "end": 25.789473684210527,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 25.789473684210527,
+      "end": 26.210526315789473,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 26.210526315789473,
+      "end": 26.63157894736842,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 26.63157894736842,
+      "end": 27.05263157894737,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 27.05263157894737,
+      "end": 27.473684210526315,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 27.473684210526315,
+      "end": 27.894736842105264,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 27.894736842105264,
+      "end": 28.315789473684212,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 28.315789473684212,
+      "end": 28.736842105263158,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 28.736842105263158,
+      "end": 29.157894736842103,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 29.157894736842103,
+      "end": 29.57894736842105,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 29.57894736842105,
+      "end": 30.0,
+      "text": "\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22\u0e17\u0e23\u0e32\u0e22"
+    },
+    {
+      "start": 30.0,
+      "end": 32.1,
+      "text": "\u0e41\u0e15\u0e48\u0e2b\u0e32\u0e27\u0e48\u0e32\u0e40\u0e25\u0e48\u0e19\u0e44\u0e2b\u0e21\u0e04\u0e38\u0e49\u0e14\u0e40\u0e25\u0e48\u0e19\u0e19\u0e35\u0e48\u0e04\u0e38\u0e49\u0e14"
+    },
+    {
+      "start": 32.1,
+      "end": 34.199999999999996,
+      "text": "\u0e0a\u0e2d\u0e1a\u0e40\u0e25\u0e22\u0e41\u0e1a\u0e1a\u0e41\u0e04\u0e48\u0e21\u0e31\u0e19\u0e40\u0e25\u0e48\u0e19\u0e2a\u0e38\u0e02\u0e1c\u0e21"
+    },
+    {
+      "start": 34.199999999999996,
+      "end": 36.3,
+      "text": "\u0e40\u0e1b\u0e47\u0e19\u0e04\u0e19\u0e43\u0e19\u0e25\u0e31\u0e01\u0e29\u0e13\u0e4c\u0e40\u0e01\u0e21\u0e35\u0e22\u0e19\u0e43\u0e19\u0e01\u0e32\u0e23\u0e1a\u0e38\u0e01\u0e21\u0e32\u0e01"
+    },
+    {
+      "start": 36.3,
+      "end": 38.005714285714284,
+      "text": "\u0e2d\u0e22\u0e48\u0e32\u0e17\u0e35\u0e48\u0e1c\u0e21\u0e1a\u0e2d\u0e01\u0e44\u0e1b\u0e40\u0e15\u0e2d\u0e23\u0e4c\u0e1c\u0e21\u0e40\u0e01\u0e35\u0e22\u0e19\u0e40\u0e14\u0e47\u0e01"
+    },
+    {
+      "start": 38.005714285714284,
+      "end": 39.71142857142857,
+      "text": "\u0e04\u0e19\u0e42\u0e17\u0e19\u0e43\u0e0a\u0e48\u0e21\u0e30\u0e0b\u0e36\u0e48\u0e07\u0e17\u0e35\u0e48\u0e44\u0e21\u0e48\u0e2d\u0e48\u0e32\u0e07"
+    },
+    {
+      "start": 39.71142857142857,
+      "end": 41.41714285714285,
+      "text": "\u0e40\u0e01\u0e35\u0e22\u0e19\u0e40\u0e14\u0e47\u0e01\u0e04\u0e19\u0e42\u0e17\u0e19\u0e1a\u0e38\u0e4a\u0e01\u0e41\u0e04\u0e48\u0e19\u0e35\u0e48\u0e21\u0e31\u0e19"
+    },
+    {
+      "start": 41.41714285714285,
+      "end": 43.122857142857136,
+      "text": "\u0e15\u0e31\u0e27\u0e02\u0e49\u0e32\u0e21\u0e2d\u0e32\u0e04\u0e32\u0e23\u0e42\u0e17\u0e19\u0e04\u0e37\u0e2d\u0e41\u0e25\u0e30\u0e04\u0e37\u0e2d\u0e2a\u0e34\u0e48\u0e07"
+    },
+    {
+      "start": 43.122857142857136,
+      "end": 44.82857142857142,
+      "text": "\u0e17\u0e35\u0e48\u0e40\u0e23\u0e35\u0e22\u0e01\u0e27\u0e48\u0e32\u0e01\u0e32\u0e23\u0e1a\u0e38\u0e01\u0e41\u0e2d\u0e47\u0e01\u0e42\u0e01\u0e0b\u0e4c\u0e0b\u0e36\u0e48\u0e07"
+    },
+    {
+      "start": 44.82857142857142,
+      "end": 46.53428571428571,
+      "text": "\u0e23\u0e48\u0e2d\u0e22\u0e40\u0e01\u0e34\u0e49\u0e27\u0e41\u0e21\u0e48\u0e07\u0e15\u0e2d\u0e1a\u0e42\u0e08\u0e23\u0e17\u0e35\u0e48\u0e40\u0e02\u0e35\u0e22\u0e19"
+    },
+    {
+      "start": 46.53428571428571,
+      "end": 48.239999999999995,
+      "text": "\u0e21\u0e31\u0e19\u0e40\u0e01\u0e35\u0e48\u0e22\u0e19\u0e40\u0e01\u0e35\u0e48\u0e22\u0e19\u0e40\u0e01\u0e35\u0e48\u0e22\u0e19\u0e40\u0e22\u0e35\u0e48\u0e22\u0e19\u0e40\u0e22\u0e35\u0e48\u0e22\u0e19\u0e40\u0e22\u0e35\u0e48\u0e22\u0e19"
+    },
+    {
+      "start": 48.239999999999995,
+      "end": 48.85894736842105,
+      "text": "\u0e04\u0e37\u0e2d\u0e40\u0e14\u0e47\u0e01\u0e40\u0e1b\u0e47\u0e19\u0e01\u0e32\u0e23\u0e40\u0e21\u0e37\u0e48\u0e2d\u0e01\u0e32\u0e23\u0e04\u0e38\u0e14\u0e04\u0e38\u0e14\u0e40\u0e2e\u0e35\u0e22"
+    },
+    {
+      "start": 48.85894736842105,
+      "end": 49.4778947368421,
+      "text": "\u0e41\u0e1a\u0e1a\u0e40\u0e2e\u0e35\u0e22\u0e40\u0e2e\u0e35\u0e22\u0e41\u0e15\u0e48\u0e01\u0e32\u0e23\u0e01\u0e31\u0e1a\u0e01\u0e32\u0e23\u0e40\u0e01\u0e34\u0e14"
+    },
+    {
+      "start": 49.4778947368421,
+      "end": 50.09684210526316,
+      "text": "\u0e40\u0e2b\u0e21\u0e37\u0e2d\u0e19\u0e41\u0e04\u0e48\u0e19\u0e35\u0e49\u0e2a\u0e33\u0e1a\u0e38\u0e2a\u0e19\u0e38\u0e01\u0e21\u0e32\u0e01\u0e15\u0e35\u0e42\u0e04\u0e15\u0e23"
+    },
+    {
+      "start": 50.09684210526316,
+      "end": 50.715789473684204,
+      "text": "\u0e41\u0e23\u0e07\u0e15\u0e35\u0e42\u0e04\u0e15\u0e23\u0e41\u0e21\u0e48\u0e41\u0e23\u0e07\u0e44\u0e21\u0e48\u0e40\u0e17\u0e48\u0e32\u0e44\u0e23\u0e41\u0e15\u0e48\u0e21\u0e31\u0e19\u0e21\u0e31\u0e19"
+    },
+    {
+      "start": 50.715789473684204,
+      "end": 51.33473684210526,
+      "text": "\u0e21\u0e32\u0e01\u0e40\u0e25\u0e22\u0e27\u0e48\u0e32\u0e44\u0e21\u0e48\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 51.33473684210526,
+      "end": 51.95368421052631,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 51.95368421052631,
+      "end": 52.572631578947366,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 52.572631578947366,
+      "end": 53.19157894736842,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 53.19157894736842,
+      "end": 53.810526315789474,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 53.810526315789474,
+      "end": 54.42947368421052,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 54.42947368421052,
+      "end": 55.048421052631575,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 55.048421052631575,
+      "end": 55.66736842105263,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 55.66736842105263,
+      "end": 56.28631578947368,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 56.28631578947368,
+      "end": 56.90526315789474,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 56.90526315789474,
+      "end": 57.52421052631579,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 57.52421052631579,
+      "end": 58.143157894736845,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 58.143157894736845,
+      "end": 58.76210526315789,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 58.76210526315789,
+      "end": 59.381052631578946,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01"
+    },
+    {
+      "start": 59.381052631578946,
+      "end": 60.0,
+      "text": "\u0e04\u0e38\u0e01\u0e04\u0e38\u0e01\u0e04"
+    },
+    {
+      "start": 60.0,
+      "end": 61.5,
+      "text": "\u0e44\u0e21\u0e48\u0e04\u0e48\u0e30\u0e16\u0e49\u0e32\u0e07\u0e01\u0e27\u0e48\u0e32\u0e08\u0e37\u0e49\u0e2d\u0e01\u0e47\u0e15\u0e30"
+    },
+    {
+      "start": 61.5,
+      "end": 63.0,
+      "text": "\u0e2d\u0e39\u0e44\u0e1b\u0e14\u0e39\u0e44\u0e14\u0e49\u0e44\u0e1b\u0e14\u0e39\u0e0a\u0e48\u0e2d\u0e07\u0e15\u0e31\u0e27\u0e40\u0e2d\u0e07\u0e44\u0e14\u0e49\u0e27\u0e48\u0e32"
+    },
+    {
+      "start": 63.0,
+      "end": 64.5,
+      "text": "\u0e21\u0e35\u0e42\u0e23\u0e22\u0e2d\u0e49\u0e2d\u0e01\u0e34\u0e08\u0e34\u0e1a\u0e2d\u0e48\u0e32\u0e14\u0e39\u0e04\u0e48\u0e30"
+    },
+    {
+      "start": 64.5,
+      "end": 66.0,
+      "text": "\u0e42\u0e23\u0e22\u0e2d\u0e49\u0e2d\u0e01\u0e34\u0e08\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e2d\u0e49\u0e2d\u0e01\u0e34\u0e08"
+    },
+    {
+      "start": 66.0,
+      "end": 67.5,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 67.5,
+      "end": 69.0,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 69.0,
+      "end": 70.5,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 70.5,
+      "end": 72.0,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 72.0,
+      "end": 73.5,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 73.5,
+      "end": 75.0,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 75.0,
+      "end": 76.5,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 76.5,
+      "end": 78.0,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 78.0,
+      "end": 79.5,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 79.5,
+      "end": 81.0,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 81.0,
+      "end": 82.5,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 82.5,
+      "end": 84.0,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 84.0,
+      "end": 85.5,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 85.5,
+      "end": 87.0,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a\u0e0b"
+    },
+    {
+      "start": 87.0,
+      "end": 88.5,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e34\u0e1a"
+    },
+    {
+      "start": 88.5,
+      "end": 90.0,
+      "text": "\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b\u0e0b\u0e34\u0e1a\u0e0b"
+    },
+    {
+      "start": 90.0,
+      "end": 92.0,
+      "text": "\u0e01\u0e35\u0e40\u0e27\u0e34\u0e23\u0e4c\u0e44\u0e19\u0e15\u0e4c\u0e2a\u0e35\u0e48\u0e41\u0e01\u0e21\u0e40\u0e01\u0e4a\u0e15"
+    },
+    {
+      "start": 92.0,
+      "end": 94.0,
+      "text": "\u0e2b\u0e49\u0e32"
+    },
+    {
+      "start": 90.0,
+      "end": 92.72727272727273,
+      "text": "\u0e40\u0e2d\u0e2d\u0e15\u0e2d\u0e19\u0e19\u0e35\u0e49\u0e19\u0e32\u0e22\u0e19\u0e35\u0e49\u0e16\u0e49\u0e32\u0e44\u0e21\u0e48\u0e21\u0e35\u0e04\u0e19"
+    },
+    {
+      "start": 92.72727272727273,
+      "end": 95.45454545454545,
+      "text": "\u0e19\u0e34\u0e27\u0e2d\u0e48\u0e2d\u0e1c\u0e21\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49\u0e2a\u0e31\u0e01\u0e08\u0e31\u0e14\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e19\u0e35\u0e49\u0e27\u0e48\u0e32"
+    },
+    {
+      "start": 95.45454545454545,
+      "end": 98.18181818181819,
+      "text": "\u0e1c\u0e21\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49\u0e08\u0e31\u0e14\u0e21\u0e32\u0e40\u0e08\u0e4a\u0e15\u0e4c\u0e25\u0e07\u0e41\u0e15\u0e48\u0e21\u0e35"
+    },
+    {
+      "start": 98.18181818181819,
+      "end": 100.9090909090909,
+      "text": "\u0e40\u0e25\u0e48\u0e19\u0e21\u0e32\u0e40\u0e08\u0e4a\u0e15\u0e4c\u0e04\u0e37\u0e2d\u0e16\u0e49\u0e32\u0e40\u0e1b\u0e47\u0e19\u0e17\u0e35\u0e48\u0e17\u0e35\u0e48\u0e2b\u0e49\u0e2d\u0e07"
+    },
+    {
+      "start": 100.9090909090909,
+      "end": 103.63636363636364,
+      "text": "\u0e1c\u0e21\u0e15\u0e2d\u0e19\u0e19\u0e35\u0e49\u0e1c\u0e21\u0e21\u0e35\u0e23\u0e2d\u0e22\u0e2d\u0e22\u0e39\u0e48\u0e2a\u0e32\u0e21\u0e40\u0e14\u0e47\u0e01"
+    },
+    {
+      "start": 103.63636363636364,
+      "end": 106.36363636363636,
+      "text": "\u0e17\u0e35\u0e48\u0e41\u0e1a\u0e1a\u0e08\u0e31\u0e14\u0e40\u0e25\u0e48\u0e19\u0e44\u0e14\u0e49\u0e40\u0e25\u0e22\u0e41\u0e1a\u0e1a\u0e44\u0e21\u0e48"
+    },
+    {
+      "start": 106.36363636363636,
+      "end": 109.0909090909091,
+      "text": "\u0e44\u0e14\u0e49\u0e41\u0e22\u0e48\u0e07\u0e2d\u0e30\u0e44\u0e23\u0e01\u0e31\u0e19\u0e01\u0e47\u0e04\u0e37\u0e2d\u0e21\u0e32\u0e40\u0e08\u0e4a\u0e15\u0e4c"
+    },
+    {
+      "start": 109.0909090909091,
+      "end": 111.81818181818181,
+      "text": "\u0e08\u0e35\u0e27\u0e31\u0e19\u0e19\u0e31\u0e22\u0e41\u0e25\u0e30\u0e01\u0e47\u0e2d\u0e30\u0e44\u0e23\u0e27\u0e48\u0e32\u0e21\u0e32"
+    },
+    {
+      "start": 111.81818181818181,
+      "end": 114.54545454545455,
+      "text": "\u0e40\u0e08\u0e4a\u0e15\u0e4c\u0e2a\u0e34\u0e48\u0e07\u0e40\u0e0b\u0e1f\u0e43\u0e0a\u0e48\u0e2a\u0e32\u0e21\u0e40\u0e14\u0e47\u0e01\u0e19\u0e35\u0e49\u0e17\u0e35\u0e48"
+    },
+    {
+      "start": 114.54545454545455,
+      "end": 117.27272727272727,
+      "text": "\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e21\u0e32\u0e40\u0e08\u0e4a\u0e15\u0e4c\u0e17\u0e35\u0e48\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e31\u0e19\u0e44\u0e2b\u0e23\u0e48\u0e44\u0e14\u0e49"
+    },
+    {
+      "start": 117.27272727272727,
+      "end": 120.0,
+      "text": "\u0e04\u0e38\u0e13\u0e2a\u0e32\u0e21"
+    },
+    {
+      "start": 120.0,
+      "end": 122.3,
+      "text": "\u0e43\u0e2a\u0e48\u0e02\u0e2d\u0e07\u0e25\u0e07\u0e01\u0e31\u0e19\u0e44\u0e14\u0e49\u0e41\u0e25\u0e49\u0e27\u0e01\u0e47\u0e21\u0e32\u0e08\u0e31\u0e14"
+    },
+    {
+      "start": 122.3,
+      "end": 124.6,
+      "text": "\u0e41\u0e22\u0e01\u0e01\u0e31\u0e19\u0e19\u0e30\u0e41\u0e15\u0e48\u0e04\u0e34\u0e15\u0e2d\u0e25\u0e4c\u0e25\u0e31\u0e15\u0e40\u0e15\u0e2d\u0e23\u0e4c\u0e19\u0e35\u0e48\u0e04\u0e37\u0e2d\u0e15\u0e49\u0e2d\u0e07\u0e01\u0e35\u0e48"
+    },
+    {
+      "start": 124.6,
+      "end": 126.89999999999999,
+      "text": "\u0e42\u0e0b\u0e48\u0e19\u0e49\u0e2d\u0e07\u0e43\u0e0a\u0e49\u0e25\u0e07\u0e01\u0e31\u0e19\u0e19\u0e30\u0e04\u0e34\u0e15\u0e2d\u0e25\u0e4c\u0e25\u0e31\u0e15\u0e40\u0e15\u0e2d\u0e23\u0e4c\u0e22\u0e31\u0e07\u0e21\u0e35"
+    },
+    {
+      "start": 126.89999999999999,
+      "end": 129.2,
+      "text": "\u0e2b\u0e01\u0e43\u0e1a\u0e44\u0e21\u0e48\u0e1e\u0e2d\u0e43\u0e0a\u0e49\u0e2d\u0e48\u0e30"
+    },
+    {
+      "start": 132.2,
+      "end": 134.55,
+      "text": "\u0e04\u0e48\u0e32\u0e07\u0e2d\u0e34\u0e42\u0e25\u0e48\u0e21\u0e31\u0e19\u0e40\u0e1b\u0e47\u0e19\u0e41\u0e04\u0e48\u0e19\u0e42\u0e2d\u0e25\u0e48"
+    },
+    {
+      "start": 134.55,
+      "end": 136.9,
+      "text": "\u0e2d\u0e48\u0e30\u0e15\u0e48\u0e2d\u0e21\u0e31\u0e19"
+    },
+    {
+      "start": 136.9,
+      "end": 138.5225,
+      "text": "\u0e21\u0e31\u0e19\u0e40\u0e23\u0e34\u0e48\u0e21\u0e17\u0e35\u0e48\u0e08\u0e30\u0e21\u0e35\u0e04\u0e27\u0e32\u0e21\u0e41\u0e15\u0e01\u0e15\u0e48\u0e2d\u0e04\u0e37\u0e2d"
+    },
+    {
+      "start": 138.5225,
+      "end": 140.145,
+      "text": "\u0e15\u0e2d\u0e19\u0e17\u0e35\u0e48\u0e21\u0e35\u0e0b\u0e35\u0e2d\u0e39\u0e14\u0e32\u0e23\u0e4c\u0e01\u0e48\u0e2d\u0e19\u0e01\u0e31\u0e1a\u0e21\u0e35"
+    },
+    {
+      "start": 140.145,
+      "end": 141.7675,
+      "text": "\u0e40\u0e1a\u0e35\u0e22\u0e1a\u0e2d\u0e31\u0e25\u0e40\u0e15\u0e2d\u0e23\u0e4c\u0e0b\u0e36\u0e48\u0e07\u0e21\u0e31\u0e19\u0e42\u0e07\u0e48\u0e23\u0e48\u0e2d\u0e07\u0e04\u0e39\u0e48\u0e42\u0e07\u0e48\u0e23\u0e48\u0e2d\u0e07"
+    },
+    {
+      "start": 141.7675,
+      "end": 143.39,
+      "text": "\u0e2a\u0e2d\u0e07\u0e43\u0e2a\u0e40\u0e25\u0e22\u0e41\u0e15\u0e48\u0e2a\u0e38\u0e14\u0e44\u0e17\u0e22\u0e41\u0e25\u0e30\u0e21\u0e31\u0e19"
+    },
+    {
+      "start": 143.39,
+      "end": 145.0125,
+      "text": "\u0e04\u0e37\u0e2d\u0e42\u0e2d\u0e25\u0e48\u0e2d\u0e48\u0e30\u0e14\u0e35\u0e41\u0e25\u0e30\u0e16\u0e49\u0e32\u0e21\u0e31\u0e19"
+    },
+    {
+      "start": 145.0125,
+      "end": 146.635,
+      "text": "\u0e44\u0e21\u0e48\u0e21\u0e35\u0e42\u0e2d\u0e25\u0e48\u0e2d\u0e48\u0e30\u0e21\u0e31\u0e19\u0e21\u0e31\u0e19\u0e21\u0e31\u0e19\u0e21\u0e31\u0e19"
+    },
+    {
+      "start": 146.635,
+      "end": 148.2575,
+      "text": "\u0e44\u0e21\u0e48\u0e21\u0e35\u0e40\u0e17\u0e35\u0e48\u0e22\u0e30\u0e41\u0e25\u0e30\u0e41\u0e25\u0e30\u0e41\u0e04\u0e48\u0e19\u0e04\u0e48\u0e32\u0e07\u0e2d\u0e34"
+    },
+    {
+      "start": 148.2575,
+      "end": 149.88,
+      "text": "\u0e42\u0e25\u0e48\u0e2d\u0e48\u0e30"
+    }
+  ],
+  "version": 5
+}

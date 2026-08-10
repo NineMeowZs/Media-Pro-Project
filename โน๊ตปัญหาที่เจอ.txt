@@ -1,0 +1,17 @@
+- ShortCut ของ Window ปกติใช้ไม่ได้ อาทิ Ctrl+C,+V ใช้ไม่ได้
+- ตอนกดเลือก Path ของโมเดล อยากให้มันมีจุด 3 จุดให้เราเลือกหาโมเดลนั้น ๆ ในตัวคอมเราได้
+- อยากให้มันใช้เมาส์ลากคลุม Component ต่าง ๆ ได้
+- Proxy build ทำงานได้ (ffmpeg build ใน background, status bar แสดง progress) มันลื่นขึ้นเล็กน้อย แต่ยังมีความกระตุกอยู่พอสมควร
+- ทำ Waveform บน Timeline  →  เพิ่มความน่าใช้
+3️⃣  ปรับ Transcript/Search Panel ให้โดดเด่น  →  ชูฟีเจอร์ unique
+4️⃣  เพิ่ม GPU Decode (NVDEC)  →  optimize เพิ่มเติม
+
+ปัญหา UX ปัจจุบันที่ควรแก้:
+ปัญหา	วิธีแก้
+Preview กระตุก → ผู้ใช้ไม่อยากใช้	Proxy System
+Timeline ยังไม่มี Waveform เสียง	แสดง waveform บน audio track
+Transcript Panel ยังดูธรรมดา	ทำ highlight + search result count
+ไม่มี Keyboard shortcut แสดงให้เห็น	เพิ่ม Shortcut tooltip / cheatsheet
+ไม่มี Preview Resolution toggle	ปุ่มสลับ Full / Half / Quarter res
+
+ปรับ UI ให้สวยขึ้น
