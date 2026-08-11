@@ -7,3 +7,5 @@ numpy
 customtkinter
 imageio
 imageio-ffmpeg
+pygame-ce
+transformers
