@@ -151,7 +151,7 @@ class ProxyManager:
 
     def _run_ffmpeg(self, src: str, dst: str, on_progress_cb) -> bool:
         """
-        Encode a 480p proxy using ffmpeg.
+        Encode a 480p proxy using ffmpeg with GPU hardware acceleration when available.
         Returns True on success, False on failure.
         """
         # Get source duration for progress reporting
@@ -159,15 +159,26 @@ class ProxyManager:
 
         tmp_dst = dst + ".tmp.mp4"
 
+        # Check for GPU encoders
+        v_codec_args = ["-c:v", "libx264", "-crf", "23", "-preset", "ultrafast", "-tune", "fastdecode"]
+        try:
+            from video_exporter import _detect_gpu_encoder
+            enc_name, _ = _detect_gpu_encoder()
+            if enc_name == "h264_nvenc":
+                v_codec_args = ["-c:v", "h264_nvenc", "-preset", "p1", "-rc", "vbr", "-cq", "24"]
+            elif enc_name == "h264_qsv":
+                v_codec_args = ["-c:v", "h264_qsv", "-preset", "veryfast", "-global_quality", "24"]
+            elif enc_name == "h264_amf":
+                v_codec_args = ["-c:v", "h264_amf", "-quality", "speed"]
+        except Exception:
+            pass
+
         cmd = [
             _FFMPEG, "-y",
             "-i", src,
-            # Video: scale to max 480 height, keep aspect, H.264 ultrafast
+            # Video: scale to max 480 height, keep aspect
             "-vf", "scale=-2:min(480\\,ih)",
-            "-c:v", "libx264",
-            "-crf", "23",
-            "-preset", "ultrafast",
-            "-tune", "fastdecode",
+            *v_codec_args,
             # Audio: copy stream as-is (fast, no re-encode)
             "-c:a", "copy",
             "-movflags", "+faststart",

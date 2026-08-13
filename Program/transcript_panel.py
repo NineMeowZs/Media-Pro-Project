@@ -76,6 +76,20 @@ class TranscriptPanel(ctk.CTkFrame):
         )
         self.regen_btn.pack(side="left", padx=2)
 
+        # Persistent Delete All Subtitles Button (Red Trash Icon)
+        self.del_all_btn = ctk.CTkButton(
+            self.search_frame,
+            text="🗑",
+            height=28,
+            width=32,
+            corner_radius=6,
+            fg_color=C_RED,
+            hover_color="#dc2626",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            command=self.controller._delete_all_subtitles
+        )
+        self.del_all_btn.pack(side="left", padx=2)
+
         # Scrollable Frame for transcript rows
         self.scroll_frame = ctk.CTkScrollableFrame(
             self,
@@ -148,14 +162,29 @@ class TranscriptPanel(ctk.CTkFrame):
                 text_color=TXT_W,
                 justify="left",
                 anchor="w",
-                wraplength=180
+                wraplength=160
             )
-            text_lbl.pack(side="left", fill="x", expand=True, padx=(4, 6), pady=6)
+            text_lbl.pack(side="left", fill="x", expand=True, padx=(4, 2), pady=6)
+
+            # Delete button (🗑) — calls unified _del_subtitle(idx)
+            del_btn = ctk.CTkButton(
+                row,
+                text="🗑",
+                width=24,
+                height=22,
+                corner_radius=5,
+                fg_color=PANEL_MID,
+                hover_color=C_RED,
+                font=ctk.CTkFont(size=10),
+                command=lambda segment_idx=idx: self._on_delete_click(segment_idx)
+            )
+            del_btn.pack(side="right", padx=(2, 6), pady=6)
 
             # Keep references
             self.row_widgets[idx] = row
             row.time_lbl = time_lbl
             row.text_lbl = text_lbl
+            row.del_btn = del_btn
 
             # Bind mouse clicks and hovers
             for w in (row, time_lbl, text_lbl):
@@ -213,12 +242,22 @@ class TranscriptPanel(ctk.CTkFrame):
             row.configure(fg_color="transparent")
 
     def _on_row_click(self, idx):
+        """Select and seek to the subtitle segment at idx."""
+        self.controller.sel_track = "subtitle"
+        self.controller.sel_idx = idx
+        self.select_segment(idx)
         self.controller.seek_to_segment(idx)
         # Request focus so keyboard events go here
-        self.row_widgets[idx].focus_set()
+        if idx in self.row_widgets:
+            self.row_widgets[idx].focus_set()
 
     def _on_row_double_click(self, idx):
         self._start_inline_edit(idx)
+
+    def _on_delete_click(self, idx):
+        """Delete subtitle at idx from both timeline and transcript panel."""
+        if hasattr(self.controller, "_del_subtitle"):
+            self.controller._del_subtitle(idx)
 
     def _on_search_change(self, *args):
         self.filter(self.search_var.get())

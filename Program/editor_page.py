@@ -59,6 +59,64 @@ except ImportError:
         line_spacing=8; bg_opacity=0.5; max_chars_per_line=40; max_lines=2
 
 
+
+def _build_atempo_filter(speed: float) -> str:
+    """Chain FFmpeg atempo filters to support any speed multiplier between 0.1x and 10.0x."""
+    spd = max(0.1, min(10.0, float(speed)))
+    filters = []
+    curr = spd
+    while curr > 2.0:
+        filters.append("atempo=2.0")
+        curr /= 2.0
+    while curr < 0.5:
+        filters.append("atempo=0.5")
+        curr /= 0.5
+    filters.append(f"atempo={curr:.4f}")
+    return ",".join(filters)
+
+# ── Enable GPU / OpenCL acceleration ─────────────────────────────────────────
+try:
+    cv2.setUseOptimized(True)
+    cv2.ocl.setUseOpenCL(True)
+except Exception:
+    pass
+
+# ── PyTorch CUDA frame processing utilities ───────────────────────────────────
+_TORCH_CUDA = False
+_torch_device = None
+try:
+    import torch
+    if torch.cuda.is_available():
+        _TORCH_CUDA = True
+        _torch_device = torch.device("cuda")
+        # Allow TF32 for faster GPU matrix ops (Ampere+ GPUs)
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
+        torch.backends.cudnn.benchmark = True   # optimise kernels for fixed input sizes
+        print(f"[EditorPage] PyTorch CUDA enabled: {torch.cuda.get_device_name(0)}")
+except Exception:
+    pass
+
+
+def _gpu_resize_bgr(frame: np.ndarray, target_w: int, target_h: int) -> np.ndarray:
+    """
+    Fast C++ OpenCV resize for preview frames during playback.
+    Avoids host-device PyTorch memory roundtrips that cause PCIe latency stutter.
+    """
+    if frame is None:
+        return frame
+    return cv2.resize(frame, (target_w, target_h), interpolation=cv2.INTER_LINEAR)
+
+
+def _gpu_bgr2rgb(frame: np.ndarray) -> np.ndarray:
+    """
+    Fast BGR to RGB channel view flip (zero-copy numpy slice).
+    """
+    if frame is None:
+        return frame
+    return frame[:, :, ::-1]
+
+
 # ═════════════════════════════════════════════════════════════════════════════
 class EditorPage(ctk.CTkFrame):
 
@@ -69,7 +127,7 @@ class EditorPage(ctk.CTkFrame):
         self._on_back = on_back
 
         # Track data: {key: [clip_dict, ...]}  — layer_N keys created dynamically
-        self.tracks  = {"main": [], "subtitle": [], "audio_0": [], "audio_1": []}
+        self.tracks  = {"main": [], "subtitle": [], "audio_0": []}
         self.assets  = []
         self.segments: list[dict] = []
         self.style   = SubtitleStyle()
@@ -217,26 +275,101 @@ class EditorPage(ctk.CTkFrame):
         """Compat shim — restore normal status."""
         self._status("Ready")
 
-    def _setup_audio(self, path):
+    def _setup_audio(self, path=None):
+        """
+        Build and load the timeline preview audio track into pygame mixer.
+        Mixes all active main video clips and audio track clips on the timeline.
+        """
         def run():
-            self.after(0, lambda: self._status("Loading audio…"))
             try:
+                ff = imageio_ffmpeg.get_ffmpeg_exe()
+
+                # Collect all audio-bearing clips from main track and audio tracks
+                audio_clips = []
+                for cl in self.tracks.get("main", []):
+                    cp = cl.get("path", "")
+                    if cp and os.path.exists(cp):
+                        audio_clips.append(cl)
+
+                for ak in sorted(self._audio_keys()):
+                    for cl in self.tracks.get(ak, []):
+                        cp = cl.get("path", "")
+                        if cp and os.path.exists(cp):
+                            audio_clips.append(cl)
+
                 fd, tmp = tempfile.mkstemp(suffix=".wav")
                 os.close(fd)
                 self._audio_tmp = tmp
-                ff = imageio_ffmpeg.get_ffmpeg_exe()
-                subprocess.run([ff,"-y","-i",path,"-vn",
-                                "-ar","44100","-ac","2",tmp],
-                               capture_output=True, timeout=120)
-                pygame.mixer.music.load(tmp)
+
+                if not audio_clips:
+                    # Create 5s silent WAV if no clips
+                    cmd = [ff, "-y", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-t", "5", tmp]
+                    subprocess.run(cmd, capture_output=True, timeout=10)
+                    try:
+                        pygame.mixer.music.load(tmp)
+                    except Exception:
+                        pass
+                    return
+
+                inputs_args = []
+                filter_chains = []
+                n_inputs = 0
+
+                for cl in audio_clips:
+                    clip_path = cl.get("path", "")
+                    tl       = cl.get("tl", 0.0)
+                    st       = cl.get("start", 0.0)
+                    en       = cl.get("end", 0.0)
+                    spd      = max(cl.get("speed", 1.0), 0.01)
+                    vol      = cl.get("volume", 1.0)
+                    dur      = max(0.05, (en - st) / spd)
+                    delay_ms = max(0, int(tl * 1000))
+                    idx      = n_inputs
+
+                    inputs_args += ["-ss", str(st), "-t", str(dur), "-i", clip_path]
+                    chain = f"[{idx}:a]"
+                    if spd != 1.0:
+                        chain += f"atempo={min(max(spd, 0.5), 2.0)},"
+                    chain += f"volume={vol},adelay={delay_ms}|{delay_ms}[am{idx}]"
+                    filter_chains.append(chain)
+                    n_inputs += 1
+
+                if n_inputs == 1 and audio_clips[0].get("tl", 0.0) == 0.0 and audio_clips[0].get("start", 0.0) == 0.0 and audio_clips[0].get("speed", 1.0) == 1.0:
+                    # Single 0-delay clip — fast direct decode
+                    cmd = [ff, "-y", "-i", audio_clips[0]["path"], "-vn", "-ar", "44100", "-ac", "2", tmp]
+                    subprocess.run(cmd, capture_output=True, timeout=60)
+                else:
+                    mix_tag = "".join(f"[am{i}]" for i in range(n_inputs))
+                    filter_complex = ";".join(filter_chains) + f";{mix_tag}amix=inputs={n_inputs}:normalize=0[aout]"
+                    cmd = (
+                        [ff, "-y"]
+                        + inputs_args
+                        + ["-filter_complex", filter_complex,
+                           "-map", "[aout]",
+                           "-ar", "44100", "-ac", "2",
+                           tmp]
+                    )
+                    proc = subprocess.run(cmd, capture_output=True, timeout=120)
+                    if proc.returncode != 0 or not os.path.exists(tmp) or os.path.getsize(tmp) == 0:
+                        # Fallback to single direct decode
+                        cmd = [ff, "-y", "-i", audio_clips[0]["path"], "-vn", "-ar", "44100", "-ac", "2", tmp]
+                        subprocess.run(cmd, capture_output=True, timeout=60)
+
+                if os.path.exists(tmp) and os.path.getsize(tmp) > 0:
+                    pygame.mixer.music.load(tmp)
             except Exception as e:
-                print(f"[Audio] {e}")
+                print(f"[Audio Error] {e}")
             self.after(0, self._finish_load)
         threading.Thread(target=run, daemon=True).start()
+
+    def _reload_audio(self):
+        """Rebuild and reload mixed audio after track changes."""
+        self._setup_audio()
 
     def _finish_load(self):
         """Called when audio is ready – just update status."""
         self._status("Ready")
+
 
     # ── keys ──────────────────────────────────────────────────────────────────
     def _is_typing(self):
@@ -249,18 +382,21 @@ class EditorPage(ctk.CTkFrame):
         return False
 
     def _bind_keys(self):
-        # 1. Control Key Combinations (Ctrl+Z, Ctrl+Y, Ctrl+S, Ctrl+O, Ctrl+I)
+        # 1. Control Key Combinations (Ctrl+Z, Ctrl+Y, Ctrl+S, Ctrl+O, Ctrl+I, Ctrl+B)
         def _on_ctrl_key(event):
             if self._is_typing():
                 return  # let the widget handle it normally (copy/paste in entries)
             key = event.keysym.lower()
             code = event.keycode
-            # US keycodes: Z=90, Y=89, S=83, O=79, I=73
+            # US keycodes: Z=90, Y=89, S=83, O=79, I=73, B=66
             if key == 'z' or code == 90:
                 self._undo_do()
                 return "break"
             elif key == 'y' or code == 89:
                 self._redo_do()
+                return "break"
+            elif key == 'b' or code == 66:
+                self._split()
                 return "break"
             elif key == 's' or code == 83:
                 self._save()
@@ -383,7 +519,7 @@ class EditorPage(ctk.CTkFrame):
         try:
             with open(path) as f: data = json.load(f)
             saved = data.get("tracks", {})
-            self.tracks = {"main": [], "subtitle": [], "audio_0": [], "audio_1": []}
+            self.tracks = {"main": [], "subtitle": [], "audio_0": []}
             # Restore all tracks including dynamic layers
             for k, v in saved.items():
                 self.tracks[k] = v
@@ -412,6 +548,12 @@ class EditorPage(ctk.CTkFrame):
             self._tab("Media"); self._status(f"Loaded: {os.path.basename(path)}")
             for k in self._audio_keys():
                 for cl in self.tracks[k]:
+                    if cl.get("path"): self._extract_waveforms_bg(cl["path"])
+            # Also extract waveforms for main track video clips
+            for cl in self.tracks.get("main", []):
+                if cl.get("path"): self._extract_waveforms_bg(cl["path"])
+            for lk in [k for k in self.tracks if k.startswith("layer_")]:
+                for cl in self.tracks[lk]:
                     if cl.get("path"): self._extract_waveforms_bg(cl["path"])
             # Add to recents
             self._add_to_recent(path)
@@ -466,7 +608,7 @@ class EditorPage(ctk.CTkFrame):
                 self._proj_title_lbl.configure(text=self._proj_name)
             with open(path) as f: data = json.load(f)
             saved = data.get("tracks", {})
-            self.tracks = {"main": [], "subtitle": [], "audio_0": [], "audio_1": []}
+            self.tracks = {"main": [], "subtitle": [], "audio_0": []}
             for k, v in saved.items():
                 self.tracks[k] = v
             for old, new in [("audio1","audio_0"),("audio2","audio_1"),("overlay","layer_0"),("text","layer_1")]:
@@ -511,6 +653,16 @@ class EditorPage(ctk.CTkFrame):
                 main_video_path = self.tracks["main"][0]["path"]
                 self._setup_audio(main_video_path)
                 self._extract_waveforms_bg(main_video_path)
+                # Also extract waveforms for all main track clips
+                for cl in self.tracks.get("main", []):
+                    if cl.get("path"): self._extract_waveforms_bg(cl["path"])
+                # Extract waveforms for audio and layer tracks
+                for k in self._audio_keys():
+                    for cl in self.tracks.get(k, []):
+                        if cl.get("path"): self._extract_waveforms_bg(cl["path"])
+                for lk in [k for k in self.tracks if k.startswith("layer_")]:
+                    for cl in self.tracks.get(lk, []):
+                        if cl.get("path"): self._extract_waveforms_bg(cl["path"])
                 # ── Build proxy after UI settles (defer 500ms) ───────────────────
                 self.after(500, lambda p=main_video_path: self._start_proxy_build(p))
 
@@ -582,12 +734,31 @@ class EditorPage(ctk.CTkFrame):
         rows.append(("main", "VIDEO", C_BLUE, 56, "main"))
         # Subtitle
         rows.append(("subtitle", "SUBTITLE", C_AMBER, 28, "subtitle"))
-        # Audio tracks
-        for key in self._audio_keys():
+
+        # Audio tracks: show those with clips, plus always at least one empty slot
+        audio_keys = self._audio_keys()
+        shown_any_empty = False
+        for key in audio_keys:
             n = int(key.split("_")[1])
-            label = "MUSIC" if n == 0 else f"AUDIO {n+1}"
-            rows.append((key, label, C_TEAL if n == 0 else C_GREEN, 32, "audio"))
+            label = f"AUDIO {n+1}"
+            col = C_TEAL if n == 0 else C_GREEN
+            rows.append((key, label, col, 32, "audio"))
+            if not self.tracks.get(key):
+                shown_any_empty = True
+
+        # Always ensure at least one empty audio slot exists for dropping
+        if not shown_any_empty:
+            existing = audio_keys
+            next_n = int(existing[-1].split("_")[1]) + 1 if existing else 0
+            new_key = f"audio_{next_n}"
+            if new_key not in self.tracks:
+                self.tracks[new_key] = []
+            label = f"AUDIO {next_n+1}"
+            col = C_TEAL if next_n == 0 else C_GREEN
+            rows.append((new_key, label, col, 32, "audio"))
+
         return rows
+
 
     def _find_free_layer(self, tl_start: float, tl_end: float) -> str:
         """
@@ -777,6 +948,12 @@ class EditorPage(ctk.CTkFrame):
             self.preview_panel._show(frame)
 
     def _refresh_preview(self):
+        # Throttle to max 30fps to avoid CPU thrash from rapid property changes
+        import time as _time
+        now = _time.perf_counter()
+        if hasattr(self, "_last_preview_t") and (now - self._last_preview_t) < 0.033:
+            return
+        self._last_preview_t = now
         if hasattr(self, "preview_panel"):
             self.preview_panel._refresh_preview()
 
@@ -886,7 +1063,7 @@ class EditorPage(ctk.CTkFrame):
                     cap         = SmartVideoReader(play_path)
                     cap_path    = play_path
 
-                ok, fr = cap.get_frame_at_time(t)
+                ok, fr = cap.get_frame_at_time(src_t)
                 if not ok:
                     time.sleep(0.01); continue
 
@@ -907,8 +1084,10 @@ class EditorPage(ctk.CTkFrame):
                     fh, fw = fr_ready.shape[:2]
                     if fh > 360:
                         nw = int(fw * (360 / fh))
-                        fr_ready = cv2.resize(fr_ready, (nw, 360), interpolation=cv2.INTER_NEAREST)
-                    fr_ready = cv2.cvtColor(fr_ready, cv2.COLOR_BGR2RGB)
+                        # GPU bilinear resize (falls back to cv2 if no CUDA)
+                        fr_ready = _gpu_resize_bgr(fr_ready, nw, 360)
+                    # GPU BGR→RGB flip (nearly free — just numpy view)
+                    fr_ready = _gpu_bgr2rgb(fr_ready)
                 else:
                     fr_ready = fr
 
@@ -920,11 +1099,12 @@ class EditorPage(ctk.CTkFrame):
                 fi += 1
         finally:
             if cap: cap.release()
+            import gc; gc.collect()  # reclaim memory after decode thread exits
 
     def _tick(self):
         if not self.playing: return
         if self._pt0 < 0:
-            self.after(15, self._tick); return
+            self.after(33, self._tick); return
 
         elapsed   = time.perf_counter() - self._pt0
         target_fi = max(self.fi, self._pfi0 + int(elapsed * TARGET_FPS))
@@ -948,18 +1128,20 @@ class EditorPage(ctk.CTkFrame):
             self.fi = shown[0]
             self._show(shown[1])
 
-            # Throttle secondary widget redraws (timecode, slider, playhead line) during active video playback
+            # Throttle secondary widget redraws to ~100ms (10Hz) during playback
+            # to keep main thread free for frame display
             now = time.perf_counter()
             if not hasattr(self, "_last_ui_tick"):
                 self._last_ui_tick = 0.0
-            if now - self._last_ui_tick > 0.08:
+            if now - self._last_ui_tick > 0.10:
                 t = self.fi / float(TARGET_FPS)
                 self._upd_time(t)
                 self._upd_scrub(t)
                 self._fast_ph_update()
                 self._last_ui_tick = now
 
-        self.after(15, self._tick)
+        # Schedule at exactly 1/TARGET_FPS ≈ 33ms to match display frame rate
+        self.after(33, self._tick)
 
     def _fast_ph_update(self):
         if not (hasattr(self.timeline_panel, '_tl_ph_line') and hasattr(self.timeline_panel, '_tlc')): return
@@ -971,28 +1153,26 @@ class EditorPage(ctk.CTkFrame):
             self.timeline_panel._tlc.coords(self.timeline_panel._tl_ph_cap,
                                             px-6, 0, px+6, 0, px+2, 10, px-2, 10)
 
-            # Auto-scroll: throttle to 200ms to prevent back-and-forth jitter
+            # Auto-scroll: throttle to 300ms — use cached scrollregion to avoid Tk IPC on every call
             now = time.perf_counter()
             if not hasattr(self, "_last_scroll_t"):
                 self._last_scroll_t = 0.0
-            if now - self._last_scroll_t < 0.2:
+            if now - self._last_scroll_t < 0.3:
                 return
             c = self.timeline_panel._tlc
             W = c.winfo_width()
-            sr = c.cget("scrollregion")
-            if sr:
-                parts = sr.split()
-                if len(parts) >= 4:
-                    cw = float(parts[2])
-                    if cw > W:
-                        left, right = c.xview()
-                        vis_left = left * cw
-                        vis_right = right * cw
-                        margin = W * 0.15
-                        if px < vis_left or px > (vis_right - margin):
-                            target_left = px - W / 2
-                            c.xview_moveto(max(0.0, target_left / cw))
-                            self._last_scroll_t = now
+            # Use cached scrollregion width (updated only when _draw_tl runs, not every frame)
+            cw = getattr(self, "_cached_tl_cw", 0)
+            if cw <= W:
+                return
+            left, right = c.xview()
+            vis_left  = left * cw
+            vis_right = right * cw
+            margin = W * 0.15
+            if px < vis_left or px > (vis_right - margin):
+                target_left = px - W / 2
+                c.xview_moveto(max(0.0, target_left / cw))
+                self._last_scroll_t = now
         except Exception:
             pass
 
@@ -1104,11 +1284,105 @@ class EditorPage(ctk.CTkFrame):
         self._push_undo(); self._status(f"Split at {_ft(t)}"); self._draw_tl()
 
     def _del_sel(self):
-        items=self.tracks.get(self.sel_track,[])
-        if 0<=self.sel_idx<len(items):
-            items.pop(self.sel_idx)
-            self.sel_idx=max(0,self.sel_idx-1)
-            self._push_undo(); self._draw_tl(); self._status("Deleted")
+        """
+        Delete all selected items across single selection AND box multi-selection (_multi_sel).
+        Safely removes items per track in descending order to avoid index shifting.
+        """
+        targets = set()
+        if getattr(self, "_multi_sel", None):
+            for k, idx in self._multi_sel:
+                targets.add((k, idx))
+        if self.sel_track and 0 <= self.sel_idx < len(self.tracks.get(self.sel_track, [])):
+            targets.add((self.sel_track, self.sel_idx))
+
+        if not targets:
+            return
+
+        # Group targets by track
+        by_track = {}
+        for k, idx in targets:
+            by_track.setdefault(k, []).append(idx)
+
+        has_sub_deleted = False
+
+        for k, idx_list in by_track.items():
+            items = self.tracks.get(k, [])
+            # Sort indices in descending order to prevent index corruption during pop
+            for idx in sorted(idx_list, reverse=True):
+                if 0 <= idx < len(items):
+                    items.pop(idx)
+                    if k == "subtitle":
+                        has_sub_deleted = True
+
+        if has_sub_deleted:
+            self._sync_segments_from_tracks()
+            if hasattr(self, "transcript_panel"):
+                self.transcript_panel.set_segments(self.segments)
+
+        self._multi_sel = []
+        self.sel_track = ""
+        self.sel_idx = -1
+        if hasattr(self, "properties_panel"):
+            self.properties_panel._refresh_props()
+
+        self._push_undo()
+        self._draw_tl()
+        self._refresh_preview()
+        self._status("Deleted selected items")
+
+    def _del_subtitle(self, idx):
+        """Unified subtitle delete: removes clip from timeline AND segment from transcript panel."""
+        sub_clips = self.tracks.get("subtitle", [])
+        if not (0 <= idx < len(sub_clips)):
+            return
+        sub_clips.pop(idx)
+        # Rebuild segments from remaining subtitle clips to stay in sync
+        self._sync_segments_from_tracks()
+        # Refresh transcript panel
+        if hasattr(self, "transcript_panel"):
+            self.transcript_panel.set_segments(self.segments)
+        # Update selection
+        remaining = self.tracks.get("subtitle", [])
+        self.sel_idx = min(idx, len(remaining) - 1) if remaining else -1
+        if not remaining:
+            self.sel_track = ""
+            self.sel_idx = -1
+        self._push_undo()
+        self._draw_tl()
+        self._status("Subtitle deleted")
+
+    def _delete_all_subtitles(self):
+        """Delete all subtitle clips from timeline tracks and transcript panel."""
+        if not self.tracks.get("subtitle") and not self.segments:
+            from tkinter import messagebox
+            messagebox.showinfo("Subtitles", "ไม่มีซับไตเติลให้ลบ")
+            return
+
+        from tkinter import messagebox
+        if messagebox.askyesno("ลบซับทั้งหมด", "คุณต้องการลบซับไตเติลทั้งหมดออกจากไทม์ไลน์ใช่หรือไม่?"):
+            self._push_undo()
+            self.tracks["subtitle"] = []
+            self.segments = []
+            if hasattr(self, "transcript_panel"):
+                self.transcript_panel.set_segments([])
+            if self.sel_track == "subtitle":
+                self.sel_track = ""
+                self.sel_idx = -1
+            self._multi_sel = [item for item in getattr(self, "_multi_sel", []) if item[0] != "subtitle"]
+            self._draw_tl()
+            self._refresh_preview()
+            self._status("ลบซับไตเติลทั้งหมดเรียบร้อยแล้ว")
+
+    def _sync_segments_from_tracks(self):
+        """Rebuild self.segments from subtitle clips in tracks to keep them perfectly in sync."""
+        self.segments = []
+        for clip in self.tracks.get("subtitle", []):
+            dur = (clip["end"] - clip["start"]) / max(clip.get("speed", 1.0), 0.01)
+            self.segments.append({
+                "start": clip.get("tl", 0.0),
+                "end": clip.get("tl", 0.0) + dur,
+                "text": clip.get("sub_text", clip.get("name", ""))
+            })
 
     def _dup(self, tk_key, idx):
         items=self.tracks[tk_key]
@@ -1207,46 +1481,91 @@ class EditorPage(ctk.CTkFrame):
             self.assets.append({"path":path,"name":os.path.basename(path),"type":"audio"})
             self._tab("Audio")
 
+    def _get_media_duration(self, path):
+        """Get accurate duration from video or audio file using ffprobe/ffmpeg."""
+        try:
+            ff = imageio_ffmpeg.get_ffmpeg_exe()
+            cmd = [ff, "-i", path]
+            res = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            import re
+            m = re.search(r'Duration:\s*(\d+):(\d+):([\d.]+)', res.stderr)
+            if m:
+                h, mi, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
+                return h * 3600 + mi * 60 + s
+        except Exception:
+            pass
+        return None
+
     def _add_to_tl(self, asset):
-        ext=os.path.splitext(asset["path"])[1].lower()
-        is_audio = ext in (".wav",".mp3",".aac",".ogg")
-        fps = TARGET_FPS; dur = 5.0
-        if not is_audio:
+        ext = os.path.splitext(asset["path"])[1].lower()
+        is_audio = ext in (".wav", ".mp3", ".aac", ".ogg")
+        is_image = ext in (".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp")
+        fps = TARGET_FPS
+        dur = 5.0
+
+        if is_image:
+            dur = 5.0  # default 5s for images, user can trim
+        elif is_audio:
+            # Read real audio duration
+            real_dur = self._get_media_duration(asset["path"])
+            dur = real_dur if real_dur and real_dur > 0 else 5.0
+        else:
+            # Video
             cap = cv2.VideoCapture(asset["path"])
             fps = cap.get(cv2.CAP_PROP_FPS) or TARGET_FPS
             cnt = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            dur = cnt / fps if cnt > 0 else 5.0; cap.release()
+            dur = cnt / fps if cnt > 0 else 5.0
+            cap.release()
 
         tl_start = self._dur()
         tl_end = tl_start + dur
 
         if is_audio:
-            if not self.tracks.get("audio_0"):
-                tk = "audio_0"
-            elif not self.tracks.get("audio_1"):
-                tk = "audio_1"
-            else:
+            # Find first empty audio track, or create one
+            tk = None
+            for ak in self._audio_keys():
+                if not self.tracks.get(ak):
+                    tk = ak
+                    break
+            if tk is None:
                 existing = self._audio_keys()
-                n = int(existing[-1].split("_")[1]) + 1
+                if existing:
+                    n = int(existing[-1].split("_")[1]) + 1
+                else:
+                    n = 0
                 tk = f"audio_{n}"
                 self.tracks[tk] = []
         elif not self.tracks.get("main"):
             tk = "main"
+        elif is_image:
+            tk = self._find_free_layer(tl_start, tl_end)
         else:
             tk = self._find_free_layer(tl_start, tl_end)
 
         clip_obj = self._clip(asset["path"], asset["name"], 0, dur,
                               tl=tl_start, fps=fps)
-        if ext in (".jpg", ".jpeg", ".png"):
+        if is_image:
             clip_obj["source_dur"] = 999999.0
+            clip_obj["end"] = 999999.0
+        if is_audio:
+            clip_obj["source_dur"] = dur
+
         self.tracks[tk].append(clip_obj)
-        if is_audio or ext in (".mp4",".mov",".avi",".mkv",".webm"):
+        self.sel_track = tk
+        self.sel_idx = len(self.tracks[tk]) - 1
+
+        if is_audio or ext in (".mp4", ".mov", ".avi", ".mkv", ".webm"):
             self._extract_waveforms_bg(asset["path"])
-        # ── Kick off proxy build for video clips added to timeline ───────────────
-        if ext in (".mp4",".mov",".avi",".mkv",".webm"):
+        # Kick off proxy build for video clips added to timeline
+        if ext in (".mp4", ".mov", ".avi", ".mkv", ".webm"):
             self._start_proxy_build(asset["path"])
+        # Reload mixed audio whenever an audio clip is added to a track
+        if is_audio:
+            self.after(200, self._reload_audio)
         self._push_undo(); self._rebuild_label_column(); self._draw_tl()
+        self._refresh_props()
         self._status(f"Added to [{tk}]: {asset['name']}")
+
 
     # ── Helpers ───────────────────────────────────────────────────────────────
     def _at(self, track, t):
@@ -1273,21 +1592,43 @@ class EditorPage(ctk.CTkFrame):
 
     # ── Undo / Redo ───────────────────────────────────────────────────────────
     def _push_undo(self):
-        snap=copy.deepcopy(self.tracks); self._undo.append(snap)
-        if len(self._undo)>MAX_UNDO: self._undo.pop(0)
+        # Save both tracks AND segments together so undo is fully atomic
+        snap = {"tracks": copy.deepcopy(self.tracks),
+                "segments": copy.deepcopy(self.segments)}
+        self._undo.append(snap)
+        if len(self._undo) > MAX_UNDO: self._undo.pop(0)
         self._redo.clear()
 
     def _undo_do(self):
-        if len(self._undo)<2: self._status("Nothing to undo"); return
-        self._redo.append(self._undo.pop())
-        self.tracks=copy.deepcopy(self._undo[-1])
+        if len(self._undo) < 2: self._status("Nothing to undo"); return
+        curr = self._undo.pop()
+        self._redo.append(curr)
+        snap = self._undo[-1]
+        self.tracks = copy.deepcopy(snap["tracks"] if isinstance(snap, dict) else snap)
+        self.segments = copy.deepcopy(snap.get("segments", []) if isinstance(snap, dict) else [])
+        if not self.segments:
+            self._sync_segments_from_tracks()
+        if hasattr(self, "transcript_panel"):
+            self.transcript_panel.set_segments(self.segments)
+        self.sel_track = ""
+        self.sel_idx = -1
+        self._multi_sel = []
         self._rebuild_label_column()
         self._draw_tl(); self._render(self.fi); self._status("Undo")
 
     def _redo_do(self):
         if not self._redo: self._status("Nothing to redo"); return
-        snap=self._redo.pop(); self._undo.append(copy.deepcopy(self.tracks))
-        self.tracks=copy.deepcopy(snap)
+        snap = self._redo.pop()
+        self._undo.append(snap)
+        self.tracks = copy.deepcopy(snap["tracks"] if isinstance(snap, dict) else snap)
+        self.segments = copy.deepcopy(snap.get("segments", []) if isinstance(snap, dict) else [])
+        if not self.segments:
+            self._sync_segments_from_tracks()
+        if hasattr(self, "transcript_panel"):
+            self.transcript_panel.set_segments(self.segments)
+        self.sel_track = ""
+        self.sel_idx = -1
+        self._multi_sel = []
         self._rebuild_label_column()
         self._draw_tl(); self._render(self.fi); self._status("Redo")
 
@@ -1306,6 +1647,89 @@ class EditorPage(ctk.CTkFrame):
             })
         export_segs.sort(key=lambda x: x["start"])
         return export_segs
+
+    def _detach_audio(self, track_key, idx):
+        """Extract audio from the clip's time range and add it as a separate audio track.
+        After detach, mutes the source video clip so it has no audio."""
+        items = self.tracks.get(track_key, [])
+        if not (0 <= idx < len(items)):
+            return
+        clip = items[idx]
+        path = clip.get("path", "")
+        if not path or not os.path.exists(path):
+            self._status("Cannot detach: invalid path"); return
+        ext = os.path.splitext(path)[1].lower()
+        if ext not in (".mp4", ".mov", ".avi", ".mkv", ".webm"):
+            self._status("Cannot detach: not a video file"); return
+
+        # Capture the clip's actual time range (after any splitting)
+        clip_start = clip.get("start", 0.0)           # start in source file (seconds)
+        clip_dur   = (clip["end"] - clip["start"]) / max(clip.get("speed", 1.0), 0.01)
+        clip_tl    = clip.get("tl", 0.0)               # position on timeline
+
+        self._status("Detaching audio…")
+
+        def _run_detach():
+            try:
+                ff = imageio_ffmpeg.get_ffmpeg_exe()
+                base = os.path.splitext(os.path.basename(path))[0]
+                out_dir = os.path.dirname(path)
+                out_path = os.path.join(out_dir, f"{base}_audio.wav")
+                counter = 1
+                while os.path.exists(out_path):
+                    out_path = os.path.join(out_dir, f"{base}_audio_{counter}.wav")
+                    counter += 1
+                # Extract ONLY the clip's portion from the source video
+                cmd = [
+                    ff, "-y",
+                    "-ss", str(clip_start),      # seek to clip start in source
+                    "-t",  str(clip_dur),         # extract only clip duration
+                    "-i",  path,
+                    "-vn", "-ar", "44100", "-ac", "2", out_path
+                ]
+                res = subprocess.run(cmd, capture_output=True, timeout=120)
+                if res.returncode != 0:
+                    raise RuntimeError("FFmpeg audio extraction failed")
+
+                # Find free audio track
+                tk = None
+                for ak in self._audio_keys():
+                    if not self.tracks.get(ak):
+                        tk = ak; break
+                if tk is None:
+                    existing = self._audio_keys()
+                    n = int(existing[-1].split("_")[1]) + 1 if existing else 0
+                    tk = f"audio_{n}"
+                    self.tracks[tk] = []
+
+                # Audio clip starts at tl=clip_tl, source start=0 (already trimmed)
+                audio_clip = self._clip(
+                    out_path,
+                    os.path.basename(out_path),
+                    0,
+                    clip_dur,
+                    tl=clip_tl,
+                    fps=TARGET_FPS
+                )
+                audio_clip["source_dur"] = clip_dur
+
+                def _ui_update():
+                    self.tracks[tk].append(audio_clip)
+                    # Mute the source video clip so it no longer plays audio
+                    clip["muted"] = True
+                    asset = {"path": out_path, "name": os.path.basename(out_path), "type": "audio"}
+                    self.assets.append(asset)
+                    self._extract_waveforms_bg(out_path)
+                    self._push_undo()
+                    self._rebuild_label_column()
+                    self._draw_tl()
+                    self._status(f"Audio detached → {os.path.basename(out_path)} (video muted)")
+
+                self.after(0, _ui_update)
+            except Exception as ex:
+                self.after(0, lambda e=ex: self._status(f"Detach error: {e}"))
+
+        threading.Thread(target=_run_detach, daemon=True).start()
 
     def _export(self):
         if not self.tracks["main"]:
@@ -1510,10 +1934,29 @@ class EditorPage(ctk.CTkFrame):
                     "-c:v", "libx264", "-crf", str(crf), "-preset", "fast",
                     "-c:a", "aac", "-b:a", "192k", target_out]
 
-            self.after(0, lambda: self._status("Rendering video tracks…"))
-            res = subprocess.run(cmd, capture_output=True, text=True)
-            if res.returncode != 0:
-                err = (res.stderr or "")[-600:]
+            self.after(0, lambda: self._status("Rendering… 0%"))
+            # Use Popen to stream stderr for live progress updates
+            total_dur = self._dur()
+            import re as _re
+            proc = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                                    text=True, encoding="utf-8", errors="replace")
+            stderr_lines = []
+            while True:
+                line = proc.stderr.readline()
+                if not line and proc.poll() is not None:
+                    break
+                if line:
+                    stderr_lines.append(line)
+                    # Parse FFmpeg time= progress
+                    m = _re.search(r'time=(\d+):(\d+):([\d.]+)', line)
+                    if m and total_dur > 0:
+                        h, mi, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
+                        elapsed = h * 3600 + mi * 60 + s
+                        pct = min(99, int(elapsed / total_dur * 100))
+                        self.after(0, lambda p=pct: self._status(f"Rendering… {p}%"))
+            ret = proc.wait()
+            if ret != 0:
+                err = "".join(stderr_lines)[-600:]
                 raise RuntimeError(f"FFmpeg error: {err}")
 
             if burn_subs and export_segs:
@@ -1547,11 +1990,19 @@ class EditorPage(ctk.CTkFrame):
         _SubtitleDialog(self.master,self.style,self._on_sub)
 
     def _render_main_track_audio(self) -> str:
-        """Render combined audio of all clips on main track to a temp wav file."""
+        """
+        Render combined audio of all video clips on main track to a temp wav file.
+        Applies exact start/end trimming, clip speed (atempo), and timeline position (adelay).
+        """
         main_clips = self.tracks.get("main", [])
         if not main_clips:
             return ""
-        if len(main_clips) == 1 and main_clips[0].get("tl", 0.0) == 0.0:
+
+        # Use raw file directly ONLY if 1 clip with 1.0x speed, 0 start, 0 tl
+        if (len(main_clips) == 1 
+            and main_clips[0].get("tl", 0.0) == 0.0 
+            and main_clips[0].get("start", 0.0) == 0.0 
+            and main_clips[0].get("speed", 1.0) == 1.0):
             return main_clips[0]["path"]
 
         try:
@@ -1562,22 +2013,26 @@ class EditorPage(ctk.CTkFrame):
             filter_chains = []
 
             for idx, cl in enumerate(main_clips):
-                path = cl["path"]
-                tl = cl.get("tl", 0.0)
+                path  = cl["path"]
+                tl    = cl.get("tl", 0.0)
                 start = cl.get("start", 0.0)
-                dur = (cl["end"] - cl["start"]) / max(cl.get("speed", 1.0), 0.01)
+                end   = cl.get("end", 0.0)
                 speed = cl.get("speed", 1.0)
+                delay_ms = max(0, int(tl * 1000))
 
-                inputs.extend(["-ss", str(start), "-t", str(dur), "-i", path])
-                delay_ms = int(tl * 1000)
-                filter_chains.append(f"[{idx}:a]adelay={delay_ms}|{delay_ms},atempo={speed}[a{idx}]")
+                inputs.extend(["-ss", str(start), "-to", str(end), "-i", path])
+                atempo_str = _build_atempo_filter(speed)
+                filter_chains.append(f"[{idx}:a]{atempo_str},adelay={delay_ms}|{delay_ms}[a{idx}]")
 
             mix_inputs = "".join([f"[a{i}]" for i in range(len(main_clips))])
-            filter_complex = f"{';'.join(filter_chains)};{mix_inputs}amix=inputs={len(main_clips)}[aout]"
+            if len(main_clips) == 1:
+                filter_complex = f"{filter_chains[0]};[a0]anull[aout]"
+            else:
+                filter_complex = f"{';'.join(filter_chains)};{mix_inputs}amix=inputs={len(main_clips)}:normalize=0[aout]"
 
             cmd = [ff, "-y"] + inputs + ["-filter_complex", filter_complex, "-map", "[aout]", "-ac", "1", "-ar", "16000", temp_wav]
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-            if proc.returncode == 0 and os.path.exists(temp_wav):
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+            if proc.returncode == 0 and os.path.exists(temp_wav) and os.path.getsize(temp_wav) > 0:
                 return temp_wav
         except Exception as e:
             print(f"[AudioRender Error] {e}")
@@ -1611,6 +2066,7 @@ class EditorPage(ctk.CTkFrame):
                         seg["start"] += t_start
                         seg["end"] += t_start
 
+                self.after(0, self._push_undo)
                 self.segments = segs
 
                 if hasattr(self, "transcript_panel"):
@@ -1764,9 +2220,13 @@ class EditorPage(ctk.CTkFrame):
         self.fi = int(seg["start"] * TARGET_FPS)
         self.sel_track = "subtitle"
         self.sel_idx = idx
+        # Sync transcript panel selection
+        if hasattr(self, "transcript_panel"):
+            self.transcript_panel.select_segment(idx)
         if hasattr(self, "timeline_panel"):
             self.timeline_panel._draw_tl()
         self._render(self.fi)
+        self._refresh_props()
 
     def _import_srt(self):
         path = filedialog.askopenfilename(
@@ -2186,6 +2646,37 @@ class _SubtitleDialog(ctk.CTkToplevel):
         srt_path = ""
         if self._srt_var.get():
             srt_path = self._srt_path or self._srt_entry.get().strip()
+
+        # ── Validate model path before submitting ────────────────────────────
+        # If user typed a directory path, verify it actually exists and looks
+        # like a HuggingFace model folder (has config.json or pytorch_model.bin)
+        if mp and not self._mv.get() == mp:
+            if not os.path.isdir(mp):
+                from tkinter import messagebox as _mb
+                _mb.showerror(
+                    "Model Path Error",
+                    f"ไม่พบ folder:\n{mp}\n\n"
+                    "กรุณาเลือก folder ของ Whisper model ที่ถูกต้อง\n"
+                    "(ควรมีไฟล์ config.json หรือ pytorch_model.bin)\n\n"
+                    "หรือเลือก fallback model (tiny/base/small/medium) แทน"
+                )
+                return  # ไม่ปิด dialog ให้ user แก้ไขก่อน
+            # Warn if folder looks incomplete
+            has_model = any(
+                os.path.exists(os.path.join(mp, f))
+                for f in ["config.json", "pytorch_model.bin",
+                          "model.safetensors", "best.pt", "model.pt"]
+            )
+            if not has_model:
+                from tkinter import messagebox as _mb
+                ok = _mb.askyesno(
+                    "Model Warning",
+                    f"ไม่พบไฟล์ model ใน folder:\n{mp}\n\n"
+                    "อาจเกิดข้อผิดพลาดระหว่างโหลด\n"
+                    "ต้องการดำเนินการต่อหรือไม่?"
+                )
+                if not ok:
+                    return
 
         rmode = self._range_mode.get()
         t_start = 0.0

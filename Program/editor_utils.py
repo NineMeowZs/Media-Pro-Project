@@ -71,7 +71,7 @@ TGAP       = 3     # gap between track rows (px)
 LABEL_W    = 90
 EDGE_PX    = 9
 MAX_UNDO   = 60
-FRAME_BUF  = 90
+FRAME_BUF  = 45
 SNAP_PX    = 8     # pixel distance for magnetic snap
 FADE_ZONE  = 8     # px from corner → fade handle
 

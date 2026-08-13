@@ -27,6 +27,7 @@ class TimelinePanel(ctk.CTkFrame):
         self._tl0 = 0.0
         self._st0 = 0.0
         self._en0 = 0.0
+        self._last_drag_ms = 0  # throttle timestamp for move redraws
         # Rubber-band selection state
         self._rb_x0 = 0.0
         self._rb_y0 = 0.0
@@ -92,11 +93,17 @@ class TimelinePanel(ctk.CTkFrame):
         self._tlc.bind("<Configure>",       lambda e: self._draw_tl())
         self._tlc.bind("<Motion>",          self._tl_hover)
 
-        # Sync scrolling on mouse wheel
-        self._tlc.bind("<MouseWheel>",       lambda e: self._tlc.yview_scroll(int(-1 * (e.delta / 120)), "units"))
+        # Scroll behaviour:
+        #   Plain MouseWheel       → vertical scroll (เลื่อน tracks ขึ้น/ลง)
+        #   Ctrl+MouseWheel        → zoom in/out
+        #   Shift+MouseWheel       → horizontal scroll (pan timeline ซ้าย/ขวา)
+        self._tlc.bind("<MouseWheel>",
+            lambda e: self._tlc.yview_scroll(int(-1 * (e.delta / 120)), "units"))
         self._tlc.bind("<Control-MouseWheel>", self._tl_zoom)
-        self._lcc.bind("<MouseWheel>",       lambda e: self._tlc.yview_scroll(int(-1 * (e.delta / 120)), "units"))
-        self._tlc.bind("<Shift-MouseWheel>",  lambda e: self._tlc.xview_scroll(int(-1 * (e.delta / 120)), "units"))
+        self._tlc.bind("<Shift-MouseWheel>",
+            lambda e: self._tlc.xview_scroll(int(-1 * (e.delta / 120)), "units"))
+        self._lcc.bind("<MouseWheel>",
+            lambda e: self._tlc.yview_scroll(int(-1 * (e.delta / 120)), "units"))
 
     def _scale(self):
         W = self._tlc.winfo_width()
@@ -164,13 +171,39 @@ class TimelinePanel(ctk.CTkFrame):
             if key == "main":
                 c.create_line(0, y, cw, y, fill="#252535", width=1)
 
-            # Draw row background & label text on label canvas
+            # Draw row background & icon label on label canvas
             self._lcc.create_rectangle(0, y, LABEL_W, y + row_h, fill=lbl_bg, outline="")
             self._lcc.create_line(0, y + row_h, LABEL_W, y + row_h, fill=BORD)
+
+            # Icon + small label instead of long text
+            ICONS = {
+                "main":     ("\u25b6", C_BLUE),      # ▶ VIDEO
+                "subtitle": ("T",      C_AMBER),     # T SUBTITLE
+                "audio":    ("\u266b", C_TEAL),      # ♫ AUDIO
+                "layer":    ("\u25a0", C_PURPLE),    # ■ OVERLAY
+                "empty":    ("+",      TXT_G),
+            }
+            icon_char, icon_col = ICONS.get(kind, ("?", TXT_G))
+            cx_lbl = LABEL_W // 2
+            cy_lbl = y + row_h // 2
+            # Large icon
             self._lcc.create_text(
-                12, y + row_h // 2, text=lbl,
-                fill=col, anchor="w", font=("Helvetica", 8, "bold")
+                cx_lbl - 14, cy_lbl, text=icon_char,
+                fill=icon_col, font=("Segoe UI", 13, "bold"), anchor="center"
             )
+            # Small track number for audio/layer tracks
+            if kind == "audio":
+                n = int(key.split("_")[1]) + 1
+                self._lcc.create_text(
+                    cx_lbl + 8, cy_lbl, text=str(n),
+                    fill=icon_col, font=("Segoe UI", 9, "bold"), anchor="center"
+                )
+            elif kind == "layer":
+                n = int(key.split("_")[1]) + 1
+                self._lcc.create_text(
+                    cx_lbl + 8, cy_lbl, text=str(n),
+                    fill=icon_col, font=("Segoe UI", 9, "bold"), anchor="center"
+                )
 
             # Muted/Solo badge on row
             if self.controller._muted.get(key):
@@ -207,6 +240,11 @@ class TimelinePanel(ctk.CTkFrame):
                 # Waveforms for Audio Tracks
                 if kind == "audio":
                     self._draw_waveform(c, item, x1, ty1, x2, ty2, clip_col)
+
+                # Waveform in bottom half of VIDEO (main) clips
+                if kind == "main" and (x2 - x1) > 20:
+                    wf_mid = (ty1 + ty2) // 2
+                    self._draw_waveform(c, item, x1, wf_mid, x2, ty2, _dark(clip_col, 10))
 
                 # Overlay icon hints
                 if kind in ("layer", "video") and key != "main" and x2 - x1 > 20:
@@ -276,6 +314,9 @@ class TimelinePanel(ctk.CTkFrame):
         total_h = y + 40
         self._tlc.configure(scrollregion=(0, 0, cw, max(H, total_h)))
         self._lcc.configure(scrollregion=(0, 0, LABEL_W, max(H, total_h)))
+        # Cache canvas width for _fast_ph_update (avoids Tk cget() IPC on every playback tick)
+        self.controller._cached_tl_cw = cw
+
 
     def _draw_waveform(self, c, item, x1, ty1, x2, ty2, col):
         """Draw waveform amplitude bars for audio clips."""
@@ -312,45 +353,61 @@ class TimelinePanel(ctk.CTkFrame):
         cy = self._tlc.canvasy(e.y)
         t_click = cx / sc
 
-        # Check if clicking on/near ruler or playhead to scrub playhead
-        ph_x = (self.controller.fi / float(TARGET_FPS)) * sc
-        if cy <= RULER_H + 10 or abs(cx - ph_x) <= 16:
+        # ── Step 1: Try to hit a CLIP first (highest priority) ─────────────────
+        # A clip is "hit" when cy is WITHIN its clip-body area (ty1..ty2) AND cx overlaps [x1, x2].
+        # Trim mode only activates in the outer 8px of the clip body.
+        hit_k = hit_i = None
+        mode = "move"
+        y = RULER_H + 2
+        for key, lbl, col, th, kind in self.controller._all_track_rows():
+            if key == "__empty_layer__":
+                continue
+            row_h = th + TGAP * 2
+            ty1 = y + TGAP        # top edge of clip body (excluding gap)
+            ty2 = y + TGAP + th   # bottom edge of clip body (excluding gap)
+            if ty1 <= cy <= ty2:
+                for i, item in enumerate(self.controller.tracks.get(key, [])):
+                    dur = (item["end"] - item["start"]) / max(item["speed"], 0.01)
+                    tl = item.get("tl", 0.0)
+                    x1 = tl * sc
+                    x2 = (tl + dur) * sc
+                    # Hit if cursor is anywhere inside [x1-2, x2+2] (small tolerance)
+                    if x1 - 4 <= cx <= x2 + 4:
+                        hit_k = key
+                        hit_i = i
+                        clip_w = x2 - x1
+                        TRIM_PX = 8  # only trim in outer 8px
+                        if clip_w <= 18:
+                            # Very narrow clip: left half = trim_l, right half = trim_r
+                            mode = "trim_l" if cx < (x1 + x2) / 2 else "trim_r"
+                        elif abs(cx - x1) <= TRIM_PX:
+                            mode = "trim_l"
+                        elif abs(cx - x2) <= TRIM_PX:
+                            mode = "trim_r"
+                        else:
+                            mode = "move"
+                        break
+                if hit_k is not None:
+                    break  # Stop searching once we found a clip
+            y += row_h
+
+        # ── Step 2: Ruler or playhead cap → scrub ──────────────────────────
+        if cy <= RULER_H:
             self._dm = "scrub"
             self.controller.fi = max(0, int(t_click * TARGET_FPS))
             self.controller._render(self.controller.fi)
             self._draw_tl()
             return
 
-        hit_k = hit_i = None
-        mode = "scrub"
-        y = RULER_H + 2
-        for key, lbl, col, th, kind in self.controller._all_track_rows():
-            row_h = th + TGAP * 2
-            if y <= cy <= y + row_h and key != "__empty_layer__":
-                for i, item in enumerate(self.controller.tracks.get(key, [])):
-                    dur = (item["end"] - item["start"]) / max(item["speed"], 0.01)
-                    tl = item.get("tl", 0.0)
-                    x1 = tl * sc
-                    x2 = (tl + dur) * sc
-                    if x1 - 12 <= cx <= x2 + 12:
-                        hit_k = key
-                        hit_i = i
-                        clip_w = x2 - x1
-                        if clip_w <= 30:
-                            if cx < (x1 + x2) / 2.0:
-                                mode = "trim_l"
-                            else:
-                                mode = "trim_r"
-                        else:
-                            if cx <= x1 + 12 or abs(cx - x1) <= 12:
-                                mode = "trim_l"
-                            elif cx >= x2 - 12 or abs(cx - x2) <= 12:
-                                mode = "trim_r"
-                            else:
-                                mode = "move"
-                        break
-                break
-            y += row_h
+        # Playhead cap triangle area (only when no clip was hit)
+        ph_x = (self.controller.fi / float(TARGET_FPS)) * sc
+        on_ph_cap = (abs(cx - ph_x) <= 10 and cy <= RULER_H + 18)
+        if on_ph_cap and hit_k is None:
+            self._dm = "scrub"
+            self.controller.fi = max(0, int(t_click * TARGET_FPS))
+            self.controller._render(self.controller.fi)
+            self._draw_tl()
+            return
 
         if hit_k is not None:
             # Shift+click: toggle item in multi_sel without clearing others
@@ -379,25 +436,24 @@ class TimelinePanel(ctk.CTkFrame):
                 self.controller.transcript_panel.select_segment(hit_i)
                 self.controller.transcript_panel.scroll_to_segment(hit_i)
 
-            # Sync labels in properties panel
             self.controller._refresh_props()
         else:
-            if not (e.state & 1):  # Clear multi-sel and clip selection when clicking empty space
+            if not (e.state & 1):
                 self.controller._multi_sel = []
                 self.controller.sel_track = ""
                 self.controller.sel_idx = -1
                 if hasattr(self.controller, "properties_panel"):
                     self.controller.properties_panel._refresh_props()
-            # Start rubber-band drag
+            # Rubber-band or scrub on empty space
             self._dm = "rubber"
             self._rb_x0 = cx
             self._rb_y0 = cy
             self._rb_rect = None
-            # Also scrub to that position
             self.controller.fi = max(0, int(t_click * TARGET_FPS))
             self.controller._render(self.controller.fi)
 
         self._draw_tl()
+
 
     def _tl_drag(self, e):
         cx = self._tlc.canvasx(e.x)
@@ -416,7 +472,20 @@ class TimelinePanel(ctk.CTkFrame):
             return
 
         if self._dm == "scrub":
-            self.controller.fi = max(0, int(cx / sc * TARGET_FPS))
+            # Snap playhead to clip edges for easier control
+            raw_t = cx / sc
+            thresh = 8.0 / max(sc, 0.01)  # 8px snap threshold
+            best_t = raw_t
+            best_d = thresh
+            for k, clips in self.controller.tracks.items():
+                for c in clips:
+                    dur = (c["end"] - c["start"]) / max(c.get("speed", 1.0), 0.01)
+                    for edge_t in (c.get("tl", 0.0), c.get("tl", 0.0) + dur):
+                        d = abs(edge_t - raw_t)
+                        if d < best_d:
+                            best_d = d
+                            best_t = edge_t
+            self.controller.fi = max(0, int(best_t * TARGET_FPS))
             self.controller._render(self.controller.fi)
             return
 
@@ -426,8 +495,16 @@ class TimelinePanel(ctk.CTkFrame):
         cl = self.controller.tracks[self._dtk][self._di]
 
         if self._dm == "move":
+            # Compute new tl position — NO auto-zoom, scale stays fixed
             raw = max(0.0, self._tl0 + dx)
             cl["tl"] = self.controller._snap(raw, self._dtk, self._di)
+
+            # If clip is dragged past visible area, scroll canvas to follow (no zoom)
+            clip_x2 = (cl["tl"] + (cl["end"] - cl["start"]) / max(cl.get("speed", 1.0), 0.01)) * sc
+            canvas_w = self._tlc.winfo_width()
+            view_right = (self._tlc.xview()[1]) * (max(canvas_w, int(self.controller._dur() * sc) + 120))
+            if clip_x2 > view_right - 20:
+                self._tlc.xview_scroll(2, "units")
 
             # Drag vertically to switch tracks in real-time
             target_track = None
@@ -475,13 +552,38 @@ class TimelinePanel(ctk.CTkFrame):
                     self.controller.sel_idx = self._di
                     self.controller._rebuild_label_column()
 
-            self._draw_tl()
-            self.controller._refresh_preview()
+            # Throttle redraws to ~125fps (8ms) to reduce CPU thrash during fast drags
+            import time as _t
+            now_ms = int(_t.perf_counter() * 1000)
+            if now_ms - self._last_drag_ms >= 8:
+                self._last_drag_ms = now_ms
+                self._draw_tl()
+                self.controller._refresh_preview()
         elif self._dm == "trim_l":
-            ns = max(0.0, min(self._st0 + dx, cl["end"] - 0.05))
-            d = ns - self._st0
-            cl["start"] = ns
-            cl["tl"] = max(0.0, self._tl0 + d / cl["speed"])
+            ext = os.path.splitext(cl.get("path", ""))[1].lower()
+            is_unlimited = (
+                ext in (".jpg", ".jpeg", ".png", ".wav", ".mp3", ".aac", ".ogg", "")
+                or self._dtk.startswith("audio_")
+                or self._dtk == "subtitle"
+            )
+            if is_unlimited:
+                # Unlimited clips (image/audio/subtitle): ขยาย/หดจากด้านซ้ายได้อิสระ
+                # dx < 0 = ดึงซ้าย (ขยาย), dx > 0 = ดัน (หด)
+                new_tl = max(0.0, self._tl0 + dx)
+                delta_tl = new_tl - self._tl0
+                # end stays fixed, start/end adjust together to change duration
+                # Actually: tl moves, end = end - delta (duration changes)
+                new_dur = max(0.05, (self._en0 - self._st0) - delta_tl / max(cl.get("speed", 1.0), 0.01))
+                cl["tl"] = new_tl
+                # Keep start at 0 for unlimited, adjust end to maintain desired visual duration
+                cl["start"] = 0.0
+                cl["end"] = max(0.05, new_dur)
+            else:
+                # Video clips: clamp source start >= 0
+                ns = max(0.0, min(self._st0 + dx, cl["end"] - 0.05))
+                d = ns - self._st0
+                cl["start"] = ns
+                cl["tl"] = max(0.0, self._tl0 + d / max(cl.get("speed", 1.0), 0.01))
             self._draw_tl()
             self.controller._refresh_preview()
         elif self._dm == "trim_r":
@@ -506,10 +608,12 @@ class TimelinePanel(ctk.CTkFrame):
             new_sel = []
             y = RULER_H + 2
             for key, lbl, col, th, kind in self.controller._all_track_rows():
+                if key == "__empty_layer__":
+                    continue
                 row_h = th + TGAP * 2
                 ty1 = y + TGAP
                 ty2 = y + TGAP + th
-                if ty1 <= ry2 and ty2 >= ry1 and key != "__empty_layer__":
+                if ty1 <= ry2 and ty2 >= ry1:
                     for i, item in enumerate(self.controller.tracks.get(key, [])):
                         dur = (item["end"] - item["start"]) / max(item["speed"], 0.01)
                         tl = item.get("tl", 0.0)
@@ -534,33 +638,42 @@ class TimelinePanel(ctk.CTkFrame):
 
     def _tl_hover(self, e):
         cx = self._tlc.canvasx(e.x)
+        cy = self._tlc.canvasy(e.y)  # use canvas coords, not raw widget coords
         sc = self._scale()
         y = RULER_H + 2
         for key, lbl, col, th, kind in self.controller._all_track_rows():
+            if key == "__empty_layer__":
+                continue
             row_h = th + TGAP * 2
             ty1 = y + TGAP
             ty2 = y + TGAP + th
-            if ty1 <= e.y <= ty2 and key != "__empty_layer__":
+            if ty1 <= cy <= ty2:
                 for item in self.controller.tracks.get(key, []):
                     dur = (item["end"] - item["start"]) / max(item["speed"], 0.01)
                     tl = item.get("tl", 0.0)
                     x1 = tl * sc
                     x2 = (tl + dur) * sc
-                    if abs(cx - x1) <= EDGE_PX or abs(cx - x2) <= EDGE_PX:
-                        self._tlc.configure(cursor="sb_h_double_arrow")
+                    if x1 <= cx <= x2:  # cursor is on this clip
+                        if abs(cx - x1) <= EDGE_PX or abs(cx - x2) <= EDGE_PX:
+                            self._tlc.configure(cursor="sb_h_double_arrow")  # resize
+                        else:
+                            self._tlc.configure(cursor="fleur")  # move
                         return
             y += row_h
         self._tlc.configure(cursor="arrow")
 
     def _tl_rclick(self, e):
         cx = self._tlc.canvasx(e.x)
+        cy = self._tlc.canvasy(e.y)   # ต้องใช้ canvas coords ไม่ใช่ screen coords
         sc = self._scale()
         y = RULER_H + 2
         for key, lbl, col, th, kind in self.controller._all_track_rows():
+            if key == "__empty_layer__":
+                continue
             row_h = th + TGAP * 2
             ty1 = y + TGAP
             ty2 = y + TGAP + th
-            if ty1 <= e.y <= ty2 and key != "__empty_layer__":
+            if ty1 <= cy <= ty2:   # ใช้ cy (canvas coords)
                 for i, item in enumerate(self.controller.tracks.get(key, [])):
                     dur = (item["end"] - item["start"]) / max(item["speed"], 0.01)
                     tl = item.get("tl", 0.0)
@@ -583,11 +696,17 @@ class TimelinePanel(ctk.CTkFrame):
             activebackground=C_BLUE, activeforeground=TXT_W,
             relief="flat", bd=0, font=("Helvetica", 10)
         )
-        m.add_command(label=" Split Here",          command=self.controller._split)
-        m.add_command(label=" Delete",              command=self.controller._del_sel)
-        m.add_command(label=" Ripple Delete [G]",   command=self.controller._ripple_delete)
-        m.add_command(label=" Duplicate",           command=lambda: self.controller._dup(tk_key, idx))
+        m.add_command(label=" Split Here  [Ctrl+B]",   command=self.controller._split)
+        m.add_command(label=" Delete",                  command=self.controller._del_sel)
+        m.add_command(label=" Ripple Delete [G]",        command=self.controller._ripple_delete)
+        m.add_command(label=" Duplicate",               command=lambda: self.controller._dup(tk_key, idx))
         m.add_separator()
+        # Detach audio — only shown for video clips on main/layer tracks
+        clip_path = self.controller.tracks.get(tk_key, [{}])[idx].get("path", "") if idx < len(self.controller.tracks.get(tk_key, [])) else ""
+        if clip_path and os.path.splitext(clip_path)[1].lower() in (".mp4", ".mov", ".avi", ".mkv", ".webm"):
+            m.add_command(label=" 🔊 Detach Audio",
+                          command=lambda: self.controller._detach_audio(tk_key, idx))
+            m.add_separator()
         for sp in (4.0, 2.0, 1.5, 1.0, 0.75, 0.5, 0.25):
             m.add_command(label=f" Speed ×{sp}", command=lambda s=sp: self.controller._set_speed(idx, tk_key, s))
         m.add_separator()
@@ -599,7 +718,6 @@ class TimelinePanel(ctk.CTkFrame):
         m.add_separator()
         m.add_command(label=" Move to Main Video",  command=lambda: self.controller._move_track(idx, tk_key, "main"))
         m.add_command(label=" Move to Audio 1",      command=lambda: self.controller._move_track(idx, tk_key, "audio_0"))
-        m.add_command(label=" Move to Audio 2",      command=lambda: self.controller._move_track(idx, tk_key, "audio_1"))
         # Dynamic layers
         for lk in self.controller._layer_keys():
             n = int(lk.split("_")[1])

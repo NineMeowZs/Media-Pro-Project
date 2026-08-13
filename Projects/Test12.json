@@ -1,0 +1,82 @@
+{
+  "tracks": {
+    "main": [
+      {
+        "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e15\u0e31\u0e14\u0e40\u0e2a\u0e23\u0e47\u0e08\u0e41\u0e25\u0e49\u0e27/\u0e42\u0e2d\u0e40\u0e27\u0e2d\u0e23\u0e4c\u0e40\u0e04\u0e23\u0e22\u0e4cD-SS05\u0e43\u0e2a\u0e48\u0e40\u0e14\u0e47\u0e04\u0e44\u0e2b\u0e19\u0e04\u0e38\u0e49\u0e21\u0e22\u0e31\u0e07\u0e44\u0e07/\u0e42\u0e2d\u0e40\u0e27\u0e2d\u0e23\u0e4c\u0e40\u0e04\u0e23\u0e22\u0e4cD-SS05\u0e43\u0e2a\u0e48\u0e40\u0e14\u0e47\u0e04\u0e44\u0e2b\u0e19\u0e04\u0e38\u0e49\u0e21\u0e22\u0e31\u0e07\u0e44\u0e07.mp4",
+        "name": "\u0e42\u0e2d\u0e40\u0e27\u0e2d\u0e23\u0e4c\u0e40\u0e04\u0e23\u0e22\u0e4cD-SS05\u0e43\u0e2a\u0e48\u0e40\u0e14\u0e47\u0e04\u0e44\u0e2b\u0e19\u0e04\u0e38\u0e49\u0e21\u0e22\u0e31\u0e07\u0e44\u0e07.mp4",
+        "start": 0,
+        "end": 162.8,
+        "speed": 1.2409836065573772,
+        "volume": 1.0,
+        "tl": 0.0,
+        "fps": 30.0,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 162.8,
+        "scale": 0.66,
+        "rotate": -65
+      }
+    ],
+    "subtitle": [],
+    "audio_0": [
+      {
+        "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e2d\u0e31\u0e14/1SoundEffect SFX/Cardfight Vanguard G NEXT Kazuma Shouji and Luard 1st fight theme (Full ver.).mp3",
+        "name": "Cardfight Vanguard G NEXT Kazuma Shouji and Luard 1st fight theme (Full ver.).mp3",
+        "start": 0,
+        "end": 129.44,
+        "speed": 1.0,
+        "volume": 1.5819672131147542,
+        "tl": 0.0,
+        "fps": 30,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 129.44
+      }
+    ],
+    "layer_0": [
+      {
+        "path": "",
+        "name": "\u0e2a\u0e27\u0e31\u0e2a\u0e14\u0e35\u0e04\u0e23\u0e31\u0e1a",
+        "start": 0.0,
+        "end": 9.873974142776841,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 0.0,
+        "fps": 30,
+        "custom_x": 0.5,
+        "custom_y": 0.2,
+        "font_name": "Cordia New",
+        "font_size": 36,
+        "font_color": "#ffffff",
+        "decoration": "shadow",
+        "source_dur": 999999.0,
+        "bold": true
+      }
+    ],
+    "audio_1": []
+  },
+  "assets": [
+    {
+      "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e15\u0e31\u0e14\u0e40\u0e2a\u0e23\u0e47\u0e08\u0e41\u0e25\u0e49\u0e27/\u0e42\u0e2d\u0e40\u0e27\u0e2d\u0e23\u0e4c\u0e40\u0e04\u0e23\u0e22\u0e4cD-SS05\u0e43\u0e2a\u0e48\u0e40\u0e14\u0e47\u0e04\u0e44\u0e2b\u0e19\u0e04\u0e38\u0e49\u0e21\u0e22\u0e31\u0e07\u0e44\u0e07/\u0e42\u0e2d\u0e40\u0e27\u0e2d\u0e23\u0e4c\u0e40\u0e04\u0e23\u0e22\u0e4cD-SS05\u0e43\u0e2a\u0e48\u0e40\u0e14\u0e47\u0e04\u0e44\u0e2b\u0e19\u0e04\u0e38\u0e49\u0e21\u0e22\u0e31\u0e07\u0e44\u0e07.mp4",
+      "name": "\u0e42\u0e2d\u0e40\u0e27\u0e2d\u0e23\u0e4c\u0e40\u0e04\u0e23\u0e22\u0e4cD-SS05\u0e43\u0e2a\u0e48\u0e40\u0e14\u0e47\u0e04\u0e44\u0e2b\u0e19\u0e04\u0e38\u0e49\u0e21\u0e22\u0e31\u0e07\u0e44\u0e07.mp4",
+      "type": "video"
+    },
+    {
+      "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e2d\u0e31\u0e14/1SoundEffect SFX/Cardfight Vanguard G NEXT Kazuma Shouji and Luard 1st fight theme (Full ver.).mp3",
+      "name": "Cardfight Vanguard G NEXT Kazuma Shouji and Luard 1st fight theme (Full ver.).mp3",
+      "type": "audio"
+    }
+  ],
+  "muted": {},
+  "segments": [],
+  "ratio": "9:16",
+  "style": {
+    "font_name": "Tahoma",
+    "font_size": 32,
+    "font_color": "#FFFFFF",
+    "decoration": "outline",
+    "animation": "fade_in",
+    "position": "bottom_center"
+  },
+  "version": 5
+}

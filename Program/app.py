@@ -358,7 +358,7 @@ class HomePage(ctk.CTkFrame):
             lbl2.configure(bg=CARD_NAVY, fg=TEXT_WHITE)
 
         for w in [card2.frame, lbl2]:
-            w.bind("<Button-1>", lambda e: self._browse())
+            w.bind("<Button-1>", lambda e: self._on_start(None))
             w.bind("<Enter>", _hover2_on)
             w.bind("<Leave>", _hover2_off)
 

@@ -8,6 +8,11 @@ from editor_utils import (
     C_BLUE, C_TEAL, C_GREEN, C_AMBER, C_PINK, C_RED,
     _ft, _dark, _bright, HAS_SUBTITLES
 )
+try:
+    from subtitle_config import FONT_CHOICES
+except ImportError:
+    FONT_CHOICES = ["Tahoma", "Arial", "TH Sarabun New", "Leelawadee", "Cordia New",
+                    "Angsana New", "Courier New", "Times New Roman", "Verdana", "Impact"]
 class PropertiesPanel(ctk.CTkFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, width=270, fg_color=PANEL_DARK, corner_radius=12, border_width=0)
@@ -60,9 +65,9 @@ class PropertiesPanel(ctk.CTkFrame):
         kind = self.controller._track_kind(self.controller.sel_track)
 
         if self.controller.sel_track == "subtitle":
-            self._props_subtitle(sc, clip)
+            self._props_clip_text(sc, clip, is_subtitle=True)
         elif clip.get("path", "") == "":
-            self._props_text(sc, clip)
+            self._props_clip_text(sc, clip, is_subtitle=False)
         elif kind == "audio":
             self._props_audio(sc, clip)
         else:
@@ -288,7 +293,7 @@ class PropertiesPanel(ctk.CTkFrame):
         self._props_info(sc, clip)
 
     def _props_text(self, sc, clip):
-        """Text clip properties: edit label text and font customizations."""
+        """Text clip properties: edit label text, font, size, color."""
         self._plbl(sc, "ข้อความ", C_PINK)
         tv = tk.StringVar(value=clip.get("name", ""))
 
@@ -304,31 +309,57 @@ class PropertiesPanel(ctk.CTkFrame):
             fg_color=PANEL_MID, border_color=C_PINK
         )
         entry.pack(fill="x", padx=4, pady=(0, 6))
-
-        # Push undo and lose focus on Enter, push undo on FocusOut
         entry.bind("<FocusOut>", lambda e: self.controller._push_undo())
         entry.bind("<Return>", lambda e: (
             self.controller._push_undo(),
             sc.focus_set()
         ))
 
-        self._plbl(sc, "ขนาดฟอนต์")
-        sz_v = tk.IntVar(value=clip.get("font_size", 36))
-        sz_lbl = ctk.CTkLabel(
-            sc, text=f"{sz_v.get()}px",
-            font=ctk.CTkFont(size=9), text_color=TXT_G
-        )
-        ctk.CTkSlider(
-            sc, from_=12, to=96, variable=sz_v,
-            progress_color=C_PINK, button_color=C_PINK,
-            command=lambda v: (
-                clip.update({"font_size": int(float(v))}),
-                sz_lbl.configure(text=f"{int(float(v))}px"),
-                self.controller._refresh_preview()
-            )
-        ).pack(fill="x", padx=4)
-        sz_lbl.pack(anchor="e", padx=4)
+        # Font family
+        self._plbl(sc, "ฟอนต์")
+        font_row = ctk.CTkFrame(sc, fg_color="transparent")
+        font_row.pack(fill="x", pady=2)
+        current_font = clip.get("font_name", "Tahoma")
+        font_var = tk.StringVar(value=current_font)
 
+        def _on_font(val):
+            clip["font_name"] = val
+            self.controller._refresh_preview()
+
+        ctk.CTkOptionMenu(
+            font_row,
+            values=FONT_CHOICES,
+            variable=font_var,
+            width=160, height=26, corner_radius=6,
+            fg_color=PANEL_MID, button_color=PANEL_HOV,
+            font=ctk.CTkFont(size=9),
+            command=_on_font,
+        ).pack(side="right", padx=(4, 0))
+
+        # Font size (px) — numeric entry only
+        self._plbl(sc, "ขนาดฟอนต์ (px)")
+        sz_row = ctk.CTkFrame(sc, fg_color="transparent")
+        sz_row.pack(fill="x", pady=2)
+        ctk.CTkLabel(sz_row, text="Size px", font=ctk.CTkFont(size=10), text_color=TXT_L).pack(side="left")
+        sz_ent = ctk.CTkEntry(sz_row, width=60, height=26, corner_radius=6,
+                               font=ctk.CTkFont(size=10, weight="bold"))
+        sz_ent.insert(0, str(clip.get("font_size", 36)))
+        sz_ent.pack(side="right", padx=(4, 0))
+
+        def _apply_size(val_str):
+            try:
+                v = max(8, min(200, int(float(val_str))))
+                clip["font_size"] = v
+                sz_ent.delete(0, "end")
+                sz_ent.insert(0, str(v))
+                self.controller._refresh_preview()
+            except ValueError:
+                pass
+
+        sz_ent.bind("<Return>", lambda e: _apply_size(sz_ent.get()))
+        sz_ent.bind("<FocusOut>", lambda e: _apply_size(sz_ent.get()))
+
+        # Color
         self._plbl(sc, "สี (#hex)")
         cv = tk.StringVar(value=clip.get("font_color", "#ffffff"))
         ce = ctk.CTkEntry(sc, textvariable=cv, height=26, corner_radius=6, fg_color=PANEL_MID)
@@ -341,54 +372,187 @@ class PropertiesPanel(ctk.CTkFrame):
         self._plbl(sc, "◎ ลากบนวิดีโอเพื่อย้าย", C_AMBER)
         self._props_info(sc, clip)
 
-    def _props_subtitle(self, sc, clip):
-        """Subtitle clip properties: text editor and global subtitle font sizes."""
-        self._plbl(sc, "ข้อความซับ", C_AMBER)
-        sv = tk.StringVar(value=clip.get("sub_text", clip.get("name", "")))
-        ctk.CTkEntry(
-            sc, textvariable=sv, height=28, corner_radius=6,
-            fg_color=PANEL_MID, border_color=C_AMBER
-        ).pack(fill="x", padx=4, pady=(0, 3))
+    # ── Unified Text / Subtitle Properties ──────────────────────────────────
+    def _props_clip_text(self, sc, clip, is_subtitle=False):
+        """Shared properties panel for both Text clips and Subtitle clips."""
+        accent = C_AMBER if is_subtitle else C_PINK
 
-        def _save_sub():
-            t = sv.get().strip()
-            if not t:
-                return
-            clip["sub_text"] = t
-            clip["name"] = t[:24]
-            for seg in self.controller.segments:
-                if abs(seg["start"] - clip.get("tl", 0)) < 0.1:
-                    seg["text"] = t
-                    break
-            self.controller._push_undo()
-            self.controller._draw_tl()
+        # ── Text content box ─────────────────────────────────────────────────
+        if is_subtitle:
+            self._plbl(sc, "\u26ac \u0e02\u0e49\u0e2d\u0e04\u0e27\u0e32\u0e21\u0e0b\u0e31\u0e1a", accent)
+            txt_box = ctk.CTkTextbox(
+                sc, height=64, corner_radius=8, fg_color=PANEL_MID,
+                border_color=accent, border_width=1, text_color=TXT_W,
+                font=ctk.CTkFont(family="Segoe UI", size=11), wrap="word"
+            )
+            txt_box.pack(fill="x", padx=4, pady=(0, 2))
+            current_text = clip.get("sub_text", clip.get("name", ""))
+            txt_box.insert("1.0", current_text)
+
+            def _save_sub():
+                t = txt_box.get("1.0", "end").strip()
+                if not t:
+                    return
+                clip["sub_text"] = t
+                clip["name"] = t[:24]
+                for seg in self.controller.segments:
+                    if abs(seg["start"] - clip.get("tl", 0)) < 0.1:
+                        seg["text"] = t; break
+                self.controller._push_undo()
+                self.controller._draw_tl()
+                self.controller._refresh_preview()
+
+            txt_box.bind("<Control-Return>", lambda e: _save_sub())
+            txt_box.bind("<FocusOut>", lambda e: _save_sub())
+            ctk.CTkButton(
+                sc, text="\u2713 \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01", height=22, corner_radius=6,
+                fg_color=accent, hover_color=_dark(accent),
+                font=ctk.CTkFont(size=9, weight="bold"), command=_save_sub
+            ).pack(fill="x", padx=4, pady=(0, 6))
+
+        else:
+            self._plbl(sc, "\u26ac \u0e02\u0e49\u0e2d\u0e04\u0e27\u0e32\u0e21", accent)
+            tv = tk.StringVar(value=clip.get("name", ""))
+
+            def _on_txt_edit(*args):
+                clip["name"] = tv.get()
+                self.controller._draw_tl()
+                self.controller._refresh_preview()
+
+            tv.trace_add("write", _on_txt_edit)
+            e = ctk.CTkEntry(sc, textvariable=tv, height=28, corner_radius=6,
+                             fg_color=PANEL_MID, border_color=accent)
+            e.pack(fill="x", padx=4, pady=(0, 6))
+            e.bind("<FocusOut>", lambda ev: self.controller._push_undo())
+            e.bind("<Return>", lambda ev: (self.controller._push_undo(), sc.focus_set()))
+
+        ctk.CTkFrame(sc, height=1, fg_color=BORD).pack(fill="x", pady=(2, 6))
+
+        # ── Typography ────────────────────────────────────────────────────────
+        self._plbl(sc, "\u2712 \u0e15\u0e31\u0e27\u0e2d\u0e31\u0e01\u0e29\u0e23", accent)
+
+        # Font family
+        font_row = ctk.CTkFrame(sc, fg_color="transparent")
+        font_row.pack(fill="x", pady=2)
+        ctk.CTkLabel(font_row, text="\u0e1f\u0e2d\u0e19\u0e15\u0e4c",
+                     font=ctk.CTkFont(size=10), text_color=TXT_L, width=44).pack(side="left")
+        current_font = clip.get("font_name",
+            self.controller.style.font_name if is_subtitle else "Tahoma")
+        font_var = tk.StringVar(value=current_font)
+
+        def _on_font(val):
+            clip["font_name"] = val
             self.controller._refresh_preview()
 
-        ctk.CTkButton(
-            sc, text="✓ บันทึก", height=24, corner_radius=6,
-            fg_color=C_AMBER, hover_color=_dark(C_AMBER),
-            font=ctk.CTkFont(size=9, weight="bold"),
-            command=_save_sub
-        ).pack(fill="x", padx=4, pady=(0, 6))
+        ctk.CTkOptionMenu(
+            font_row, values=FONT_CHOICES, variable=font_var,
+            width=162, height=26, corner_radius=6,
+            fg_color=PANEL_MID, button_color=PANEL_HOV,
+            font=ctk.CTkFont(size=9), command=_on_font,
+        ).pack(side="right")
 
-        self._plbl(sc, "ขนาดฟอนต์ (ทั้งหมด)")
-        sz_v = tk.IntVar(value=self.controller.style.font_size)
-        sz_lbl = ctk.CTkLabel(
-            sc, text=f"{sz_v.get()}px",
-            font=ctk.CTkFont(size=9), text_color=TXT_G
+        # Bold / Italic
+        style_row = ctk.CTkFrame(sc, fg_color="transparent")
+        style_row.pack(fill="x", pady=3)
+        ctk.CTkLabel(style_row, text="Style",
+                     font=ctk.CTkFont(size=10), text_color=TXT_L, width=44).pack(side="left")
+        bold_val   = tk.BooleanVar(value=bool(clip.get("bold",   False)))
+        italic_val = tk.BooleanVar(value=bool(clip.get("italic", False)))
+
+        def _toggle_bold():
+            clip["bold"] = bold_val.get()
+            bold_btn.configure(fg_color=accent if bold_val.get() else PANEL_MID)
+            self.controller._refresh_preview()
+
+        def _toggle_italic():
+            clip["italic"] = italic_val.get()
+            italic_btn.configure(fg_color=accent if italic_val.get() else PANEL_MID)
+            self.controller._refresh_preview()
+
+        bold_btn = ctk.CTkButton(
+            style_row, text="B", width=36, height=26, corner_radius=6,
+            fg_color=accent if bold_val.get() else PANEL_MID,
+            hover_color=PANEL_HOV, font=ctk.CTkFont(size=11, weight="bold"),
+            command=lambda: (bold_val.set(not bold_val.get()), _toggle_bold())
         )
-        ctk.CTkSlider(
-            sc, from_=12, to=72, variable=sz_v,
-            progress_color=C_AMBER, button_color=C_AMBER,
-            command=lambda v: (
-                setattr(self.controller.style, "font_size", int(float(v))),
-                sz_lbl.configure(text=f"{int(float(v))}px"),
-                self.controller._refresh_preview()
-            )
-        ).pack(fill="x", padx=4)
-        sz_lbl.pack(anchor="e", padx=4)
+        bold_btn.pack(side="left", padx=(4, 2))
 
-        self._plbl(sc, "◎ ลากบนวิดีโอเพื่อย้าย", C_AMBER)
+        italic_btn = ctk.CTkButton(
+            style_row, text="I", width=36, height=26, corner_radius=6,
+            fg_color=accent if italic_val.get() else PANEL_MID,
+            hover_color=PANEL_HOV, font=ctk.CTkFont(family="Georgia", size=11),
+            command=lambda: (italic_val.set(not italic_val.get()), _toggle_italic())
+        )
+        italic_btn.pack(side="left", padx=2)
+
+        # Font size (px)
+        sz_row = ctk.CTkFrame(sc, fg_color="transparent")
+        sz_row.pack(fill="x", pady=2)
+        ctk.CTkLabel(sz_row, text="\u0e02\u0e19\u0e32\u0e14 (px)",
+                     font=ctk.CTkFont(size=10), text_color=TXT_L, width=64).pack(side="left")
+        default_sz = self.controller.style.font_size if is_subtitle else 36
+        sz_ent = ctk.CTkEntry(sz_row, width=60, height=26, corner_radius=6,
+                               font=ctk.CTkFont(size=10, weight="bold"))
+        sz_ent.insert(0, str(clip.get("font_size", default_sz)))
+        sz_ent.pack(side="right")
+
+        def _apply_sz(val_str):
+            try:
+                v = max(8, min(200, int(float(val_str))))
+                clip["font_size"] = v
+                sz_ent.delete(0, "end")
+                sz_ent.insert(0, str(v))
+                self.controller._refresh_preview()
+            except ValueError:
+                pass
+
+        sz_ent.bind("<Return>", lambda e: _apply_sz(sz_ent.get()))
+        sz_ent.bind("<FocusOut>", lambda e: _apply_sz(sz_ent.get()))
+
+        # Color
+        self._plbl(sc, "\u0e2a\u0e35 (#hex)")
+        cv = tk.StringVar(value=clip.get("font_color", "#ffffff"))
+        ce = ctk.CTkEntry(sc, textvariable=cv, height=26, corner_radius=6, fg_color=PANEL_MID)
+        ce.pack(fill="x", padx=4, pady=(0, 4))
+        ce.bind("<Return>", lambda e: (
+            clip.update({"font_color": cv.get()}),
+            self.controller._refresh_preview()
+        ))
+        ce.bind("<FocusOut>", lambda e: (
+            clip.update({"font_color": cv.get()}),
+            self.controller._refresh_preview()
+        ))
+
+        ctk.CTkFrame(sc, height=1, fg_color=BORD).pack(fill="x", pady=(6, 4))
+
+        # ── Apply to ALL subtitles button ─────────────────────────────────────
+        if is_subtitle:
+            def _apply_to_all():
+                fn  = clip.get("font_name",  self.controller.style.font_name)
+                fs  = clip.get("font_size",  self.controller.style.font_size)
+                fc  = clip.get("font_color", "#ffffff")
+                bl  = clip.get("bold",   False)
+                it  = clip.get("italic", False)
+                for sub_clip in self.controller.tracks.get("subtitle", []):
+                    sub_clip["font_name"]  = fn
+                    sub_clip["font_size"]  = fs
+                    sub_clip["font_color"] = fc
+                    sub_clip["bold"]       = bl
+                    sub_clip["italic"]     = it
+                self.controller._push_undo()
+                self.controller._refresh_preview()
+                self.controller._status(f"\u2713 \u0e2a\u0e44\u0e15\u0e25\u0e4c\u0e16\u0e39\u0e01 apply \u0e44\u0e1b\u0e17\u0e38\u0e01 subtitle ({len(self.controller.tracks.get('subtitle', []))} \u0e04\u0e25\u0e34\u0e1b)")
+
+            ctk.CTkButton(
+                sc,
+                text="\u2609 Apply Font/Style to ALL Subs",
+                height=28, corner_radius=8,
+                fg_color=C_AMBER, hover_color=_dark(C_AMBER),
+                font=ctk.CTkFont(size=9, weight="bold"),
+                command=_apply_to_all
+            ).pack(fill="x", padx=4, pady=(0, 4))
+
+        self._plbl(sc, "\u25ce \u0e25\u0e32\u0e01\u0e1a\u0e19\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e22\u0e49\u0e32\u0e22", C_AMBER)
         self._props_info(sc, clip)
 
     def _props_info(self, sc, clip):

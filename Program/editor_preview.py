@@ -291,31 +291,49 @@ class PreviewPanel(ctk.CTkFrame):
         # Render subtitle & text overlays
         if HAS_SUBTITLES:
             t = self.controller.fi / float(TARGET_FPS)
-            # Text clips
-            for tc in self.controller.tracks.get("text", []):
-                dur = max(tc["end"] - tc["start"], 0.05) / max(tc.get("speed", 1.0), 0.01)
-                tl = tc.get("tl", 0.0)
-                if tl <= t <= tl + dur and tc.get("name", "").strip():
-                    try:
-                        ts = SubtitleStyle()
-                        ts.font_name = tc.get("font_name", "Tahoma")
-                        ts.font_size = tc.get("font_size", 36)
-                        ts.font_color = tc.get("font_color", "#ffffff")
-                        ts.decoration = tc.get("decoration", "shadow")
-                        ts.animation = "none"
-                        ts.position = "custom"
-                        ts.custom_x = tc.get("custom_x", 0.5)
-                        ts.custom_y = tc.get("custom_y", 0.2)
-                        bgr = draw_subtitles_on_frame(bgr, tc["name"], ts, 0.5)
-                    except Exception:
-                        pass
+            # Text clips — stored in layer_* tracks (path == "")
+            for lk in self.controller._layer_keys():
+                for tc in self.controller.tracks.get(lk, []):
+                    if tc.get("path", "") != "":
+                        continue  # skip media clips, only process text clips
+                    dur = max(tc["end"] - tc["start"], 0.05) / max(tc.get("speed", 1.0), 0.01)
+                    tl = tc.get("tl", 0.0)
+                    if tl <= t <= tl + dur and tc.get("name", "").strip():
+                        try:
+                            ts = SubtitleStyle()
+                            ts.font_name = tc.get("font_name", "Tahoma")
+                            ts.font_size = tc.get("font_size", 36)
+                            ts.font_color = tc.get("font_color", "#ffffff")
+                            ts.decoration = tc.get("decoration", "shadow")
+                            ts.bold = bool(tc.get("bold", False))
+                            ts.italic = bool(tc.get("italic", False))
+                            ts.animation = "none"
+                            ts.position = "custom"
+                            ts.custom_x = tc.get("custom_x", 0.5)
+                            ts.custom_y = tc.get("custom_y", 0.2)
+                            bgr = draw_subtitles_on_frame(bgr, tc["name"], ts, 0.5)
+                        except Exception:
+                            pass
+
             # Auto subtitles
             sub_visible = getattr(self.controller, "_sub_visible", True)
             if sub_visible:
-                sub, prog = self._find_sub(t)
+                sub, prog, sub_clip = self._find_sub(t)
                 if sub:
                     try:
-                        bgr = draw_subtitles_on_frame(bgr, sub, self.controller.style, prog)
+                        # Build per-clip style: start from global style then apply clip overrides
+                        import copy
+                        render_style = copy.copy(self.controller.style)
+                        if sub_clip is not None:
+                            if "font_name" in sub_clip:
+                                render_style.font_name = sub_clip["font_name"]
+                            if "font_size" in sub_clip:
+                                render_style.font_size = sub_clip["font_size"]
+                            if "bold" in sub_clip:
+                                render_style.bold = sub_clip["bold"]
+                            if "italic" in sub_clip:
+                                render_style.italic = sub_clip["italic"]
+                        bgr = draw_subtitles_on_frame(bgr, sub, render_style, prog)
                     except Exception:
                         pass
 
@@ -451,18 +469,18 @@ class PreviewPanel(ctk.CTkFrame):
             return frame[y:y + nh, :]
 
     def _find_sub(self, t):
-        # Look in the dedicated subtitle track
+        # Look in the dedicated subtitle track — return (text, progress, clip_or_None)
         for clip in self.controller.tracks.get("subtitle", []):
             dur = max(clip["end"] - clip["start"], 0.05) / max(clip.get("speed", 1.0), 0.01)
             tl = clip.get("tl", 0.0)
             if tl <= t <= tl + dur:
                 prog = (t - tl) / max(dur, 0.001)
-                return clip.get("sub_text", clip.get("name", "")), prog
-        # Fallback to transcribe segments
+                return clip.get("sub_text", clip.get("name", "")), prog, clip
+        # Fallback to transcribe segments (no per-clip style override)
         for s in self.controller.segments:
             if s["start"] <= t <= s["end"]:
-                return s["text"], (t - s["start"]) / max(s["end"] - s["start"], 0.001)
-        return "", 0.5
+                return s["text"], (t - s["start"]) / max(s["end"] - s["start"], 0.001), None
+        return "", 0.5, None
 
     def _apply_overlay(self, frame, t):
         """Overlay image/video elements from timeline overlay layers at timestamp t."""
@@ -556,6 +574,12 @@ class PreviewPanel(ctk.CTkFrame):
         total = self.controller._dur()
         self._tlbl.configure(text=f"{_ft(t)} / {_ft(total)}")
 
+        # During playback: skip transcript panel scroll to avoid update_idletasks()
+        # blocking the main thread and causing frame drops.
+        # Only sync transcript selection when paused/scrubbing.
+        if getattr(self.controller, "playing", False):
+            return
+
         if hasattr(self.controller, "transcript_panel"):
             active_idx = self.controller.find_active_segment()
             if active_idx != self.controller.transcript_panel.selected_idx:
@@ -565,3 +589,4 @@ class PreviewPanel(ctk.CTkFrame):
     def _upd_scrub(self, t):
         total = max(self.controller._dur(), 0.1)
         self._scrub_v.set(t / total * 1000)
+

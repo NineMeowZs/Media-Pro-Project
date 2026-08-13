@@ -134,6 +134,64 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# GPU Hardware Encoder Detection
+# ─────────────────────────────────────────────────────────────────────────────
+
+_GPU_ENCODER_CACHE = None
+
+def _detect_gpu_encoder() -> tuple[str, list[str]]:
+    """
+    Auto-detect available GPU hardware encoder in FFmpeg.
+    Returns (encoder_name, encoder_args).
+    Priority: NVENC (NVIDIA) > QSV (Intel) > AMF (AMD) > libx264 (CPU)
+    """
+    global _GPU_ENCODER_CACHE
+    if _GPU_ENCODER_CACHE is not None:
+        return _GPU_ENCODER_CACHE
+
+    ff = imageio_ffmpeg.get_ffmpeg_exe()
+    try:
+        res = subprocess.run([ff, "-encoders"], capture_output=True, text=True, timeout=5)
+        encoders_output = res.stdout if res.returncode == 0 else ""
+    except Exception:
+        encoders_output = ""
+
+    if "h264_nvenc" in encoders_output:
+        _GPU_ENCODER_CACHE = (
+            "h264_nvenc",
+            [
+                "-c:v", "h264_nvenc",
+                "-preset", "p6",
+                "-rc", "vbr",
+                "-cq", "17",
+                "-b:v", "16M",
+                "-maxrate", "30M",
+                "-bufsize", "30M",
+                "-spatial-aq", "1",
+                "-temporal-aq", "1",
+                "-pix_fmt", "yuv420p",
+            ]
+        )
+    elif "h264_qsv" in encoders_output:
+        _GPU_ENCODER_CACHE = (
+            "h264_qsv",
+            ["-c:v", "h264_qsv", "-preset", "slow", "-global_quality", "18", "-pix_fmt", "yuv420p"]
+        )
+    elif "h264_amf" in encoders_output:
+        _GPU_ENCODER_CACHE = (
+            "h264_amf",
+            ["-c:v", "h264_amf", "-quality", "quality", "-pix_fmt", "yuv420p"]
+        )
+    else:
+        _GPU_ENCODER_CACHE = (
+            "libx264",
+            ["-c:v", "libx264", "-crf", "17", "-preset", "slow", "-pix_fmt", "yuv420p"]
+        )
+
+    return _GPU_ENCODER_CACHE
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Fast export: ffmpeg ASS filter  (≈ 10–20× faster than frame-by-frame)
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -146,10 +204,14 @@ def export_video_with_subtitles(
 ):
     """
     Burn subtitles using ffmpeg's ASS subtitle filter.
+    Uses GPU hardware acceleration (NVENC / QSV / AMF) when available.
     Falls back to slow frame-by-frame rendering if ffmpeg fails.
     """
+    enc_name, enc_args = _detect_gpu_encoder()
+    gpu_msg = f"GPU ({enc_name})" if enc_name != "libx264" else "CPU (libx264)"
+
     if progress_cb:
-        progress_cb("กำลัง Export (เร็ว – ffmpeg ASS filter) …")
+        progress_cb(f"กำลัง Export ด้วย {gpu_msg} …")
 
     ff = imageio_ffmpeg.get_ffmpeg_exe()
 
@@ -166,17 +228,21 @@ def export_video_with_subtitles(
     # Escape path for ffmpeg on Windows (backslash → forward-slash, escape colons)
     ass_path_escaped = tmp_ass.replace("\\", "/").replace(":", "\\:")
 
+    # Build command line with optional GPU hardware decoding
+    hw_args = ["-hwaccel", "auto"] if enc_name != "libx264" else []
+
     cmd = [
         ff, "-y",
+        *hw_args,
         "-i", input_path,
         "-vf", f"ass='{ass_path_escaped}'",
-        "-c:v", "libx264", "-crf", "18", "-preset", "fast",
+        *enc_args,
         "-c:a", "aac", "-b:a", "192k",
         output_path,
     ]
 
     if progress_cb:
-        progress_cb("กำลัง Render ด้วย ffmpeg …")
+        progress_cb(f"กำลัง Render ด้วย ffmpeg ({gpu_msg}) …")
 
     result = subprocess.run(cmd, capture_output=True, text=True)
 
@@ -188,7 +254,24 @@ def export_video_with_subtitles(
         if progress_cb:
             progress_cb(f"บันทึกไฟล์สำเร็จ: {os.path.basename(output_path)}")
     else:
-        # ASS filter failed (e.g. libass not compiled in ffmpeg) → fallback
+        # If GPU command failed, retry once with CPU libx264 before falling back to frame-by-frame
+        if enc_name != "libx264":
+            if progress_cb:
+                progress_cb("GPU export ไม่ผ่าน – ลองสลับใช้ CPU libx264 …")
+            cpu_cmd = [
+                ff, "-y",
+                "-i", input_path,
+                "-vf", f"ass='{ass_path_escaped}'",
+                "-c:v", "libx264", "-crf", "18", "-preset", "fast",
+                "-c:a", "aac", "-b:a", "192k",
+                output_path,
+            ]
+            res_cpu = subprocess.run(cpu_cmd, capture_output=True, text=True)
+            if res_cpu.returncode == 0:
+                if progress_cb:
+                    progress_cb(f"บันทึกไฟล์สำเร็จ: {os.path.basename(output_path)}")
+                return
+
         if progress_cb:
             progress_cb("ffmpeg ASS ล้มเหลว – สลับไปใช้ frame-by-frame …")
         _export_frame_by_frame(input_path, output_path, segments, style, progress_cb)
@@ -213,7 +296,7 @@ def _export_frame_by_frame(
     style: SubtitleStyle,
     progress_cb=None,
 ):
-    """Original slow export – kept as fallback."""
+    """Fallback export: render frame-by-frame with GPU-accelerated video writer when available."""
     from moviepy import VideoFileClip
     from moviepy.video.io.ffmpeg_writer import FFMPEG_VideoWriter
     from subtitle_renderer import draw_subtitles_on_frame
@@ -222,15 +305,18 @@ def _export_frame_by_frame(
     fps   = clip.fps
     total = max(1, int(clip.duration * fps))
 
+    enc_name, _ = _detect_gpu_encoder()
+    codec = enc_name if enc_name != "libx264" else "libx264"
+
     tmp_video = output_path + "_tmp_noaudio.mp4"
     writer = FFMPEG_VideoWriter(
         tmp_video, clip.size, fps,
-        codec="libx264", preset="fast", bitrate="5000k",
+        codec=codec, preset="fast", bitrate="5000k",
         audiofile=None,
     )
 
     if progress_cb:
-        progress_cb("Render ทีละ Frame … 0%")
+        progress_cb(f"Render ทีละ Frame ({codec}) … 0%")
 
     for i, frame in enumerate(clip.iter_frames(fps=fps, dtype="uint8")):
         t = i / fps
@@ -269,3 +355,4 @@ def _export_frame_by_frame(
 
     if progress_cb:
         progress_cb(f"บันทึกไฟล์สำเร็จ: {os.path.basename(output_path)}")
+

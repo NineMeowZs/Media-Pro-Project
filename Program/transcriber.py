@@ -68,20 +68,94 @@ def _extract_audio_numpy(video_path: str) -> np.ndarray:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-def _run_vad(audio: np.ndarray, progress_cb=None) -> list[dict]:
+# ─────────────────────────────────────────────────────────────────────────────
+def _run_vad(audio: np.ndarray, progress_cb=None, sample_rate: int = 16000, deadair_sensitivity: float = 1.0) -> list[dict]:
     """
-    แบ่งช่วงสัญญาณเสียงออฟไลน์ 100% (หลีกเลี่ยงการเชื่อมต่อภายนอกที่ทำให้ค้าง)
-    เพื่อเตรียมส่งไปถอดความด้วย Whisper
+    Offline Energy/RMS-based Voice Activity Detection (VAD).
+    Detects real speech boundaries and silence gaps (>0.3s) to split audio into natural speech chunks.
+    Filters out Dead Air silences so subtitles are generated only for active speech.
     """
-    _report_progress(progress_cb, 20, "Analyzing audio VAD segments...")
-        
-    chunk_len = 16000 * 30  # แบ่งช่วงละ 30 วินาทีตามมาตรฐาน Whisper window size
-    chunks = []
-    for start in range(0, len(audio), chunk_len):
-        end = min(start + chunk_len, len(audio))
-        if (end - start) > 1600:  # มีขนาดมากกว่า 0.1 วินาที
-            chunks.append({"start": start, "end": end})
-    return chunks
+    _report_progress(progress_cb, 20, "Analyzing audio VAD speech segments...")
+
+    if len(audio) == 0:
+        return []
+
+    # 1. Compute frame RMS energy (20ms frame = 320 samples @ 16kHz, 10ms hop = 160 samples)
+    frame_len = int(sample_rate * 0.02)
+    hop_len = int(sample_rate * 0.01)
+
+    num_frames = (len(audio) - frame_len) // hop_len + 1
+    if num_frames <= 0:
+        return [{"start": 0, "end": len(audio)}]
+
+    shape = (num_frames, frame_len)
+    strides = (audio.strides[0] * hop_len, audio.strides[0])
+    frames = np.lib.stride_tricks.as_strided(audio, shape=shape, strides=strides)
+    rms = np.sqrt(np.mean(frames ** 2, axis=1) + 1e-9)
+
+    # 2. Dynamic adaptive threshold (relative to noise floor)
+    sorted_rms = np.sort(rms)
+    noise_floor = np.mean(sorted_rms[:max(1, int(len(sorted_rms) * 0.20))])
+    mult = max(1.2, 2.2 / max(0.2, deadair_sensitivity))
+    threshold = max(0.008, noise_floor * mult)
+
+    is_speech = rms > threshold
+
+    # 3. Smooth speech mask (fill short silence holes < 0.25s, drop short noise bursts < 0.15s)
+    min_silence_frames = int(0.25 / 0.01)
+    min_speech_frames = int(0.15 / 0.01)
+
+    silence_count = 0
+    for i in range(len(is_speech)):
+        if not is_speech[i]:
+            silence_count += 1
+        else:
+            if 0 < silence_count < min_silence_frames:
+                is_speech[i - silence_count : i] = True
+            silence_count = 0
+
+    speech_segments = []
+    in_speech = False
+    seg_start = 0
+
+    for i in range(len(is_speech)):
+        if is_speech[i] and not in_speech:
+            in_speech = True
+            seg_start = i * hop_len
+        elif not is_speech[i] and in_speech:
+            in_speech = False
+            seg_end = i * hop_len + frame_len
+            if (seg_end - seg_start) >= (min_speech_frames * hop_len):
+                speech_segments.append({"start": seg_start, "end": seg_end})
+
+    if in_speech:
+        seg_end = len(audio)
+        if (seg_end - seg_start) >= (min_speech_frames * hop_len):
+            speech_segments.append({"start": seg_start, "end": seg_end})
+
+    # Fallback if no speech detected (e.g. very quiet speech)
+    if not speech_segments:
+        chunk_len = 16000 * 10
+        for start in range(0, len(audio), chunk_len):
+            end = min(start + chunk_len, len(audio))
+            if (end - start) > 1600:
+                speech_segments.append({"start": start, "end": end})
+        return speech_segments
+
+    # 4. Merge adjacent segments if silence gap < 0.35s and total duration <= 10s
+    merged = []
+    curr = speech_segments[0]
+    for nxt in speech_segments[1:]:
+        gap = (nxt["start"] - curr["end"]) / float(sample_rate)
+        dur = (nxt["end"] - curr["start"]) / float(sample_rate)
+        if gap < 0.35 and dur <= 10.0:
+            curr["end"] = nxt["end"]
+        else:
+            merged.append(curr)
+            curr = nxt
+    merged.append(curr)
+
+    return merged
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -119,20 +193,35 @@ def _run_local_whisper(
         processor = WhisperProcessor.from_pretrained(model_dir, local_files_only=True)
     except Exception:
         try:
-            processor = WhisperProcessor.from_pretrained(model_dir)
+            processor = WhisperProcessor.from_pretrained(model_dir, local_files_only=False)
         except Exception:
             pass
 
     if processor is None:
-        # Fallback to standard whisper-small processor for local .pt files
-        try:
-            processor = WhisperProcessor.from_pretrained("openai/whisper-small")
-        except Exception:
-            processor = WhisperProcessor.from_pretrained("openai/whisper-base")
+        for fallback_model in ["openai/whisper-small", "openai/whisper-base", "openai/whisper-tiny"]:
+            try:
+                processor = WhisperProcessor.from_pretrained(fallback_model, local_files_only=True)
+                break
+            except Exception:
+                pass
+        if processor is None:
+            raise RuntimeError(
+                "ไม่สามารถโหลด Whisper processor ได้\n"
+                "กรุณาตรวจสอบ internet หรือดาวน์โหลด model ไว้ใน cache ก่อน"
+            )
 
     # 3. Load Model Architecture & Weights
     model = None
     device_str = "cuda" if torch.cuda.is_available() else "cpu"
+    torch_dtype = torch.float16 if device_str == "cuda" else torch.float32
+
+    if device_str == "cuda":
+        torch.backends.cudnn.benchmark = True
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
+        _report_progress(progress_cb, 15, f"Using GPU: {torch.cuda.get_device_name(0)} (FP16 mode)")
+    else:
+        _report_progress(progress_cb, 15, "Using CPU for transcription (no CUDA GPU)")
 
     if pt_file and os.path.exists(pt_file):
         try:
@@ -148,7 +237,9 @@ def _run_local_whisper(
                 elif h_dim == 768: base_model_name = "openai/whisper-small"
                 elif h_dim == 1024: base_model_name = "openai/whisper-medium"
 
-            model = WhisperForConditionalGeneration.from_pretrained(base_model_name)
+            model = WhisperForConditionalGeneration.from_pretrained(
+                base_model_name, torch_dtype=torch_dtype
+            )
             model.load_state_dict(state, strict=False)
             model = model.to(device_str)
             model.eval()
@@ -157,18 +248,24 @@ def _run_local_whisper(
 
     if model is None:
         try:
-            model = WhisperForConditionalGeneration.from_pretrained(model_dir, local_files_only=True)
+            model = WhisperForConditionalGeneration.from_pretrained(
+                model_dir, local_files_only=True, torch_dtype=torch_dtype
+            )
             model = model.to(device_str)
             model.eval()
         except Exception as e:
             try:
-                model = WhisperForConditionalGeneration.from_pretrained(model_dir)
+                model = WhisperForConditionalGeneration.from_pretrained(
+                    model_dir, local_files_only=False, torch_dtype=torch_dtype
+                )
                 model = model.to(device_str)
                 model.eval()
             except Exception as e2:
                 raise RuntimeError(
                     f"โหลดโมเดลจาก '{model_path}' ไม่สำเร็จ\n"
-                    f"รายละเอียด: {e2}"
+                    f"รายละเอียด: {e2}\n\n"
+                    "วิธีแก้: เลือก folder ของ HuggingFace Whisper model ที่มี config.json\n"
+                    "หรือเลือก fallback model (tiny/base/small/medium) ใน dialog"
                 )
 
     # Force Thai language + transcribe task
@@ -179,14 +276,16 @@ def _run_local_whisper(
     except Exception:
         forced_decoder_ids = None
 
-    # Setup pipeline
     try:
         pipe = pipeline(
             "automatic-speech-recognition",
             model=model,
             tokenizer=processor.tokenizer,
             feature_extractor=processor.feature_extractor,
-            device=0 if device_str == "cuda" else -1
+            torch_dtype=torch_dtype,
+            device=0 if device_str == "cuda" else -1,
+            chunk_length_s=30,
+            batch_size=8 if device_str == "cuda" else 1,
         )
     except Exception as pe:
         raise RuntimeError(f"สร้าง Whisper pipeline ไม่สำเร็จ: {pe}")
@@ -206,10 +305,13 @@ def _run_local_whisper(
             continue
 
         try:
-            # ใช้ return_timestamps=True เพื่อดึงช่วงเวลาคำพูดจริง
             res = pipe(
                 chunk.astype(np.float32),
-                generate_kwargs={"forced_decoder_ids": forced_decoder_ids} if forced_decoder_ids else {},
+                generate_kwargs={
+                    "forced_decoder_ids": forced_decoder_ids,
+                    "max_new_tokens": 225,
+                    "no_repeat_ngram_size": 3,
+                } if forced_decoder_ids else {"max_new_tokens": 225},
                 return_timestamps=True
             )
             chunks_list = res.get("chunks", [])
@@ -220,7 +322,7 @@ def _run_local_whisper(
                     if c_text and t_range:
                         c_start, c_end = t_range
                         if c_start is None: c_start = 0.0
-                        if c_end is None: c_end = (ts["end"] - ts["start"]) / 16000.0
+                        if c_end is None: c_end = end_sec - start_sec
                         raw.append({
                             "start": start_sec + c_start,
                             "end": start_sec + c_end,
@@ -303,7 +405,6 @@ def transcribe_video(
         # ─── Local transformers model (direct generate, forced Thai) ──────────
         raw_segments = _run_local_whisper(model_size, audio, speech_ts, progress_cb)
 
-
     else:
         # ─── Standard openai-whisper package ───────────────────────────────
         try:
@@ -336,8 +437,9 @@ def transcribe_video(
                     task="transcribe",
                     language="th",
                     no_speech_threshold=0.6,
+                    compression_ratio_threshold=2.4,
                     condition_on_previous_text=False,
-                    initial_prompt="ภาษาไทย",
+                    initial_prompt="ภาษาไทยต่อไปนี้คือการถอดเสียงพูดภาษาไทย",
                 )
                 if "segments" in result:
                     for sub_seg in result["segments"]:
@@ -357,21 +459,43 @@ def transcribe_video(
                     progress_cb(f"chunk {i+1} error: {type(pipe_err).__name__}: {pipe_err}")
                 continue
 
-    # 4. PyThaiNLP word segmentation → แบ่ง segment ย่อย
+    # 4. PyThaiNLP word segmentation & Character-Weighted Timestamp Alignment
     if progress_cb:
-        progress_cb("ตัดคำด้วย PyThaiNLP …")
+        progress_cb("ตัดคำและจัดลำดับเวลาซับด้วย PyThaiNLP …")
 
     final_segments: list[dict] = []
     for seg in raw_segments:
-        lines = _segment_thai(seg["text"], words_per_line=words_per_line)
-        dur   = seg["end"] - seg["start"]
-        tpl   = dur / max(len(lines), 1)
-        for j, line in enumerate(lines):
+        text = seg["text"].strip()
+        if not text:
+            continue
+
+        lines = _segment_thai(text, words_per_line=words_per_line)
+        if len(lines) == 1:
             final_segments.append({
-                "start": seg["start"] + j * tpl,
-                "end":   seg["start"] + (j + 1) * tpl,
-                "text":  line,
+                "start": seg["start"],
+                "end": seg["end"],
+                "text": lines[0],
             })
+            continue
+
+        # Allocate sub-segment duration proportionally by character count
+        dur = max(seg["end"] - seg["start"], 0.1)
+        total_chars = max(sum(len(l) for l in lines), 1)
+
+        curr_t = seg["start"]
+        for j, line in enumerate(lines):
+            line_char_ratio = len(line) / float(total_chars)
+            line_dur = dur * line_char_ratio
+            next_t = curr_t + line_dur
+            if j == len(lines) - 1:
+                next_t = seg["end"]  # anchor exact end time
+
+            final_segments.append({
+                "start": curr_t,
+                "end": next_t,
+                "text": line,
+            })
+            curr_t = next_t
 
     if progress_cb:
         progress_cb(f"เสร็จ! ได้ {len(final_segments)} ซับ จาก {len(raw_segments)} chunk")
