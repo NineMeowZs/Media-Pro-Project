@@ -107,7 +107,12 @@ class TimelinePanel(ctk.CTkFrame):
 
     def _scale(self):
         W = self._tlc.winfo_width()
-        total = max(20.0, self.controller._dur() * 1.3 + 5)
+        # During a clip drag, use cached total so the scale doesn't shrink as the
+        # clip is moved further right (prevents the disorienting "zoom out" effect)
+        if self._dm == "move" and hasattr(self, "_drag_total_cache"):
+            total = self._drag_total_cache
+        else:
+            total = max(20.0, self.controller._dur() * 1.3 + 5)
         return (W - 10) / total * self.controller.v_zoom.get()
 
     def _rebuild_label_column(self):
@@ -429,6 +434,8 @@ class TimelinePanel(ctk.CTkFrame):
             self._st0 = cl["start"]
             self._en0 = cl["end"]
             self._dx0 = cx
+            # Cache current timeline total so scale stays locked during drag
+            self._drag_total_cache = max(20.0, self.controller._dur() * 1.3 + 5)
             self.controller.v_speed.set(cl.get("speed", 1.0))
             self.controller.v_vol.set(cl.get("volume", 1.0))
 
@@ -542,6 +549,17 @@ class TimelinePanel(ctk.CTkFrame):
                     clip = old_list.pop(self._di)
                     if target_track not in self.controller.tracks:
                         self.controller.tracks[target_track] = []
+
+                    # CapCut-style: if target is a layer track that already has
+                    # clips overlapping this clip's time range → auto-create new layer
+                    if target_track.startswith("layer_") or target_track == "__empty_layer__":
+                        clip_dur = (clip["end"] - clip["start"]) / max(clip.get("speed", 1.0), 0.01)
+                        clip_tl = clip.get("tl", self._tl0)
+                        actual_target = self.controller._find_free_layer(clip_tl, clip_tl + clip_dur)
+                        if actual_target not in self.controller.tracks:
+                            self.controller.tracks[actual_target] = []
+                        target_track = actual_target
+
                     new_list = self.controller.tracks[target_track]
                     new_list.append(clip)
 
@@ -551,6 +569,7 @@ class TimelinePanel(ctk.CTkFrame):
                     self.controller.sel_track = target_track
                     self.controller.sel_idx = self._di
                     self.controller._rebuild_label_column()
+
 
             # Throttle redraws to ~125fps (8ms) to reduce CPU thrash during fast drags
             import time as _t
@@ -635,6 +654,8 @@ class TimelinePanel(ctk.CTkFrame):
             self.controller._push_undo()
         self._dm = None
         self._dtk = None
+        # Clear cached total so next render uses live duration
+        self._drag_total_cache = None
 
     def _tl_hover(self, e):
         cx = self._tlc.canvasx(e.x)

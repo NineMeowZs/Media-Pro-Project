@@ -111,8 +111,19 @@ def _load_pil_font(style: SubtitleStyle) -> ImageFont.FreeTypeFont:
 
 
 def _hex_to_rgb(hex_color: str) -> tuple:
-    hex_color = hex_color.lstrip("#")
-    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    """Safely convert any hex color string (#RRGGBB, 0xRRGGBB, RRGGBB, #RGB) to (R, G, B) tuple."""
+    try:
+        h = str(hex_color).strip().lstrip("#")
+        if h.startswith("0x") or h.startswith("0X"):
+            h = h[2:]
+        if len(h) == 3:
+            h = "".join(c * 2 for c in h)
+        if len(h) >= 6:
+            return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    except Exception:
+        pass
+    return (255, 255, 255)
+
 
 
 # --------------------------------------------------------------------------- #

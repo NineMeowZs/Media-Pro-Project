@@ -19,9 +19,19 @@ from subtitle_config import SubtitleStyle
 
 def _hex_to_ass_colour(hex_color: str, alpha: int = 0) -> str:
     """Convert #RRGGBB → ASS &HAABBGGRR (alpha 0 = fully opaque)."""
-    h = hex_color.lstrip("#")
-    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
-    return f"&H{alpha:02X}{b:02X}{g:02X}{r:02X}"
+    try:
+        h = str(hex_color).strip().lstrip("#")
+        if h.startswith("0x") or h.startswith("0X"):
+            h = h[2:]
+        if len(h) == 3:
+            h = "".join(c * 2 for c in h)
+        if len(h) >= 6:
+            r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+            return f"&H{alpha:02X}{b:02X}{g:02X}{r:02X}"
+    except Exception:
+        pass
+    return f"&H{alpha:02X}FFFFFF"
+
 
 
 def _position_to_ass_alignment(position: str) -> int:

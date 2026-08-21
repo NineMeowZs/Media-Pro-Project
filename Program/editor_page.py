@@ -29,6 +29,7 @@ import numpy as np
 import imageio_ffmpeg
 from proxy_manager import ProxyManager
 from video_display_engine import SmartVideoReader
+import last_dirs as _ld
 
 # ── Import Modular Components ────────────────────────────────────────────────
 from editor_utils import *
@@ -153,6 +154,7 @@ class EditorPage(ctk.CTkFrame):
         self._pt0       = -1.0   # perf_counter at play start (-1 = not set)
         self._pfi0      = 0      # fi at play start
         self._audio_tmp = None
+        self._play_speed = 1.0   # effective playback speed (from active clip)
 
         # Frame buffer
         self._fbuf      = queue.Queue(maxsize=FRAME_BUF)
@@ -192,6 +194,7 @@ class EditorPage(ctk.CTkFrame):
 
         if initial_project:
             self._load_project_file(initial_project)
+            self._current_project_path = initial_project
         elif initial_video:
             self._load_video(initial_video)
 
@@ -204,8 +207,9 @@ class EditorPage(ctk.CTkFrame):
         # Defer a second render after layout settles so canvas has real size
         self.after(200, lambda: self._render(self.fi))
 
+        # ── Audio: start AFTER clips are on the timeline ─────────────────────
         if initial_project:
-            pass
+            pass  # _setup_audio already called inside _load_project_file
         elif initial_video:
             self._setup_audio(initial_video)
             self._extract_waveforms_bg(initial_video)
@@ -217,6 +221,7 @@ class EditorPage(ctk.CTkFrame):
     def _load_video(self, path):
         name = os.path.basename(path)
         self._proj_name = name
+        self._current_project_path = None  # reset: new video → not yet saved
         if hasattr(self, "_proj_title_lbl"):
             self._proj_title_lbl.configure(text=self._proj_name)
         cap  = cv2.VideoCapture(path)
@@ -231,6 +236,7 @@ class EditorPage(ctk.CTkFrame):
         # ── Kick off proxy + waveform after UI is fully shown (defer 500ms) ──
         self.after(500, lambda p=path: self._start_proxy_build(p))
         self._extract_waveforms_bg(path)
+        # Audio is set up in __init__ after _load_video returns (timeline already has clip)
 
     def _clip(self, path, name, start, end, tl=0.0, fps=25.0):
         return {"path":path,"name":name,"start":start,"end":end,
@@ -282,6 +288,7 @@ class EditorPage(ctk.CTkFrame):
         """
         def run():
             try:
+                self._status("🔊 Processing audio...")
                 ff = imageio_ffmpeg.get_ffmpeg_exe()
 
                 # Collect all audio-bearing clips from main track and audio tracks
@@ -306,6 +313,8 @@ class EditorPage(ctk.CTkFrame):
                     cmd = [ff, "-y", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-t", "5", tmp]
                     subprocess.run(cmd, capture_output=True, timeout=10)
                     try:
+                        if not pygame.mixer.get_init():
+                            pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=2048)
                         pygame.mixer.music.load(tmp)
                     except Exception:
                         pass
@@ -327,18 +336,48 @@ class EditorPage(ctk.CTkFrame):
                     idx      = n_inputs
 
                     inputs_args += ["-ss", str(st), "-t", str(dur), "-i", clip_path]
-                    chain = f"[{idx}:a]"
+                    # Build filter chain parts — no trailing comma, bracket names clear
+                    chain_parts = [f"[{idx}:a]"]
                     if spd != 1.0:
-                        chain += f"atempo={min(max(spd, 0.5), 2.0)},"
-                    chain += f"volume={vol},adelay={delay_ms}|{delay_ms}[am{idx}]"
-                    filter_chains.append(chain)
+                        chain_parts.append(_build_atempo_filter(spd))
+                    if delay_ms > 0:
+                        chain_parts.append(f"adelay={delay_ms}|{delay_ms}:all=1")
+                    chain_parts.append(f"volume={vol}")
+                    chain = ",".join(chain_parts[1:]) if len(chain_parts) > 1 else "anull"
+                    filter_chains.append(f"[{idx}:a]{chain}[am{idx}]")
                     n_inputs += 1
 
-                if n_inputs == 1 and audio_clips[0].get("tl", 0.0) == 0.0 and audio_clips[0].get("start", 0.0) == 0.0 and audio_clips[0].get("speed", 1.0) == 1.0:
-                    # Single 0-delay clip — fast direct decode
-                    cmd = [ff, "-y", "-i", audio_clips[0]["path"], "-vn", "-ar", "44100", "-ac", "2", tmp]
-                    subprocess.run(cmd, capture_output=True, timeout=60)
-                else:
+                success = False
+
+                if n_inputs == 1:
+                    # Single clip path — apply speed (atempo), volume, and timeline delay
+                    cl0  = audio_clips[0]
+                    st0  = cl0.get("start", 0.0)
+                    en0  = cl0.get("end", 0.0)
+                    spd0 = max(cl0.get("speed", 1.0), 0.01)
+                    vol0 = cl0.get("volume", 1.0)
+                    dur0 = max(0.05, en0 - st0)
+                    delay_ms0 = max(0, int(cl0.get("tl", 0.0) * 1000))
+
+                    if spd0 == 1.0 and vol0 == 1.0 and delay_ms0 == 0:
+                        # Fastest path: no processing needed
+                        cmd = [ff, "-y", "-ss", str(st0), "-t", str(dur0),
+                               "-i", cl0["path"], "-vn", "-ar", "44100", "-ac", "2", tmp]
+                    else:
+                        atempo_str = _build_atempo_filter(spd0)
+                        vol_f  = f",volume={vol0:.3f}" if abs(vol0 - 1.0) > 0.01 else ""
+                        delay_f = f",adelay={delay_ms0}|{delay_ms0}:all=1" if delay_ms0 > 0 else ""
+                        fc0 = f"[0:a]{atempo_str}{vol_f}{delay_f}[aout]"
+                        cmd = [ff, "-y", "-ss", str(st0), "-t", str(dur0),
+                               "-i", cl0["path"],
+                               "-filter_complex", fc0,
+                               "-map", "[aout]", "-vn", "-ar", "44100", "-ac", "2", tmp]
+                    proc = subprocess.run(cmd, capture_output=True, timeout=60)
+                    success = (proc.returncode == 0 and
+                               os.path.exists(tmp) and os.path.getsize(tmp) > 0)
+
+                if not success and n_inputs >= 1:
+                    # Multi-clip: use amix filter
                     mix_tag = "".join(f"[am{i}]" for i in range(n_inputs))
                     filter_complex = ";".join(filter_chains) + f";{mix_tag}amix=inputs={n_inputs}:normalize=0[aout]"
                     cmd = (
@@ -350,13 +389,31 @@ class EditorPage(ctk.CTkFrame):
                            tmp]
                     )
                     proc = subprocess.run(cmd, capture_output=True, timeout=120)
-                    if proc.returncode != 0 or not os.path.exists(tmp) or os.path.getsize(tmp) == 0:
-                        # Fallback to single direct decode
-                        cmd = [ff, "-y", "-i", audio_clips[0]["path"], "-vn", "-ar", "44100", "-ac", "2", tmp]
+                    success = (proc.returncode == 0 and
+                               os.path.exists(tmp) and os.path.getsize(tmp) > 0)
+
+                    if not success:
+                        # Last resort: decode first clip directly
+                        cl0 = audio_clips[0]
+                        cmd = [ff, "-y", "-i", cl0["path"], "-vn", "-ar", "44100", "-ac", "2", tmp]
                         subprocess.run(cmd, capture_output=True, timeout=60)
 
                 if os.path.exists(tmp) and os.path.getsize(tmp) > 0:
-                    pygame.mixer.music.load(tmp)
+                    try:
+                        if not pygame.mixer.get_init():
+                            pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=2048)
+                        pygame.mixer.music.load(tmp)
+                        self.after(0, lambda: self._status("🔊 Audio ready"))
+                    except Exception as mx_err:
+                        print(f"[Mixer Load] {mx_err}")
+                        try:
+                            pygame.mixer.quit()
+                            pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=2048)
+                            pygame.mixer.music.load(tmp)
+                        except Exception as e2:
+                            print(f"[Mixer Reinit] {e2}")
+                else:
+                    print("[Audio] output WAV missing/empty — audio will be silent")
             except Exception as e:
                 print(f"[Audio Error] {e}")
             self.after(0, self._finish_load)
@@ -399,7 +456,10 @@ class EditorPage(ctk.CTkFrame):
                 self._split()
                 return "break"
             elif key == 's' or code == 83:
-                self._save()
+                if event.state & 1:  # Ctrl+Shift+S = Save As
+                    self._save_as()
+                else:
+                    self._save()
                 return "break"
             elif key == 'o' or code == 79:
                 self._load_project()
@@ -514,8 +574,10 @@ class EditorPage(ctk.CTkFrame):
     def _load_project(self):
         path = filedialog.askopenfilename(
             title="Open Project",
+            initialdir=_ld.get(_ld.OPEN_PROJECT),
             filetypes=[("VideoAI Project","*.json"),("All","*.*")])
         if not path: return
+        _ld.remember(_ld.OPEN_PROJECT, path)
         try:
             with open(path) as f: data = json.load(f)
             saved = data.get("tracks", {})
@@ -907,7 +969,7 @@ class EditorPage(ctk.CTkFrame):
                                    font=ctk.CTkFont(size=9), text_color=TXT_G)
         self._stat.pack(side="left", padx=20)
 
-        # Right: Save -> Load -> Prominent Export Button
+        # Right: Prominent Export Button (only export button shown)
         right = ctk.CTkFrame(h, fg_color="transparent")
         right.pack(side="right", padx=12)
 
@@ -918,12 +980,13 @@ class EditorPage(ctk.CTkFrame):
                       text_color="#ffffff",
                       command=self._export).pack(side="right", padx=(6, 0))
 
-        ctk.CTkButton(right, text="Load", height=32, width=58, corner_radius=8,
-                      fg_color=PANEL_LIGHT, hover_color=PANEL_HOV,
-                      font=ctk.CTkFont(size=10, weight="bold"), command=self._load_project
+        # Save As button
+        ctk.CTkButton(right, text="Save As", height=32, width=72, corner_radius=8,
+                      fg_color=PANEL_MID, hover_color=PANEL_HOV,
+                      font=ctk.CTkFont(size=10, weight="bold"), command=self._save_as
                       ).pack(side="right", padx=3)
 
-        # Save comes BEFORE Load as requested ("อยากให้ปุ่ม Save มาก่อน Load")
+        # Save button — overwrites current file, shows Save As dialog if no file yet
         ctk.CTkButton(right, text="Save", height=32, width=58, corner_radius=8,
                       fg_color=PANEL_LIGHT, hover_color=PANEL_HOV,
                       font=ctk.CTkFont(size=10, weight="bold"), command=self._save
@@ -1001,6 +1064,13 @@ class EditorPage(ctk.CTkFrame):
         if hasattr(self, "preview_panel"):
             self.preview_panel._pbtn.configure(text="⏸")
 
+        # Determine effective play speed from the active clip at current time
+        t = self.fi / float(TARGET_FPS)
+        active_clip = self._at("main", t)
+        self._play_speed = float(active_clip.get("speed", 1.0)) if active_clip else 1.0
+        if self._play_speed <= 0:
+            self._play_speed = 1.0
+
         self._dec_stop.clear()
         # flush old buffer
         while not self._fbuf.empty():
@@ -1011,12 +1081,18 @@ class EditorPage(ctk.CTkFrame):
         self._dec_th.start()
 
         start_sec = self.fi / float(TARGET_FPS)
+        play_speed = self._play_speed
         def _start_audio_and_clock():
             min_frames = min(20, FRAME_BUF - 1)
             deadline   = time.perf_counter() + 0.35
             while self._fbuf.qsize() < min_frames and time.perf_counter() < deadline:
                 time.sleep(0.003)
             try:
+                # Set pygame volume from active clip
+                _vol = 1.0
+                if active_clip:
+                    _vol = float(active_clip.get("volume", 1.0))
+                pygame.mixer.music.set_volume(min(2.0, max(0.0, _vol)))
                 pygame.mixer.music.play(start=start_sec)
             except Exception:
                 pass
@@ -1031,9 +1107,14 @@ class EditorPage(ctk.CTkFrame):
         self._pt0 = -1.0  # reset clock sentinel
         if hasattr(self, "preview_panel"):
             self.preview_panel._pbtn.configure(text="▶")
+            # Reset cached PhotoImage so pause path renders fresh high-quality frame
+            self.preview_panel._disp_img = None
+            self.preview_panel._canvas_img_id = None
         try: pygame.mixer.music.pause()
         except: pass
-        self.after(50, self._draw_tl)
+        # Re-render the current frame so preview shows the paused image
+        self.after(60, lambda: self._render(self.fi))
+        self.after(80, self._draw_tl)
 
     def _dec_worker(self):
         fi          = self.fi
@@ -1107,7 +1188,9 @@ class EditorPage(ctk.CTkFrame):
             self.after(33, self._tick); return
 
         elapsed   = time.perf_counter() - self._pt0
-        target_fi = max(self.fi, self._pfi0 + int(elapsed * TARGET_FPS))
+        # Scale elapsed by play_speed so 0.5x speed → half frame advance per second
+        play_speed = getattr(self, "_play_speed", 1.0)
+        target_fi = max(self.fi, self._pfi0 + int(elapsed * TARGET_FPS * play_speed))
         total_fi  = int(self._dur() * TARGET_FPS)
 
         if target_fi >= total_fi:
@@ -1397,6 +1480,16 @@ class EditorPage(ctk.CTkFrame):
         dur = 5.0
         tl_end = tl_start + dur
         tk = self._find_free_layer(tl_start, tl_end)
+
+        # Inherit current default style from project style settings
+        st = getattr(self, "style", None)
+        f_name  = getattr(st, "font_name", "Tahoma") if st else "Tahoma"
+        f_size  = getattr(st, "font_size", 36) if st else 36
+        f_color = getattr(st, "font_color", "#ffffff") if st else "#ffffff"
+        f_deco  = getattr(st, "decoration", "shadow") if st else "shadow"
+        f_bold  = bool(getattr(st, "bold", False)) if st else False
+        f_italic = bool(getattr(st, "italic", False)) if st else False
+
         new_clip = {
             "path": "", "name": txt,
             "start": 0, "end": dur,
@@ -1404,17 +1497,21 @@ class EditorPage(ctk.CTkFrame):
             "tl": tl_start,
             "fps": TARGET_FPS,
             "custom_x": 0.5, "custom_y": 0.2,
-            "font_name": "Tahoma", "font_size": 36,
-            "font_color": "#ffffff", "decoration": "shadow",
+            "font_name": f_name, "font_size": f_size,
+            "font_color": f_color, "decoration": f_deco,
+            "bold": f_bold, "italic": f_italic,
             "source_dur": 999999.0
         }
         self.tracks[tk].append(new_clip)
         self.sel_track = tk
         self.sel_idx = len(self.tracks[tk]) - 1
-        self._push_undo(); self._draw_tl()
+        self._push_undo()
+        self._draw_tl()
         if hasattr(self, "properties_panel"):
             self.properties_panel._refresh_props()
+        self._refresh_preview()
         self._status(f'Text: "{txt}"')
+
 
     def _move_track(self, idx, src_key, dst_key):
         items=self.tracks.get(src_key,[])
@@ -1448,6 +1545,8 @@ class EditorPage(ctk.CTkFrame):
         items=self.tracks.get(self.sel_track,[])
         if 0<=self.sel_idx<len(items):
             items[self.sel_idx]["speed"]=float(val); self._draw_tl()
+            # Reload audio with the new speed applied via atempo
+            self.after(200, self._reload_audio)
 
     def _apply_vol(self, val):
         if hasattr(self.properties_panel, "_vol_lbl") and self.properties_panel._vol_lbl.winfo_exists():
@@ -1455,14 +1554,21 @@ class EditorPage(ctk.CTkFrame):
         items=self.tracks.get(self.sel_track,[])
         if 0<=self.sel_idx<len(items):
             items[self.sel_idx]["volume"]=float(val)
+            # Apply volume to pygame immediately during playback
+            try:
+                pygame.mixer.music.set_volume(min(2.0, max(0.0, float(val))))
+            except Exception:
+                pass
 
     # ── Import / asset management ─────────────────────────────────────────────
     def _import(self):
         path=filedialog.askopenfilename(
             title="Import Media",
+            initialdir=_ld.get(_ld.IMPORT_MEDIA),
             filetypes=[("Media","*.mp4 *.mov *.avi *.mkv *.webm *.wav *.mp3 *.aac *.jpg *.png"),
                        ("All","*.*")])
         if not path: return
+        _ld.remember(_ld.IMPORT_MEDIA, path)
         ext=os.path.splitext(path)[1].lower()
         atype=("video" if ext in (".mp4",".mov",".avi",".mkv",".webm")
                else "audio" if ext in (".wav",".mp3",".aac",".ogg")
@@ -1476,8 +1582,10 @@ class EditorPage(ctk.CTkFrame):
     def _import_audio(self):
         path=filedialog.askopenfilename(
             title="Import Audio",
+            initialdir=_ld.get(_ld.IMPORT_AUDIO),
             filetypes=[("Audio","*.wav *.mp3 *.aac *.ogg"),("All","*.*")])
         if path:
+            _ld.remember(_ld.IMPORT_AUDIO, path)
             self.assets.append({"path":path,"name":os.path.basename(path),"type":"audio"})
             self._tab("Audio")
 
@@ -1517,7 +1625,9 @@ class EditorPage(ctk.CTkFrame):
             dur = cnt / fps if cnt > 0 else 5.0
             cap.release()
 
-        tl_start = self._dur()
+        # For the very first clip, always start at t=0 (no gap)
+        all_clips = sum(len(v) for v in self.tracks.values())
+        tl_start = 0.0 if all_clips == 0 else self._dur()
         tl_end = tl_start + dur
 
         if is_audio:
@@ -1537,10 +1647,14 @@ class EditorPage(ctk.CTkFrame):
                 self.tracks[tk] = []
         elif not self.tracks.get("main"):
             tk = "main"
+            tl_start = 0.0  # first video clip always at position 0
+            tl_end = tl_start + dur
         elif is_image:
             tk = self._find_free_layer(tl_start, tl_end)
         else:
-            tk = self._find_free_layer(tl_start, tl_end)
+            # Additional video: append after existing main clips
+            tk = "main"
+            # tl_start already = self._dur() from above
 
         clip_obj = self._clip(asset["path"], asset["name"], 0, dur,
                               tl=tl_start, fps=fps)
@@ -1559,9 +1673,9 @@ class EditorPage(ctk.CTkFrame):
         # Kick off proxy build for video clips added to timeline
         if ext in (".mp4", ".mov", ".avi", ".mkv", ".webm"):
             self._start_proxy_build(asset["path"])
-        # Reload mixed audio whenever an audio clip is added to a track
-        if is_audio:
-            self.after(200, self._reload_audio)
+        # Reload mixed audio whenever an audio/video clip is added
+        if is_audio or ext in (".mp4", ".mov", ".avi", ".mkv", ".webm"):
+            self.after(300, self._reload_audio)
         self._push_undo(); self._rebuild_label_column(); self._draw_tl()
         self._refresh_props()
         self._status(f"Added to [{tk}]: {asset['name']}")
@@ -1907,7 +2021,15 @@ class EditorPage(ctk.CTkFrame):
                 escaped_txt = txt.replace("'", "'\\''").replace(":", "\\:")
                 fpath = _find_font_file(ov.get("font_name", "Tahoma"))
                 fpath_escaped = fpath.replace("\\", "/").replace(":", "\\:")
-                color = ov.get("font_color", "#ffffff").replace("#", "0x")
+                # Format color for FFmpeg drawtext: 0xRRGGBB
+                raw_col = str(ov.get("font_color", "#ffffff")).strip().lstrip("#")
+                if raw_col.startswith("0x") or raw_col.startswith("0X"):
+                    raw_col = raw_col[2:]
+                if len(raw_col) == 3:
+                    raw_col = "".join(c * 2 for c in raw_col)
+                if len(raw_col) < 6:
+                    raw_col = "FFFFFF"
+                color = "0x" + raw_col.upper()
                 size = ov.get("font_size", 36)
                 cx = ov.get("custom_x", 0.5)
                 cy = ov.get("custom_y", 0.2)
@@ -1918,10 +2040,10 @@ class EditorPage(ctk.CTkFrame):
                 drawtext = f"drawtext=text='{escaped_txt}':fontsize={size}:fontcolor={color}"
                 if fpath_escaped:
                     drawtext += f":fontfile='{fpath_escaped}'"
-                # Center text at custom_x and custom_y ratios
-                drawtext += f":x=(w-tw)*{cx}:y=(h-th)*{cy}:enable='between(t,{tl_start:.3f},{tl_end:.3f})'"
+                drawtext += f":x=(w-tw)*{cx:.3f}:y=(h-th)*{cy:.3f}:enable='between(t,{tl_start:.3f},{tl_end:.3f})'"
                 if ov.get("decoration") == "shadow":
                     drawtext += ":shadowcolor=black:shadowx=2:shadowy=2"
+
 
                 next_v = f"[txt_out{len(fc)}]"
                 fc.append(f"{curr_v}{drawtext}{next_v}")
@@ -1929,12 +2051,45 @@ class EditorPage(ctk.CTkFrame):
 
             out_v = curr_v
 
+            # ── Mix in separate audio tracks (audio_0, audio_1, …) ───────────
+            extra_audio_labels: list[str] = []
+            extra_idx_offset = n + 1 + len(media_overlays)
+            if has_silent:
+                extra_idx_offset += 1
+
+            for ak in self._audio_keys():
+                for ac in self.tracks.get(ak, []):
+                    ap_path = ac.get("path", "")
+                    if not ap_path or not os.path.exists(ap_path):
+                        continue
+                    ac_start = ac.get("start", 0.0)
+                    ac_end   = ac.get("end", ac.get("source_dur", ac_start + 5.0))
+                    ac_tl    = ac.get("tl", 0.0)
+                    ac_speed = max(ac.get("speed", 1.0), 0.01)
+                    ac_vol   = ac.get("volume", 1.0)
+                    ext_idx  = extra_idx_offset + len(extra_audio_labels)
+                    cmd.extend(["-ss", str(ac_start), "-to", str(ac_end), "-i", ap_path])
+                    delay_ms = max(0, int(ac_tl * 1000))
+                    atempo_f = _build_atempo_filter(ac_speed)
+                    vol_f = f",volume={ac_vol:.3f}" if abs(ac_vol - 1.0) > 0.01 else ""
+                    lbl = f"xa{len(extra_audio_labels)}"
+                    fc.append(f"[{ext_idx}:a]{atempo_f}{vol_f},adelay={delay_ms}|{delay_ms}[{lbl}]")
+                    extra_audio_labels.append(f"[{lbl}]")
+
+            final_aout = "[aout]"
+            if extra_audio_labels:
+                mix_in = "[aout]" + "".join(extra_audio_labels)
+                n_mix = 1 + len(extra_audio_labels)
+                fc.append(f"{mix_in}amix=inputs={n_mix}:normalize=0[amixed]")
+                final_aout = "[amixed]"
+
             cmd += ["-filter_complex", ";".join(fc),
-                    "-map", out_v, "-map", "[aout]",
+                    "-map", out_v, "-map", final_aout,
                     "-c:v", "libx264", "-crf", str(crf), "-preset", "fast",
                     "-c:a", "aac", "-b:a", "192k", target_out]
 
             self.after(0, lambda: self._status("Rendering… 0%"))
+
             # Use Popen to stream stderr for live progress updates
             total_dur = self._dur()
             import re as _re
@@ -2108,9 +2263,13 @@ class EditorPage(ctk.CTkFrame):
     def _export_subs(self):
         export_segs = self.get_export_segments()
         if not export_segs: messagebox.showwarning("Export","No subtitles."); return
-        out=filedialog.asksaveasfilename(defaultextension=".mp4",
-                                         filetypes=[("MP4","*.mp4")])
+        out=filedialog.asksaveasfilename(
+            title="Export Video with Subtitles",
+            initialdir=_ld.get(_ld.EXPORT_VIDEO),
+            defaultextension=".mp4",
+            filetypes=[("MP4","*.mp4")])
         if not out: return
+        _ld.remember(_ld.EXPORT_VIDEO, out)
         vpath=self.tracks["main"][0]["path"]
         self._status("Exporting with subtitles…")
         def run():
@@ -2133,10 +2292,12 @@ class EditorPage(ctk.CTkFrame):
         init = video_stem + ".srt" if video_stem else "subtitles.srt"
         out = filedialog.asksaveasfilename(
             title="Save SRT File",
+            initialdir=_ld.get(_ld.SAVE_PROJECT),
             initialfile=init,
             defaultextension=".srt",
             filetypes=[("SRT Subtitle","*.srt"),("All files","*.*")])
         if not out: return
+        _ld.remember(_ld.SAVE_PROJECT, out)
         try:
             save_srt(export_segs, self.style, out)
             self._status(f"SRT saved: {os.path.basename(out)}")
@@ -2155,36 +2316,67 @@ class EditorPage(ctk.CTkFrame):
         self._refresh_preview()
 
     # ── Save / Autosave ───────────────────────────────────────────────────────
+    def _write_project(self, path):
+        """Write project JSON to the given path. Returns True on success."""
+        try:
+            name = os.path.basename(path)
+            self._proj_name = name
+            if hasattr(self, "_proj_title_lbl"):
+                self._proj_title_lbl.configure(text=self._proj_name)
+            payload = {
+                "tracks":  self.tracks,
+                "assets":  self.assets,
+                "muted":   self._muted,
+                "segments": self.segments,
+                "ratio":   self.v_ratio.get() if hasattr(self, "v_ratio") else "16:9",
+                "style":   {
+                    "font_name": self.style.font_name,
+                    "font_size": self.style.font_size,
+                    "font_color": self.style.font_color,
+                    "decoration": self.style.decoration,
+                    "animation": self.style.animation,
+                    "position": self.style.position,
+                } if hasattr(self, "style") else {},
+                "version": 5,
+            }
+            with open(path, "w") as f:
+                json.dump(payload, f, indent=2, default=str)
+            self._status(f"Saved: {os.path.basename(path)}")
+            self._add_to_recent(path)
+            return True
+        except Exception as ex:
+            messagebox.showerror("Save Error", str(ex))
+            return False
+
     def _save(self):
-        path=filedialog.asksaveasfilename(defaultextension=".json",
-                                          filetypes=[("Project","*.json")])
+        """Save project: overwrite current file if it exists, else ask for path (Save As)."""
+        path = getattr(self, "_current_project_path", None)
+        if not path:
+            path = filedialog.asksaveasfilename(
+                defaultextension=".json",
+                initialdir=_ld.get(_ld.SAVE_PROJECT),
+                filetypes=[("Project","*.json")])
         if path:
-            try:
-                name = os.path.basename(path)
-                self._proj_name = name
-                if hasattr(self, "_proj_title_lbl"):
-                    self._proj_title_lbl.configure(text=self._proj_name)
-                payload = {
-                    "tracks":  self.tracks,
-                    "assets":  self.assets,
-                    "muted":   self._muted,
-                    "segments": self.segments,
-                    "ratio":   self.v_ratio.get() if hasattr(self, "v_ratio") else "16:9",
-                    "style":   {
-                        "font_name": self.style.font_name,
-                        "font_size": self.style.font_size,
-                        "font_color": self.style.font_color,
-                        "decoration": self.style.decoration,
-                        "animation": self.style.animation,
-                        "position": self.style.position,
-                    } if hasattr(self, "style") else {},
-                    "version": 5,
-                }
-                with open(path,"w") as f:
-                    json.dump(payload,f,indent=2,default=str)
-                self._status(f"Saved: {os.path.basename(path)}")
-                self._add_to_recent(path)
-            except Exception as ex: messagebox.showerror("Save Error",str(ex))
+            _ld.remember(_ld.SAVE_PROJECT, path)
+            self._current_project_path = path
+            self._write_project(path)
+
+    def _save_as(self):
+        """Always show Save As dialog regardless of current project path."""
+        init_name = "project.json"
+        if getattr(self, "_proj_name", "") and self._proj_name != "Untitled Project":
+            stem = os.path.splitext(self._proj_name)[0]
+            init_name = stem + ".json" if not stem.lower().endswith(".json") else stem
+        path = filedialog.asksaveasfilename(
+            title="Save Project As",
+            defaultextension=".json",
+            initialfile=init_name,
+            initialdir=_ld.get(_ld.SAVE_PROJECT),
+            filetypes=[("Project","*.json"),("All","*.*")])
+        if path:
+            _ld.remember(_ld.SAVE_PROJECT, path)
+            self._current_project_path = path
+            self._write_project(path)
 
     def _autosave_start(self):
         def loop():
@@ -2231,10 +2423,12 @@ class EditorPage(ctk.CTkFrame):
     def _import_srt(self):
         path = filedialog.askopenfilename(
             title="Import SRT File",
+            initialdir=_ld.get(_ld.IMPORT_MEDIA),
             filetypes=[("SRT Subtitle", "*.srt"), ("All files", "*.*")]
         )
         if not path:
             return
+        _ld.remember(_ld.IMPORT_MEDIA, path)
         try:
             with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
@@ -2617,10 +2811,12 @@ class _SubtitleDialog(ctk.CTkToplevel):
     def _browse_srt(self):
         path = filedialog.asksaveasfilename(
             title="Save SRT File As",
+            initialdir=_ld.get(_ld.SAVE_PROJECT),
             initialfile="subtitles.srt",
             defaultextension=".srt",
             filetypes=[("SRT Subtitle","*.srt"),("All files","*.*")])
         if path:
+            _ld.remember(_ld.SAVE_PROJECT, path)
             self._srt_path = path
             self._srt_entry.configure(state="normal")
             self._srt_entry.delete(0, "end")
