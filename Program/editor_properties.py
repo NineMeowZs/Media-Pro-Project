@@ -890,6 +890,8 @@ class PropertiesPanel(ctk.CTkFrame):
 
         def _on_font(val):
             clip["font_name"] = val
+            if is_subtitle:
+                self.controller.style.font_name = val
             self.controller._refresh_preview()
 
         all_fonts = get_all_fonts()
@@ -909,12 +911,16 @@ class PropertiesPanel(ctk.CTkFrame):
         def _toggle_bold():
             bold_val.set(not bold_val.get())
             clip["bold"] = bold_val.get()
+            if is_subtitle:
+                self.controller.style.bold = bold_val.get()
             bold_btn.configure(fg_color=accent if bold_val.get() else PANEL_MID)
             self.controller._refresh_preview()
 
         def _toggle_italic():
             italic_val.set(not italic_val.get())
             clip["italic"] = italic_val.get()
+            if is_subtitle:
+                self.controller.style.italic = italic_val.get()
             italic_btn.configure(fg_color=accent if italic_val.get() else PANEL_MID)
             self.controller._refresh_preview()
 
@@ -939,7 +945,7 @@ class PropertiesPanel(ctk.CTkFrame):
         sz_row.pack(fill="x", pady=2)
         ctk.CTkLabel(sz_row, text="ขนาด (px)",
                      font=ctk.CTkFont(size=10), text_color=TXT_L, width=64).pack(side="left")
-        default_sz = getattr(self.controller.style, "font_size", 36) if is_subtitle else 36
+        default_sz = getattr(self.controller.style, "font_size", 44) if is_subtitle else 44
         sz_ent = ctk.CTkEntry(sz_row, width=60, height=26, corner_radius=6,
                                font=ctk.CTkFont(size=10, weight="bold"))
         sz_ent.insert(0, str(clip.get("font_size", default_sz)))
@@ -949,6 +955,8 @@ class PropertiesPanel(ctk.CTkFrame):
             try:
                 v = max(8, min(200, int(float(val_str))))
                 clip["font_size"] = v
+                if is_subtitle:
+                    self.controller.style.font_size = v
                 sz_ent.delete(0, "end")
                 sz_ent.insert(0, str(v))
                 self.controller._refresh_preview()
@@ -957,6 +965,32 @@ class PropertiesPanel(ctk.CTkFrame):
 
         sz_ent.bind("<Return>", lambda e: _apply_sz(sz_ent.get()))
         sz_ent.bind("<FocusOut>", lambda e: _apply_sz(sz_ent.get()))
+
+        # Letter Spacing (px)
+        lsp_row = ctk.CTkFrame(sc, fg_color="transparent")
+        lsp_row.pack(fill="x", pady=2)
+        ctk.CTkLabel(lsp_row, text="ระยะห่างอักษร",
+                     font=ctk.CTkFont(size=10), text_color=TXT_L, width=80).pack(side="left")
+        default_lsp = getattr(self.controller.style, "letter_spacing", 0) if is_subtitle else 0
+        lsp_ent = ctk.CTkEntry(lsp_row, width=60, height=26, corner_radius=6,
+                               font=ctk.CTkFont(size=10, weight="bold"))
+        lsp_ent.insert(0, str(clip.get("letter_spacing", default_lsp)))
+        lsp_ent.pack(side="right")
+
+        def _apply_lsp(val_str):
+            try:
+                v = max(0, min(60, int(float(val_str))))
+                clip["letter_spacing"] = v
+                if is_subtitle:
+                    self.controller.style.letter_spacing = v
+                lsp_ent.delete(0, "end")
+                lsp_ent.insert(0, str(v))
+                self.controller._refresh_preview()
+            except ValueError:
+                pass
+
+        lsp_ent.bind("<Return>", lambda e: _apply_lsp(lsp_ent.get()))
+        lsp_ent.bind("<FocusOut>", lambda e: _apply_lsp(lsp_ent.get()))
 
         # Color (#hex) + Swatch + Color Wheel
         self._plbl(sc, "สี (#hex)")
@@ -968,6 +1002,8 @@ class PropertiesPanel(ctk.CTkFrame):
             if not c.startswith("#"):
                 c = "#" + c
             clip["font_color"] = c
+            if is_subtitle:
+                self.controller.style.font_color = c
             cv.set(c)
             try:
                 cswatch.configure(bg=c)
@@ -1006,16 +1042,24 @@ class PropertiesPanel(ctk.CTkFrame):
         if is_subtitle:
             def _apply_to_all():
                 fn  = clip.get("font_name",  getattr(self.controller.style, "font_name", "Tahoma"))
-                fs  = clip.get("font_size",  getattr(self.controller.style, "font_size", 36))
+                fs  = clip.get("font_size",  getattr(self.controller.style, "font_size", 44))
                 fc  = clip.get("font_color", "#ffffff")
                 bl  = clip.get("bold",   False)
                 it  = clip.get("italic", False)
+                lsp = clip.get("letter_spacing", 0)
+                self.controller.style.font_name      = fn
+                self.controller.style.font_size      = fs
+                self.controller.style.font_color     = fc
+                self.controller.style.bold           = bl
+                self.controller.style.italic         = it
+                self.controller.style.letter_spacing = lsp
                 for sub_clip in self.controller.tracks.get("subtitle", []):
-                    sub_clip["font_name"]  = fn
-                    sub_clip["font_size"]  = fs
-                    sub_clip["font_color"] = fc
-                    sub_clip["bold"]       = bl
-                    sub_clip["italic"]     = it
+                    sub_clip["font_name"]      = fn
+                    sub_clip["font_size"]      = fs
+                    sub_clip["font_color"]     = fc
+                    sub_clip["bold"]           = bl
+                    sub_clip["italic"]         = it
+                    sub_clip["letter_spacing"] = lsp
                 self.controller._push_undo()
                 self.controller._refresh_preview()
                 self.controller._status(f"✓ สไตล์ถูก apply ไปทุก subtitle ({len(self.controller.tracks.get('subtitle', []))} คลิป)")

@@ -114,23 +114,50 @@ class PreviewPanel(ctk.CTkFrame):
         ).pack(side="left", padx=3)
 
     # ── Canvas hit-test helpers ───────────────────────────────────────────────
-    def _get_clip_bbox_canvas(self, clip):
-        """Return (cx_px, cy_px, half_w, half_h) bounding box of clip in canvas coords."""
-        cw = max(self._cv_w, 1)
-        ch = max(self._cv_h, 1)
+    def _get_clip_bbox_canvas(self, clip, track_key=""):
+        """Return (cx_px, cy_px, half_w, half_h) bounding box of clip in canvas coords with snug, accurate fit."""
+        cw = max(self._cv_w, self.canvas.winfo_width(), 1)
+        ch = max(self._cv_h, self.canvas.winfo_height(), 1)
         cx = clip.get("custom_x", 0.5) * cw
         cy = clip.get("custom_y", 0.5) * ch
         scale = float(clip.get("scale", 1.0))
-        hw = int(cw * 0.30 * scale / 2)
-        hh = int(ch * 0.30 * scale / 2)
+
+        # Check if text or subtitle clip
+        is_sub = (track_key == "subtitle") or ("sub_text" in clip)
+        is_text = is_sub or (clip.get("path", "") == "")
+
+        if is_text:
+            text = clip.get("sub_text", clip.get("name", "Text")).strip()
+            if not text:
+                text = "Text"
+            font_size = clip.get("font_size", getattr(self.controller.style, "font_size", 44))
+            disp_size = max(8, int(font_size * (ch / 1080.0) * scale))
+            lsp = clip.get("letter_spacing", getattr(self.controller.style, "letter_spacing", 0))
+            lines = text.split("\n")
+            max_line_len = max(len(l) for l in lines) if lines else 4
+            approx_w = int(max_line_len * (disp_size * 0.65 + lsp * (ch / 1080.0)) * scale)
+            approx_h = int(len(lines) * (disp_size * 1.3) * scale)
+            pad_x = 10
+            pad_y = 6
+            hw = max(20, (approx_w + pad_x * 2) // 2)
+            hh = max(12, (approx_h + pad_y * 2) // 2)
+            return cx, cy, hw, hh
+
+        if track_key == "main" or (not track_key.startswith("layer_") and clip.get("path", "") != ""):
+            hw = int(cw * 0.48 * scale)
+            hh = int(ch * 0.48 * scale)
+            return cx, cy, hw, hh
+
+        # Overlay media (images/videos on layer tracks)
+        hw = max(20, int(cw * 0.25 * scale))
+        hh = max(20, int(ch * 0.25 * scale))
         return cx, cy, hw, hh
 
-    def _hit_test_clip(self, mx, my, clip):
-        """Return True if canvas point (mx,my) is inside this clip's bounding box."""
-        cx, cy, hw, hh = self._get_clip_bbox_canvas(clip)
+    def _hit_test_clip(self, mx, my, clip, track_key=""):
+        """Return True if canvas point (mx,my) is inside this clip's tight bounding box."""
+        cx, cy, hw, hh = self._get_clip_bbox_canvas(clip, track_key=track_key)
         rotate = float(clip.get("rotate", 0.0))
         if rotate != 0.0:
-            # Rotate point into clip local space
             rad = math.radians(-rotate)
             dx = mx - cx; dy = my - cy
             lx = dx * math.cos(rad) - dy * math.sin(rad)
@@ -140,16 +167,16 @@ class PreviewPanel(ctk.CTkFrame):
 
     # ── Canvas interaction ────────────────────────────────────────────────────
     def _canvas_ov_press(self, event):
-        """Click to select or start moving clip. Tries all layer tracks."""
+        """Click to select or start moving clip. Tries all layer tracks, then subtitle."""
         mx = self.canvas.canvasx(event.x)
         my = self.canvas.canvasy(event.y)
         t = self.controller.fi / float(TARGET_FPS)
 
-        # 1. Try to hit-test every active layer clip
         hit_track = None
         hit_idx = None
         hit_clip = None
 
+        # 1. Try to hit-test every active layer clip
         for lk in reversed(self.controller._layer_keys()):  # top layers first
             clips = self.controller.tracks.get(lk, [])
             for idx, clip in enumerate(clips):
@@ -157,7 +184,7 @@ class PreviewPanel(ctk.CTkFrame):
                 tl = clip.get("tl", 0.0)
                 if not (tl <= t <= tl + dur):
                     continue
-                if self._hit_test_clip(mx, my, clip):
+                if self._hit_test_clip(mx, my, clip, track_key=lk):
                     hit_track = lk
                     hit_idx = idx
                     hit_clip = clip
@@ -172,25 +199,14 @@ class PreviewPanel(ctk.CTkFrame):
                 dur = max(clip["end"] - clip["start"], 0.05) / max(clip.get("speed", 1.0), 0.01)
                 tl = clip.get("tl", 0.0)
                 if tl <= t <= tl + dur:
-                    hit_track = "subtitle"
-                    hit_idx = idx
-                    hit_clip = clip
-                    break
-
-        # 3. Try main track video if no overlay was hit
-        if not hit_clip:
-            main_clips = self.controller.tracks.get("main", [])
-            for idx, clip in enumerate(main_clips):
-                dur = max(clip["end"] - clip["start"], 0.05) / max(clip.get("speed", 1.0), 0.01)
-                tl = clip.get("tl", 0.0)
-                if tl <= t <= tl + dur:
-                    hit_track = "main"
-                    hit_idx = idx
-                    hit_clip = clip
-                    break
+                    if self._hit_test_clip(mx, my, clip, track_key="subtitle"):
+                        hit_track = "subtitle"
+                        hit_idx = idx
+                        hit_clip = clip
+                        break
 
         if not hit_clip:
-            # Clicked empty background
+            # Clicked empty background — deselect and clear bounding box
             self._ov_drag_clip = None
             self._ov_dragging = False
             self.canvas.delete("transform_ui")
@@ -200,12 +216,12 @@ class PreviewPanel(ctk.CTkFrame):
             self._refresh_preview()
             return
 
-        # 4. Select the hit clip
+        # Select the hit clip
         self.controller.sel_track = hit_track
         self.controller.sel_idx = hit_idx
         self.controller._refresh_props()
 
-        # 5. Start drag
+        # Start drag
         self._ov_drag_clip = hit_clip
         self._tf_mode = "move"
         self._ov_dragging = True
@@ -216,7 +232,7 @@ class PreviewPanel(ctk.CTkFrame):
         self._refresh_preview()
 
     def _canvas_ov_drag(self, event):
-        """Move selected clip smoothly across canvas."""
+        """Move selected clip smoothly across canvas without flickering properties panel."""
         if not self._ov_dragging or self._ov_drag_clip is None:
             return
 
@@ -237,13 +253,14 @@ class PreviewPanel(ctk.CTkFrame):
             self.controller.style.custom_x = clip["custom_x"]
             self.controller.style.custom_y = clip["custom_y"]
 
-        self.controller._refresh_props()
+        # Note: Do not refresh properties panel on every drag pixel to prevent flickering
         self._refresh_preview()
 
     def _canvas_ov_release(self, event):
-        """Finish dragging."""
+        """Finish dragging and update properties once."""
         if self._ov_dragging:
             self.controller._push_undo()
+            self.controller._refresh_props()
         self._ov_dragging = False
         self._ov_drag_clip = None
         self._tf_mode = None
@@ -316,11 +333,12 @@ class PreviewPanel(ctk.CTkFrame):
                         try:
                             ts = SubtitleStyle()
                             ts.font_name = tc.get("font_name", "Tahoma")
-                            ts.font_size = tc.get("font_size", 36)
+                            ts.font_size = tc.get("font_size", 44)
                             ts.font_color = tc.get("font_color", "#ffffff")
                             ts.decoration = tc.get("decoration", "shadow")
                             ts.bold = bool(tc.get("bold", False))
                             ts.italic = bool(tc.get("italic", False))
+                            ts.letter_spacing = tc.get("letter_spacing", 0)
                             ts.animation = "none"
                             ts.position = "custom"
                             ts.custom_x = tc.get("custom_x", 0.5)
@@ -349,10 +367,11 @@ class PreviewPanel(ctk.CTkFrame):
                                 render_style.italic = sub_clip["italic"]
                             if "decoration" in sub_clip:
                                 render_style.decoration = sub_clip["decoration"]
-                            if "custom_x" in sub_clip:
-                                render_style.custom_x = sub_clip["custom_x"]
-                            if "custom_y" in sub_clip:
-                                render_style.custom_y = sub_clip["custom_y"]
+                            if "letter_spacing" in sub_clip:
+                                render_style.letter_spacing = sub_clip["letter_spacing"]
+                            render_style.position = "custom"
+                            render_style.custom_x = sub_clip.get("custom_x", render_style.custom_x)
+                            render_style.custom_y = sub_clip.get("custom_y", render_style.custom_y)
                         bgr = draw_subtitles_on_frame(bgr, sub, render_style, prog)
                     except Exception:
                         pass
@@ -377,23 +396,46 @@ class PreviewPanel(ctk.CTkFrame):
         self._draw_grid_overlay()
         self._draw_transform_overlay()
 
+    def _draw_grid_overlay(self):
+        """Draw snap alignment grid if enabled."""
+        self.canvas.delete("grid_overlay")
+        if not getattr(self, "_snap_grid", False):
+            return
+        cw = max(self.canvas.winfo_width(), 1)
+        ch = max(self.canvas.winfo_height(), 1)
+        for i in range(1, SNAP_GRID_DIVISIONS):
+            x = int(cw * i / SNAP_GRID_DIVISIONS)
+            y = int(ch * i / SNAP_GRID_DIVISIONS)
+            self.canvas.create_line(x, 0, x, ch, fill="#1e293b", dash=(2, 4), tags="grid_overlay")
+            self.canvas.create_line(0, y, cw, y, fill="#1e293b", dash=(2, 4), tags="grid_overlay")
+
     # ── Text clip canvas rendering ────────────────────────────────────────────
     def _draw_text_on_canvas(self, tc, cw, ch, tag="text_overlay"):
-        """Draw a text clip on canvas (fast path, no OpenCV)."""
+        """Draw a text clip on canvas with true font, weight, style, and color (fast path)."""
         cx_pos = tc.get("custom_x", 0.5)
         cy_pos = tc.get("custom_y", 0.2)
-        font_size = tc.get("font_size", 36)
+        font_name = tc.get("font_name", "Tahoma")
+        font_size = tc.get("font_size", 44)
         color = tc.get("font_color", "#ffffff")
+        bold = bool(tc.get("bold", False))
+        italic = bool(tc.get("italic", False))
+        scale = float(tc.get("scale", 1.0))
+        letter_spacing = tc.get("letter_spacing", 0)
+
         try:
-            # Validate hex color
             if not color.startswith("#"):
-                color = "#ffffff"
+                color = "#" + color
         except Exception:
             color = "#ffffff"
 
         x_px = int(cx_pos * cw)
         y_px = int(cy_pos * ch)
-        display_size = max(10, min(int(font_size * 0.7), 40))
+        display_size = max(8, int(font_size * (ch / 1080.0) * scale))
+
+        font_styles = []
+        if bold: font_styles.append("bold")
+        if italic: font_styles.append("italic")
+        fspec = (font_name, display_size, " ".join(font_styles) if font_styles else "normal")
 
         decoration = tc.get("decoration", "shadow")
         text = tc.get("name", "")
@@ -406,20 +448,18 @@ class PreviewPanel(ctk.CTkFrame):
                 self.canvas.create_text(
                     x_px + dx, y_px + dy, text=text,
                     fill="#000000", anchor="center",
-                    font=("Tahoma", display_size, "bold"),
-                    tags=tag
+                    font=fspec, tags=tag
                 )
 
         self.canvas.create_text(
             x_px, y_px, text=text,
             fill=color, anchor="center",
-            font=("Tahoma", display_size, "bold"),
-            tags=tag
+            font=fspec, tags=tag
         )
 
     # ── Transform overlay (move + bounding box only) ──────────────────────────
     def _draw_transform_overlay(self):
-        """Draw bounding box + move cursor for the selected clip. No scale/rotate handles."""
+        """Draw bounding box + move cursor for the selected clip. Fits snugly and never covers main video background."""
         self.canvas.delete("transform_ui")
 
         sel_track = getattr(self.controller, "sel_track", "")
@@ -427,27 +467,18 @@ class PreviewPanel(ctk.CTkFrame):
         if not sel_track or sel_idx < 0:
             return
 
+        # Do NOT draw transform box over main background video
+        if sel_track == "main":
+            return
+
         items = self.controller.tracks.get(sel_track, [])
         if not (0 <= sel_idx < len(items)):
             return
 
         clip = items[sel_idx]
-        cw = max(self.canvas.winfo_width(), 1)
-        ch = max(self.canvas.winfo_height(), 1)
-
-        scale = float(clip.get("scale", 1.0))
+        cx, cy, sw, sh = self._get_clip_bbox_canvas(clip, track_key=sel_track)
         rotate = float(clip.get("rotate", 0.0))
-
-        cx = int(clip.get("custom_x", 0.5) * cw)
-        cy = int(clip.get("custom_y", 0.5) * ch)
         self._tf_center = (cx, cy)
-
-        bw = int(cw * 0.30 * scale)
-        bh = int(ch * 0.30 * scale)
-        bw = min(bw, cw - 20)
-        bh = min(bh, ch - 20)
-        sw = bw / 2.0
-        sh = bh / 2.0
 
         rad = math.radians(rotate)
         cos_a = math.cos(rad)
@@ -460,49 +491,53 @@ class PreviewPanel(ctk.CTkFrame):
             wy = sin_a * lx + cos_a * ly + cy
             world_corners.append((wx, wy))
 
-        # Draw bounding box
+        # Draw snug bounding box
         poly_pts = []
         for wx, wy in world_corners:
             poly_pts.extend([wx, wy])
-        self.canvas.create_polygon(poly_pts, fill="", outline="#00d4ff",
-                                   width=2, dash=(6, 3), tags="transform_ui")
+        self.canvas.create_polygon(poly_pts, fill="", outline="#38bdf8",
+                                   width=2, dash=(5, 3), tags="transform_ui")
+
+        # Corner handle dots
+        for wx, wy in world_corners:
+            self.canvas.create_oval(wx - 3, wy - 3, wx + 3, wy + 3,
+                                    fill="#38bdf8", outline="#ffffff", width=1, tags="transform_ui")
 
         # Draw centre cross
-        cs = 6
+        cs = 5
         self.canvas.create_line(cx - cs, cy, cx + cs, cy,
-                                 fill="#00d4ff", width=2, tags="transform_ui")
+                                 fill="#38bdf8", width=2, tags="transform_ui")
         self.canvas.create_line(cx, cy - cs, cx, cy + cs,
-                                 fill="#00d4ff", width=2, tags="transform_ui")
+                                 fill="#38bdf8", width=2, tags="transform_ui")
 
         # Clip name badge
-        name = clip.get("name", "")
+        name = clip.get("sub_text", clip.get("name", ""))
         if name:
             badge_y = min(world_corners[0][1], world_corners[1][1]) - 14
             badge_y = max(badge_y, 4)
             badge_x = cx
             self.canvas.create_rectangle(
-                badge_x - 42, badge_y - 9, badge_x + 42, badge_y + 9,
-                fill="#0f172a", outline="#00d4ff", width=1, tags="transform_ui"
+                badge_x - 38, badge_y - 8, badge_x + 38, badge_y + 8,
+                fill="#0f172a", outline="#38bdf8", width=1, tags="transform_ui"
             )
             self.canvas.create_text(
                 badge_x, badge_y, text=name[:16],
-                fill="#00d4ff", font=("Consolas", 8), tags="transform_ui"
+                fill="#38bdf8", font=("Segoe UI", 8, "bold"), tags="transform_ui"
             )
-
-        # "✥ Move" cursor icon near centre
-        self.canvas.create_text(
-            cx + 16, cy - 16, text="✥",
-            fill="#ffffff", font=("Segoe UI", 11), tags="transform_ui"
-        )
 
     # ── Subtitle canvas drawing ───────────────────────────────────────────────
     def _draw_sub_on_canvas(self, text: str, sub_clip, cw: int, ch: int):
-        """Draw subtitle text directly on canvas during fast playback."""
+        """Draw subtitle text directly on canvas during fast playback with accurate font and styling."""
         style = self.controller.style
         if sub_clip is not None:
             cx_pos = sub_clip.get("custom_x", style.custom_x)
             cy_pos = sub_clip.get("custom_y", style.custom_y)
             font_size = sub_clip.get("font_size", style.font_size)
+            font_name = sub_clip.get("font_name", style.font_name)
+            bold = bool(sub_clip.get("bold", style.bold))
+            italic = bool(sub_clip.get("italic", style.italic))
+            color = sub_clip.get("font_color", style.font_color)
+            decoration = sub_clip.get("decoration", style.decoration)
         else:
             pos_map = {
                 "bottom_center": (0.5, 0.88), "bottom_left": (0.2, 0.88),
@@ -512,30 +547,41 @@ class PreviewPanel(ctk.CTkFrame):
             }
             cx_pos, cy_pos = pos_map.get(style.position, (0.5, 0.88))
             font_size = style.font_size
+            font_name = style.font_name
+            bold = bool(style.bold)
+            italic = bool(style.italic)
+            color = style.font_color
+            decoration = style.decoration
 
         x_px = int(cx_pos * cw)
         y_px = int(cy_pos * ch)
-        display_size = max(10, min(int(font_size * 0.7), 36))
+        display_size = max(8, int(font_size * (ch / 1080.0)))
+
+        font_styles = []
+        if bold: font_styles.append("bold")
+        if italic: font_styles.append("italic")
+        fspec = (font_name, display_size, " ".join(font_styles) if font_styles else "normal")
+
         try:
-            color = style.font_color if sub_clip is None else sub_clip.get("font_color", style.font_color)
+            if not color.startswith("#"):
+                color = "#" + color
         except Exception:
             color = "#ffffff"
 
-        decoration = style.decoration
         if decoration in ("outline", "shadow"):
             offsets = [(1, 1), (-1, 1), (1, -1), (-1, -1)] if decoration == "outline" else [(2, 2)]
             for dx, dy in offsets:
                 self.canvas.create_text(
                     x_px + dx, y_px + dy, text=text,
                     fill="#000000", anchor="center",
-                    font=("Tahoma", display_size, "bold"),
+                    font=fspec,
                     tags="sub_overlay"
                 )
 
         self.canvas.create_text(
             x_px, y_px, text=text,
             fill=color, anchor="center",
-            font=("Tahoma", display_size, "bold"),
+            font=fspec,
             tags="sub_overlay"
         )
 

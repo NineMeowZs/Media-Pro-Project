@@ -155,7 +155,7 @@ PRESETS = [
 @dataclass
 class SubtitleStyle:
     font_name: str = "Tahoma"
-    font_size: int = 32
+    font_size: int = 44
     font_color: str = "#FFFFFF"
     bold: bool = False
     italic: bool = False
@@ -170,4 +170,5 @@ class SubtitleStyle:
     custom_x: float = 0.5                # normalized x (0-1) for custom position
     custom_y: float = 0.85               # normalized y (0-1) for custom position
     line_spacing: int = 8               # extra px between lines
+    letter_spacing: int = 0             # extra px between characters
     bg_opacity: float = 0.5             # used only for box / highlight decoration

@@ -26,11 +26,12 @@
         "tl": 0.0,
         "fps": 30,
         "sub_text": "\u0e40\u0e04\u0e22\u0e2a\u0e48\u0e07\u0e43\u0e2a\u0e48\u0e27\u0e48\u0e32\u0e2d\u0e39\u0e40\u0e01\u0e48\u0e41\u0e14\u0e07\u0e01\u0e31\u0e1a",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -42,11 +43,12 @@
         "tl": 1.8622580645161289,
         "fps": 30,
         "sub_text": "\u0e2d\u0e38\u0e40\u0e01\u0e1f\u0e49\u0e32\u0e21\u0e4c\u0e19\u0e48\u0e30\u0e21\u0e31\u0e19\u0e43\u0e1a\u0e41\u0e25\u0e49\u0e27\u0e2a\u0e32\u0e21",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -58,11 +60,12 @@
         "tl": 3.805483870967741,
         "fps": 30,
         "sub_text": "\u0e23\u0e49\u0e2d\u0e22\u0e01\u0e23\u0e30\u0e1a\u0e32\u0e14\u0e19\u0e4c\u0e40\u0e19\u0e48",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -74,11 +77,12 @@
         "tl": 5.27,
         "fps": 30,
         "sub_text": "\u0e21\u0e31\u0e19\u0e40\u0e01\u0e47\u0e07\u0e40\u0e08\u0e4b\u0e07\u0e02\u0e19\u0e32\u0e14\u0e31\u0e1a\u0e0b\u0e37\u0e49\u0e2d\u0e21\u0e32",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -90,11 +94,12 @@
         "tl": 6.545454545454545,
         "fps": 30,
         "sub_text": "\u0e43\u0e2a\u0e48\u0e41\u0e25\u0e49\u0e27\u0e44\u0e21\u0e48\u0e40\u0e14\u0e47\u0e01\u0e43\u0e19\u0e40\u0e2b\u0e21\u0e32\u0e30\u0e01\u0e31\u0e1a\u0e43\u0e2a\u0e31\u0e22\u0e40\u0e19\u0e47\u0e01",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -106,11 +111,12 @@
         "tl": 8.32,
         "fps": 30,
         "sub_text": "\u0e44\u0e2b\u0e19\u0e08\u0e30\u0e43\u0e2a\u0e49\u0e44\u0e2b\u0e21\u0e49\u0e43\u0e2a\u0e32\u0e22\u0e43\u0e14\u0e43\u0e14\u0e40\u0e19\u0e48",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -122,11 +128,12 @@
         "tl": 9.595454545454546,
         "fps": 30,
         "sub_text": "\u0e19\u0e2d\u0e19\u0e01\u0e25\u0e31\u0e1a\u0e01\u0e32\u0e23\u0e44\u0e2a\u0e49\u0e1a\u0e49\u0e32\u0e19\u0e1a\u0e49\u0e32\u0e07",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -138,11 +145,12 @@
         "tl": 11.28,
         "fps": 30,
         "sub_text": "\u0e25\u0e33\u0e21\u0e32\u0e14\u0e39\u0e02\u0e49\u0e32\u0e02\u0e49\u0e32\u0e07\u0e19\u0e34\u0e27\u0e2d\u0e2e\u0e31\u0e1a",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -154,11 +162,12 @@
         "tl": 12.25,
         "fps": 30,
         "sub_text": "\u0e25\u0e33\u0e14\u0e39\u0e01\u0e31\u0e1a\u0e40\u0e01\u0e25\u0e35\u0e22\u0e14\u0e40\u0e17\u0e1e\u0e01\u0e48\u0e2d\u0e19",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -170,11 +179,12 @@
         "tl": 13.79,
         "fps": 30,
         "sub_text": "\u0e2d\u0e31\u0e27\u0e40\u0e27\u0e2d\u0e04\u0e22\u0e4c\u0e41\u0e19\u0e21\u0e27\u0e2d\u0e04\u0e35\u0e22\u0e4c\u0e1f\u0e49\u0e32\u0e44\u0e14\u0e49\u0e40\u0e1b\u0e47\u0e19\u0e15\u0e31\u0e27\u0e40\u0e25\u0e34\u0e01",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -186,11 +196,12 @@
         "tl": 15.559718309859154,
         "fps": 30,
         "sub_text": "\u0e43\u0e2b\u0e21\u0e48\u0e43\u0e19\u0e01\u0e32\u0e23\u0e40\u0e2d\u0e32\u0e2d\u0e2d\u0e01\u0e2d\u0e2d\u0e01\u0e21\u0e32\u0e43\u0e2a\u0e48\u0e43\u0e19",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -202,11 +213,12 @@
         "tl": 16.823802816901406,
         "fps": 30,
         "sub_text": "\u0e19\u0e35\u0e49\u0e43\u0e19\u0e40\u0e14\u0e47\u0e01\u0e02\u0e2d\u0e07\u0e40\u0e23\u0e32\u0e40\u0e19\u0e37\u0e48\u0e2d\u0e07\u0e2d\u0e31\u0e1a\u0e2a\u0e25\u0e31\u0e1a",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -218,11 +230,12 @@
         "tl": 18.23957746478873,
         "fps": 30,
         "sub_text": "\u0e0a\u0e38\u0e14\u0e40\u0e14\u0e35\u0e22\u0e2a\u0e2a\u0e38\u0e19\u0e2b\u0e49\u0e32\u0e17\u0e35\u0e48\u0e21\u0e32\u0e43\u0e1a\u0e17\u0e31\u0e49\u0e07",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -234,11 +247,12 @@
         "tl": 19.503661971830983,
         "fps": 30,
         "sub_text": "\u0e40\u0e2d\u0e07\u0e19\u0e30\u0e04\u0e30\u0e1c\u0e21\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e19\u0e33\u0e43\u0e2a\u0e14\u0e34\u0e19\u0e2d\u0e31\u0e2d",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -250,11 +264,12 @@
         "tl": 20.767746478873235,
         "fps": 30,
         "sub_text": "\u0e40\u0e27\u0e49\u0e2d",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -266,11 +281,12 @@
         "tl": 21.32,
         "fps": 30,
         "sub_text": "\u0e40\u0e2a\u0e35\u0e22\u0e07\u0e15\u0e48\u0e32\u0e07\u0e42\u0e2e\u0e25\u0e30\u0e44\u0e14\u0e49\u0e40\u0e19\u0e49\u0e19\u0e40\u0e19\u0e2e\u0e4c\u0e19\u0e30",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -282,11 +298,12 @@
         "tl": 22.57125,
         "fps": 30,
         "sub_text": "\u0e04\u0e23\u0e31\u0e1a\u0e2e\u0e39",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -298,13 +315,14 @@
         "tl": 23.49,
         "fps": 30,
         "sub_text": "\u0e0b\u0e36\u0e48\u0e07\u0e16\u0e32\u0e21\u0e27\u0e48\u0e32",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false,
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
         "custom_x": 0.488646288209607,
-        "custom_y": 0.8326488706365502
+        "custom_y": 0.8326488706365502,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -316,13 +334,14 @@
         "tl": 24.38,
         "fps": 30,
         "sub_text": "\u0e1c\u0e39\u0e49\u0e42\u0e17\u0e23\u0e40\u0e19\u0e35\u0e22",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false,
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
         "custom_x": 0.5017467248908296,
-        "custom_y": 0.8490759753593429
+        "custom_y": 0.8490759753593429,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -334,11 +353,12 @@
         "tl": 25.38,
         "fps": 30,
         "sub_text": "\u0e09\u0e31\u0e19\u0e04\u0e34\u0e14\u0e27\u0e48\u0e32\u0e04\u0e38\u0e13\u0e04\u0e37\u0e2d\u0e1c\u0e39\u0e49\u0e01\u0e32\u0e23\u0e13\u0e4c\u0e17\u0e35\u0e48",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -350,11 +370,12 @@
         "tl": 25.395757575757575,
         "fps": 30,
         "sub_text": "\u0e2a\u0e33\u0e04\u0e31\u0e0d\u0e02\u0e2d\u0e07\u0e40\u0e18\u0e2d\u0e41\u0e25\u0e30\u0e04\u0e27\u0e32\u0e21\u0e01\u0e25\u0e31\u0e1a\u0e02\u0e2d\u0e07\u0e09\u0e38\u0e19",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -366,11 +387,12 @@
         "tl": 25.41272727272727,
         "fps": 30,
         "sub_text": "\u0e41\u0e25\u0e30\u0e01\u0e31\u0e1a\u0e04\u0e38\u0e21\u0e02\u0e2d\u0e07\u0e1c\u0e39\u0e49\u0e2b\u0e0d\u0e34\u0e07\u0e17\u0e35\u0e48\u0e04\u0e38\u0e49\u0e21\u0e02\u0e36\u0e49\u0e19",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -382,11 +404,12 @@
         "tl": 25.43090909090909,
         "fps": 30,
         "sub_text": "\u0e17\u0e35\u0e48\u0e01\u0e32\u0e23\u0e16\u0e36\u0e07\u0e02\u0e2d\u0e07\u0e1b\u0e23\u0e30\u0e40\u0e17\u0e28\u0e02\u0e2d\u0e07\u0e40\u0e02\u0e32\u0e2d\u0e22\u0e48\u0e32\u0e07",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -398,11 +421,12 @@
         "tl": 25.448484848484846,
         "fps": 30,
         "sub_text": "\u0e40\u0e01\u0e34\u0e14\u0e02\u0e2d\u0e07\u0e01\u0e32\u0e23\u0e28\u0e36\u0e01\u0e29\u0e13\u0e4c\u0e02\u0e2d\u0e07\u0e1e\u0e27\u0e01\u0e40\u0e02\u0e32\u0e2b\u0e23\u0e37\u0e2d\u0e44\u0e21\u0e48\u0e21\u0e35",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -414,11 +438,12 @@
         "tl": 25.469090909090905,
         "fps": 30,
         "sub_text": "\u0e01\u0e32\u0e23\u0e2a\u0e34\u0e17\u0e18\u0e34\u0e28\u0e23\u0e34\u0e23\u0e4c\u0e28\u0e34\u0e01\u0e23\u0e4c",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -430,11 +455,12 @@
         "tl": 25.39,
         "fps": 30,
         "sub_text": "\u0e21\u0e31\u0e19\u0e19\u0e48\u0e32\u0e44\u0e1b\u0e43\u0e2a\u0e48\u0e40\u0e14\u0e47\u0e01\u0e44\u0e2b\u0e19\u0e01\u0e31\u0e1a\u0e1a\u0e49\u0e32",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -446,11 +472,12 @@
         "tl": 27.16777777777778,
         "fps": 30,
         "sub_text": "\u0e25\u0e48\u0e30",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -462,11 +489,12 @@
         "tl": 27.01,
         "fps": 30,
         "sub_text": "\u0e40\u0e23\u0e32\u0e21\u0e32\u0e14\u0e39\u0e1b\u0e31\u0e08\u0e08\u0e31\u0e22\u0e19\u0e31\u0e49\u0e19\u0e2b\u0e25\u0e31\u0e01",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -478,11 +506,12 @@
         "tl": 28.99,
         "fps": 30,
         "sub_text": "\u0e1b\u0e23\u0e30\u0e21\u0e32\u0e13\u0e27\u0e48\u0e32\u0e2d\u0e35\u0e01\u0e02\u0e49\u0e2d\u0e19\u0e35\u0e49\u0e40\u0e14\u0e35\u0e4b\u0e22\u0e27",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -494,11 +523,12 @@
         "tl": 30.56,
         "fps": 30,
         "sub_text": "\u0e2b\u0e19\u0e36\u0e48\u0e07\u0e42\u0e2d\u0e40\u0e27\u0e2d\u0e2a\u0e35\u0e48\u0e04\u0e38\u0e13\u0e42\u0e07\u0e48\u0e2b\u0e23\u0e37\u0e2d\u0e40\u0e1b\u0e25\u0e48\u0e32\u0e42\u0e2d\u0e49\u0e27",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -510,11 +540,12 @@
         "tl": 32.7104,
         "fps": 30,
         "sub_text": "\u0e2a\u0e34\u0e02\u0e38\u0e19\u0e01\u0e07\u0e01\u0e40\u0e01\u0e34\u0e19\u0e40\u0e1b\u0e47\u0e19\u0e22\u0e31\u0e07\u0e44\u0e07\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e40\u0e0a\u0e48\u0e19",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -526,11 +557,12 @@
         "tl": 34.7264,
         "fps": 30,
         "sub_text": "\u0e2d\u0e2d\u0e40\u0e01\u0e47\u0e1a\u0e42\u0e2d\u0e40\u0e2b\u0e25\u0e37\u0e2d",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -542,11 +574,12 @@
         "tl": 36.14,
         "fps": 30,
         "sub_text": "\u0e42\u0e2d\u0e49\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e40\u0e19\u0e47\u0e15\u0e08\u0e30\u0e17\u0e33\u0e43\u0e2b\u0e49\u0e14\u0e35\u0e01\u0e31\u0e1a\u0e04\u0e38\u0e13",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -558,11 +591,12 @@
         "tl": 37.39581395348837,
         "fps": 30,
         "sub_text": "\u0e43\u0e19\u0e40\u0e0a\u0e47\u0e01\u0e14\u0e49\u0e32\u0e43\u0e0a\u0e48\u0e21\u0e31\u0e49\u0e22",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -574,11 +608,12 @@
         "tl": 38.37,
         "fps": 30,
         "sub_text": "\u0e41\u0e15\u0e48\u0e16\u0e49\u0e32\u0e40\u0e23\u0e35\u0e22\u0e01\u0e01\u0e32\u0e01\u0e04\u0e38\u0e13\u0e40\u0e1b\u0e47\u0e19\u0e40\u0e23\u0e23\u0e34\u0e01",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -590,11 +625,12 @@
         "tl": 39.7325,
         "fps": 30,
         "sub_text": "\u0e01\u0e31\u0e14\u0e40\u0e01\u0e35\u0e48\u0e22\u0e27\u0e2a\u0e2d\u0e07\u0e40\u0e01\u0e23\u0e14\u0e2b\u0e19\u0e36\u0e48\u0e07\u0e2b\u0e23\u0e37\u0e2d\u0e44\u0e21\u0e48\u0e43\u0e0a\u0e48\u0e40\u0e01\u0e35\u0e22\u0e14",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -606,11 +642,12 @@
         "tl": 41.619038461538466,
         "fps": 30,
         "sub_text": "\u0e2a\u0e32\u0e27\u0e19\u0e48\u0e30\u0e21\u0e31\u0e01\u0e44\u0e14\u0e49\u0e41\u0e04\u0e48\u0e44\u0e14\u0e49\u0e44\u0e14\u0e49\u0e40\u0e14\u0e35\u0e22\u0e27\u0e21\u0e36\u0e01",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -622,11 +659,12 @@
         "tl": 43.13875,
         "fps": 30,
         "sub_text": "\u0e04\u0e38\u0e49\u0e21\u0e17\u0e38\u0e19\u0e43\u0e0a\u0e48\u0e44\u0e2b\u0e21",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -638,11 +676,12 @@
         "tl": 44.4,
         "fps": 30,
         "sub_text": "\u0e2d\u0e48\u0e30\u0e2d\u0e31\u0e19\u0e17\u0e35\u0e48\u0e2a\u0e2d\u0e07\u0e04\u0e37\u0e2d\u0e2b\u0e25\u0e31\u0e1a\u0e2b\u0e25\u0e32\u0e14\u0e2a\u0e48\u0e27\u0e19",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -654,11 +693,12 @@
         "tl": 44.574330708661414,
         "fps": 30,
         "sub_text": "\u0e02\u0e2d\u0e07\u0e40\u0e18\u0e2d\u0e2d\u0e32\u0e2b\u0e32\u0e23\u0e4c\u0e21\u0e40\u0e01\u0e34\u0e14\u0e02\u0e49\u0e32\u0e27\u0e02\u0e2d\u0e07\u0e04\u0e38\u0e13\u0e17\u0e35\u0e48",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -670,11 +710,12 @@
         "tl": 44.76803149606299,
         "fps": 30,
         "sub_text": "\u0e04\u0e38\u0e49\u0e21\u0e01\u0e31\u0e1a\u0e2a\u0e31\u0e0d\u0e0d\u0e32\u0e13\u0e2a\u0e34\u0e48\u0e07\u0e17\u0e35\u0e48\u0e01\u0e25\u0e38\u0e48\u0e21\u0e02\u0e2d\u0e07\u0e40\u0e02\u0e32",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -686,11 +727,12 @@
         "tl": 44.96818897637795,
         "fps": 30,
         "sub_text": "\u0e02\u0e2d\u0e07\u0e01\u0e32\u0e23\u0e23\u0e32\u0e29\u0e10\u0e4c\u0e02\u0e2d\u0e07\u0e1b\u0e23\u0e30\u0e40\u0e17\u0e28\u0e02\u0e2d\u0e07\u0e2a\u0e31\u0e15\u0e27\u0e4c\u0e2d\u0e31\u0e07",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -702,11 +744,12 @@
         "tl": 45.168346456692916,
         "fps": 30,
         "sub_text": "\u0e01\u0e29\u0e31\u0e15\u0e23\u0e34\u0e22\u0e4c",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -718,11 +761,12 @@
         "tl": 45.57,
         "fps": 30,
         "sub_text": "\u0e42\u0e2d\u0e40\u0e27\u0e2d\u0e23\u0e4c\u0e21\u0e48\u0e27\u0e07\u0e42\u0e2d\u0e21\u0e48\u0e07\u0e40\u0e19\u0e35\u0e48\u0e22\u0e42\u0e07\u0e48\u0e40\u0e2b\u0e21\u0e37\u0e2d\u0e19\u0e01\u0e31\u0e19\u0e04\u0e23\u0e31\u0e1a",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -734,11 +778,12 @@
         "tl": 47.587923076923076,
         "fps": 30,
         "sub_text": "\u0e04\u0e37\u0e2d\u0e21\u0e31\u0e19\u0e43\u0e2b\u0e49\u0e41\u0e27\u0e19\u0e04\u0e38\u0e13\u0e43\u0e19\u0e1a\u0e38\u0e48\u0e07\u0e21\u0e37\u0e2d",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -750,11 +795,12 @@
         "tl": 48.896846153846155,
         "fps": 30,
         "sub_text": "\u0e1a\u0e38\u0e4a\u0e07\u0e04\u0e35\u0e49\u0e44\u0e14\u0e49\u0e16\u0e49\u0e32\u0e41\u0e27\u0e07\u0e04\u0e38\u0e22\u0e44\u0e21\u0e48\u0e21\u0e35\u0e2a\u0e31\u0e01",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -766,11 +812,12 @@
         "tl": 50.36938461538462,
         "fps": 30,
         "sub_text": "\u0e22\u0e38\u0e19\u0e34\u0e01\u0e32\u0e23\u0e25\u0e39\u0e01\u0e41\u0e23\u0e21\u0e01\u0e47\u0e40\u0e1e\u0e34\u0e48\u0e21\u0e04\u0e38\u0e49\u0e21",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -782,11 +829,12 @@
         "tl": 51.6783076923077,
         "fps": 30,
         "sub_text": "\u0e02\u0e49\u0e32\u0e07\u0e43\u0e19\u0e2b\u0e19\u0e49\u0e32\u0e2a\u0e31\u0e07\u0e2d\u0e32\u0e2b\u0e32\u0e23",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -798,11 +846,12 @@
         "tl": 53.17,
         "fps": 30,
         "sub_text": "\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e44\u0e14\u0e49\u0e40\u0e1b\u0e47\u0e19\u0e43\u0e2a\u0e48\u0e2d\u0e38\u0e49\u0e2d\u0e40\u0e04\u0e23\u0e48\u0e32\u0e19\u0e35\u0e49\u0e44\u0e14\u0e49",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -814,11 +863,12 @@
         "tl": 54.58148936170213,
         "fps": 30,
         "sub_text": "\u0e44\u0e14\u0e49\u0e40\u0e19\u0e35\u0e48\u0e22\u0e2b\u0e19\u0e31\u0e01\u0e2b\u0e23\u0e37\u0e2d",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -830,11 +880,12 @@
         "tl": 55.75,
         "fps": 30,
         "sub_text": "\u0e01\u0e31\u0e1a\u0e1b\u0e31\u0e08\u0e14\u0e34\u0e49\u0e07\u0e17\u0e23\u0e2d\u0e07\u0e2e\u0e31\u0e15\u0e15\u0e4c",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -846,11 +897,12 @@
         "tl": 57.21,
         "fps": 30,
         "sub_text": "\u0e19\u0e35\u0e48\u0e04\u0e38\u0e13\u0e19\u0e35\u0e48\u0e21\u0e35\u0e15\u0e31\u0e27\u0e15\u0e35\u0e17\u0e35\u0e48\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -862,11 +914,12 @@
         "tl": 58.718116883116885,
         "fps": 30,
         "sub_text": "\u0e41\u0e1a\u0e01\u0e04\u0e35\u0e22\u0e4c\u0e15\u0e31\u0e14\u0e40\u0e23\u0e35\u0e22\u0e07\u0e44\u0e14\u0e49\u0e2b\u0e23\u0e37\u0e2d\u0e21\u0e35\u0e2b\u0e49\u0e32\u0e21",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -878,11 +931,12 @@
         "tl": 60.40720779220779,
         "fps": 30,
         "sub_text": "\u0e01\u0e25\u0e32\u0e22\u0e25\u0e36\u0e48\u0e21\u0e40\u0e1b\u0e25\u0e48\u0e32\u0e2d\u0e48\u0e32\u0e19\u0e2d\u0e22\u0e39\u0e48\u0e2a\u0e40\u0e1a\u0e2d\u0e23\u0e4c\u0e22\u0e39",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -894,11 +948,12 @@
         "tl": 62.15662337662338,
         "fps": 30,
         "sub_text": "\u0e0b\u0e34\u0e40\u0e27\u0e34\u0e23\u0e4c\u0e17\u0e1a\u0e32\u0e07\u0e04\u0e19\u0e44\u0e14\u0e49\u0e16\u0e36\u0e07\u0e40\u0e08\u0e49\u0e32\u0e1a\u0e2d\u0e01\u0e27\u0e48\u0e32",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -910,11 +965,12 @@
         "tl": 63.906038961038966,
         "fps": 30,
         "sub_text": "\u0e2a\u0e16\u0e27\u0e31\u0e19\u0e0b\u0e36\u0e48\u0e07\u0e1b\u0e23\u0e38\u0e07\u0e08\u0e33\u0e1a\u0e2d\u0e01\u0e02\u0e27\u0e31\u0e0d\u0e0b\u0e34\u0e48\u0e07",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -926,11 +982,12 @@
         "tl": 65.47448051948052,
         "fps": 30,
         "sub_text": "\u0e21\u0e35\u0e21\u0e19\u0e27\u0e19\u0e43\u0e2a\u0e48\u0e01\u0e23\u0e30\u0e15\u0e32\u0e21\u0e19\u0e30",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -942,11 +999,12 @@
         "tl": 66.83,
         "fps": 30,
         "sub_text": "\u0e41\u0e15\u0e48\u0e22\u0e37\u0e1a\u0e40\u0e27\u0e34\u0e25\u0e04\u0e07\u0e08\u0e30\u0e43\u0e2a\u0e48\u0e02\u0e27\u0e31\u0e14\u0e2a\u0e34\u0e49\u0e07\u0e44\u0e14\u0e49\u0e2d\u0e31\u0e1a",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -958,11 +1016,12 @@
         "tl": 68.28796875,
         "fps": 30,
         "sub_text": "\u0e02\u0e27\u0e48\u0e32\u0e2a\u0e34\u0e48\u0e07\u0e19\u0e35\u0e48\u0e04\u0e37\u0e2d\u0e17\u0e33\u0e43\u0e2b\u0e49\u0e21\u0e31\u0e19\u0e2b\u0e49\u0e32\u0e21",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -974,11 +1033,12 @@
         "tl": 69.51078125000001,
         "fps": 30,
         "sub_text": "\u0e01\u0e32\u0e14\u0e40\u0e19\u0e2d\u0e30",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -990,11 +1050,12 @@
         "tl": 70.44,
         "fps": 30,
         "sub_text": "\u0e0b\u0e36\u0e48\u0e07\u0e15\u0e33\u0e43\u0e2b\u0e49\u0e15\u0e31\u0e27\u0e19\u0e35\u0e49\u0e41\u0e19\u0e30\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e43\u0e2a\u0e48",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1006,11 +1067,12 @@
         "tl": 71.80310679611651,
         "fps": 30,
         "sub_text": "\u0e15\u0e31\u0e4b\u0e27\u0e42\u0e2d\u0e40\u0e04\u0e41\u0e14\u0e07\u0e42\u0e1a\u0e0a\u0e37\u0e48\u0e2d\u0e43\u0e19\u0e01\u0e32\u0e23\u0e43\u0e2b\u0e49",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1022,11 +1084,12 @@
         "tl": 73.06524271844661,
         "fps": 30,
         "sub_text": "\u0e42\u0e15\u0e02\u0e32\u0e14\u0e0b\u0e34\u0e48\u0e07\u0e40\u0e19\u0e47\u0e15\u0e15\u0e35\u0e2a\u0e48\u0e2d\u0e07\u0e23\u0e49\u0e33\u0e01\u0e32\u0e23",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1038,11 +1101,12 @@
         "tl": 74.32737864077671,
         "fps": 30,
         "sub_text": "\u0e2a\u0e2d\u0e07\u0e23\u0e2d\u0e1a\u0e44\u0e14\u0e49\u0e21\u0e32\u0e01\u0e31\u0e19\u0e43\u0e19\u0e2d\u0e35\u0e01\u0e41\u0e25\u0e49\u0e27\u0e2b\u0e31\u0e27",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1054,11 +1118,12 @@
         "tl": 76.04,
         "fps": 30,
         "sub_text": "\u0e2b\u0e23\u0e37\u0e2d\u0e08\u0e30\u0e40\u0e1b\u0e47\u0e19\u0e1a\u0e49\u0e32\u0e07\u0e15\u0e31\u0e27\u0e41\u0e1b\u0e25\u0e1b\u0e30\u0e2d\u0e30\u0e44\u0e23",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1070,11 +1135,12 @@
         "tl": 77.52571428571429,
         "fps": 30,
         "sub_text": "\u0e2d\u0e48\u0e30\u0e40\u0e2d\u0e49\u0e27\u0e48\u0e32",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1086,11 +1152,12 @@
         "tl": 78.22,
         "fps": 30,
         "sub_text": "\u0e40\u0e2d\u0e49\u0e22\u0e27\u0e48\u0e32\u0e19\u0e35\u0e49\u0e21\u0e35\u0e2a\u0e48\u0e2d\u0e07\u0e02\u0e49\u0e32\u0e07\u0e40\u0e25\u0e22\u0e04\u0e37\u0e2d",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1102,11 +1169,12 @@
         "tl": 79.48966666666666,
         "fps": 30,
         "sub_text": "\u0e42\u0e2d\u0e49\u0e27\u0e49\u0e2d\u0e40\u0e17\u0e27\u0e4c\u0e2b\u0e23\u0e37\u0e2d\u0e2d\u0e2d\u0e49\u0e2d\u0e2d\u0e40\u0e04\u0e41\u0e14\u0e07",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1118,11 +1186,12 @@
         "tl": 80.66166666666666,
         "fps": 30,
         "sub_text": "\u0e01\u0e47\u0e44\u0e14\u0e49\u0e19\u0e30\u0e27\u0e48\u0e32",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1134,11 +1203,12 @@
         "tl": 81.56,
         "fps": 30,
         "sub_text": "\u0e42\u0e2d\u0e40\u0e27\u0e2d\u0e40\u0e17\u0e25\u0e19\u0e4c\u0e08\u0e30\u0e17\u0e33\u0e43\u0e2b\u0e49\u0e41\u0e16\u0e27\u0e19\u0e49\u0e33\u0e40\u0e1b\u0e47\u0e19\u0e2a\u0e48\u0e2d\u0e07",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1150,11 +1220,12 @@
         "tl": 83.14780487804879,
         "fps": 30,
         "sub_text": "\u0e40\u0e17\u0e48\u0e32\u0e40\u0e19\u0e2d\u0e30\u0e42\u0e2d\u0e40\u0e04\u0e41\u0e25\u0e49\u0e27\u0e43\u0e2b\u0e49\u0e40\u0e23\u0e32\u0e2a\u0e2d\u0e07\u0e17\u0e35\u0e48",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1166,11 +1237,12 @@
         "tl": 84.5819512195122,
         "fps": 30,
         "sub_text": "\u0e2a\u0e48\u0e27\u0e19\u0e23\u0e2d\u0e1a\u0e44\u0e14\u0e49\u0e08\u0e31\u0e14\u0e25\u0e2d\u0e1a\u0e40\u0e1b\u0e49\u0e32\u0e1e\u0e34\u0e40\u0e0a\u0e35\u0e22\u0e27",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1182,11 +1254,12 @@
         "tl": 85.96487804878049,
         "fps": 30,
         "sub_text": "\u0e2b\u0e19\u0e36\u0e48\u0e07\u0e2a\u0e2d\u0e07\u0e44\u0e1b\u0e44\u0e14\u0e49\u0e44\u0e14\u0e49\u0e40\u0e14\u0e35\u0e4b\u0e22\u0e27\u0e19\u0e31\u0e48\u0e19\u0e40\u0e2d\u0e07\u0e19\u0e30",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1198,11 +1271,12 @@
         "tl": 87.55268292682928,
         "fps": 30,
         "sub_text": "\u0e04\u0e23\u0e31\u0e1a\u0e1c\u0e21",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1214,11 +1288,12 @@
         "tl": 88.24,
         "fps": 30,
         "sub_text": "\u0e41\u0e25\u0e30\u0e01\u0e47\u0e14\u0e35\u0e2b\u0e38\u0e48\u0e19\u0e01\u0e31\u0e19\u0e17\u0e31\u0e49\u0e07\u0e40\u0e2d\u0e07\u0e19\u0e30\u0e04\u0e23\u0e31\u0e1a",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1230,11 +1305,12 @@
         "tl": 89.96,
         "fps": 30,
         "sub_text": "\u0e2b\u0e23\u0e37\u0e2d\u0e22\u0e32\u0e2b\u0e19\u0e36\u0e48\u0e07\u0e04\u0e37\u0e2d\u0e2b\u0e31\u0e27\u0e14\u0e34",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1246,11 +1322,12 @@
         "tl": 91.24,
         "fps": 30,
         "sub_text": "\u0e40\u0e23\u0e32\u0e21\u0e35\u0e15\u0e31\u0e27\u0e02\u0e2d\u0e2a\u0e48\u0e2d\u0e07\u0e44\u0e1b\u0e40\u0e0a\u0e48\u0e19\u0e15\u0e31\u0e4b\u0e27",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1262,11 +1339,12 @@
         "tl": 92.50390532544378,
         "fps": 30,
         "sub_text": "\u0e02\u0e2d\u0e07\u0e2a\u0e35\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e07\u0e22\u0e31\u0e07\u0e21\u0e35\u0e15\u0e27\u0e48\u0e2b\u0e49\u0e32\u0e21\u0e01\u0e32\u0e14\u0e16\u0e49\u0e32",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1278,11 +1356,12 @@
         "tl": 94.03112426035503,
         "fps": 30,
         "sub_text": "\u0e1e\u0e37\u0e2d\u0e21\u0e32\u0e08\u0e30\u0e02\u0e2d\u0e02\u0e2d\u0e07\u0e44\u0e1b\u0e2b\u0e23\u0e37\u0e2d\u0e27\u0e48\u0e32\u0e08\u0e30",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1294,11 +1373,12 @@
         "tl": 95.24236686390533,
         "fps": 30,
         "sub_text": "\u0e40\u0e1b\u0e47\u0e19\u0e2b\u0e49\u0e32\u0e07\u0e01\u0e32\u0e15\u0e2d\u0e22\u0e39\u0e48\u0e17\u0e27\u0e19\u0e02\u0e27\u0e31\u0e14\u0e2a\u0e34\u0e49\u0e19",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1310,11 +1390,12 @@
         "tl": 96.6115976331361,
         "fps": 30,
         "sub_text": "\u0e01\u0e30\u0e41\u0e15\u0e48\u0e21\u0e31\u0e01\u0e01\u0e30\u0e40\u0e19\u0e35\u0e22\u0e21\u0e2d\u0e31\u0e22\u0e15\u0e31\u0e27\u0e01\u0e48\u0e2d",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1326,11 +1407,12 @@
         "tl": 97.87550295857989,
         "fps": 30,
         "sub_text": "\u0e40\u0e04\u0e41\u0e14\u0e07\u0e01\u0e47\u0e08\u0e30\u0e44\u0e1b\u0e17\u0e32\u0e07\u0e40\u0e25\u0e34\u0e28\u0e43\u0e19",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1342,11 +1424,12 @@
         "tl": 98.92875739644971,
         "fps": 30,
         "sub_text": "\u0e01\u0e32\u0e23\u0e43\u0e2a\u0e48\u0e17\u0e35\u0e48\u0e02\u0e49\u0e32\u0e19\u0e02\u0e49\u0e32\u0e07\u0e02\u0e2d\u0e07\u0e40\u0e02\u0e32",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1358,11 +1441,12 @@
         "tl": 100.53,
         "fps": 30,
         "sub_text": "\u0e42\u0e2d\u0e40\u0e04\u0e21\u0e32\u0e01\u0e40\u0e25\u0e22\u0e40\u0e19\u0e47\u0e07\u0e04\u0e48\u0e30\u0e2b\u0e21\u0e39",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1374,11 +1458,12 @@
         "tl": 101.94,
         "fps": 30,
         "sub_text": "\u0e2b\u0e23\u0e37\u0e2d\u0e08\u0e30\u0e40\u0e1b\u0e47\u0e19\u0e40\u0e14\u0e47\u0e01\u0e17\u0e35\u0e48\u0e1e\u0e31\u0e01\u0e20\u0e32\u0e29\u0e13\u0e4c\u0e2a\u0e21\u0e32\u0e23\u0e34",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1390,11 +1475,12 @@
         "tl": 103.05063829787234,
         "fps": 30,
         "sub_text": "\u0e01\u0e32\u0e23\u0e44\u0e14\u0e49\u0e40\u0e0a\u0e48\u0e07\u0e02\u0e49\u0e32\u0e27\u0e44\u0e27\u0e49",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1406,11 +1492,12 @@
         "tl": 104.2,
         "fps": 30,
         "sub_text": "\u0e43\u0e19\u0e0a\u0e16\u0e38\u0e07\u0e23\u0e39\u0e2e\u0e31\u0e19\u0e17\u0e23\u0e4c",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1422,11 +1509,12 @@
         "tl": 105.29,
         "fps": 30,
         "sub_text": "\u0e25\u0e39\u0e01\u0e04\u0e48\u0e32\u0e41\u0e19\u0e48\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e44\u0e14\u0e49\u0e0a\u0e34\u0e04\u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e44\u0e14\u0e49",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1438,11 +1526,12 @@
         "tl": 106.69063829787234,
         "fps": 30,
         "sub_text": "\u0e40\u0e0a\u0e47\u0e04\u0e2d\u0e2d\u0e01\u0e04\u0e35\u0e49\u0e17\u0e35\u0e48\u0e2b\u0e19\u0e36\u0e48\u0e07",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1454,11 +1543,12 @@
         "tl": 107.91,
         "fps": 30,
         "sub_text": "\u0e41\u0e25\u0e30\u0e25\u0e07\u0e02\u0e49\u0e32\u0e2a\u0e4c",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1470,11 +1560,14 @@
         "tl": 108.81,
         "fps": 30,
         "sub_text": "\u0e41\u0e25\u0e30\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e44\u0e14\u0e49\u0e27\u0e39\u0e49\u0e40\u0e04\u0e41\u0e23\u0e07\u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e43\u0e2b\u0e49\u0e04\u0e48\u0e32",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0,
+        "custom_x": 0.5017226528854436,
+        "custom_y": 0.8561368209255533
       },
       {
         "path": "",
@@ -1486,11 +1579,12 @@
         "tl": 110.51281690140846,
         "fps": 30,
         "sub_text": "\u0e19\u0e31\u0e49\u0e19\u0e40\u0e1b\u0e47\u0e19\u0e2a\u0e2d\u0e07\u0e04\u0e34\u0e49\u0e22\u0e4c\u0e2a\u0e2d\u0e07\u0e23\u0e2d\u0e1a\u0e40\u0e1e\u0e25\u0e07\u0e43\u0e19",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1502,11 +1596,12 @@
         "tl": 112.05084507042254,
         "fps": 30,
         "sub_text": "\u0e02\u0e2d\u0e07\u0e2b\u0e49\u0e2d\u0e21\u0e14\u0e35\u0e21\u0e32\u0e01",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1518,11 +1613,12 @@
         "tl": 113.03,
         "fps": 30,
         "sub_text": "\u0e41\u0e15\u0e48\u0e2a\u0e32\u0e27\u0e19\u0e32\u0e17\u0e35\u0e48\u0e44\u0e21\u0e48\u0e21\u0e35\u0e2d\u0e30\u0e44\u0e23\u0e1e\u0e27\u0e01",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1534,11 +1630,12 @@
         "tl": 114.39264150943396,
         "fps": 30,
         "sub_text": "\u0e19\u0e35\u0e49\u0e01\u0e47\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e40\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e42\u0e2d\u0e40\u0e27\u0e2d\u0e23\u0e4c\u0e0a\u0e35\u0e1e\u0e1f\u0e49\u0e32",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1550,11 +1647,12 @@
         "tl": 116.52,
         "fps": 30,
         "sub_text": "\u0e44\u0e14\u0e49\u0e40\u0e2b\u0e21\u0e37\u0e2d\u0e19\u0e01\u0e31\u0e19\u0e19\u0e48\u0e30\u0e04\u0e23\u0e31\u0e1a\u0e1c\u0e21\u0e2d\u0e32\u0e40\u0e25\u0e0b\u0e23\u0e31\u0e1a\u0e15\u0e31\u0e27",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1566,11 +1664,12 @@
         "tl": 118.37062937062937,
         "fps": 30,
         "sub_text": "\u0e02\u0e2d\u0e07\u0e2a\u0e35\u0e40\u0e02\u0e35\u0e22\u0e27\u0e2a\u0e35\u0e40\u0e17\u0e48\u0e32\u0e41\u0e25\u0e30\u0e01\u0e49\u0e2d\u0e2a\u0e35",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1582,11 +1681,12 @@
         "tl": 119.7586013986014,
         "fps": 30,
         "sub_text": "\u0e0a\u0e38\u0e21\u0e1e\u0e39\u0e25\u0e25\u0e48\u0e30\u0e0b\u0e37\u0e49\u0e2d\u0e07\u0e1e\u0e39\u0e14\u0e19\u0e35\u0e48\u0e01\u0e47",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1598,11 +1698,12 @@
         "tl": 121.03090909090909,
         "fps": 30,
         "sub_text": "\u0e40\u0e2b\u0e21\u0e48\u0e32\u0e01\u0e31\u0e19\u0e19\u0e30\u0e41\u0e15\u0e48\u0e15\u0e49\u0e2d\u0e07\u0e40\u0e01\u0e25\u0e35\u0e48\u0e22\u0e27",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1614,11 +1715,12 @@
         "tl": 122.41888111888112,
         "fps": 30,
         "sub_text": "\u0e21\u0e32\u0e01\u0e40\u0e01\u0e48\u0e07\u0e01\u0e31\u0e1a\u0e41\u0e15\u0e48\u0e41\u0e15\u0e48\u0e40\u0e08\u0e49\u0e32\u0e40\u0e2b\u0e15\u0e38\u0e40\u0e22\u0e47\u0e19",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1630,11 +1732,12 @@
         "tl": 124.03818181818181,
         "fps": 30,
         "sub_text": "\u0e01\u0e47\u0e44\u0e21\u0e48\u0e40\u0e01\u0e4b\u0e07\u0e41\u0e25\u0e49\u0e27",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1646,11 +1749,12 @@
         "tl": 125.2,
         "fps": 30,
         "sub_text": "\u0e2d\u0e32\u0e08\u0e21\u0e2a\u0e31\u0e15\u0e27\u0e4c\u0e17\u0e38\u0e07\u0e04\u0e4c\u0e14\u0e31\u0e07\u0e04\u0e35\u0e22\u0e4c\u0e1f\u0e49\u0e32\u0e44\u0e02\u0e48\u0e01\u0e47\u0e44\u0e14\u0e49",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1662,11 +1766,12 @@
         "tl": 126.82526315789474,
         "fps": 30,
         "sub_text": "\u0e43\u0e19\u0e2d\u0e38\u0e48\u0e19",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1678,11 +1783,12 @@
         "tl": 127.49,
         "fps": 30,
         "sub_text": "\u0e2a\u0e38\u0e19\u0e40\u0e02\u0e35\u0e22\u0e27\u0e41\u0e2e\u0e30",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1694,11 +1800,12 @@
         "tl": 128.56,
         "fps": 30,
         "sub_text": "\u0e04\u0e38\u0e13\u0e1e\u0e39\u0e14\u0e27\u0e48\u0e32\u0e19\u0e49\u0e33\u0e40\u0e02\u0e35\u0e22\u0e27\u0e19\u0e35\u0e49\u0e21\u0e31\u0e19\u0e40\u0e01\u0e48\u0e07\u0e21\u0e32\u0e01",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1710,11 +1817,12 @@
         "tl": 129.84076923076924,
         "fps": 30,
         "sub_text": "\u0e41\u0e2b\u0e25\u0e30\u0e1e\u0e27\u0e01\u0e21\u0e31\u0e49\u0e19\u0e44\u0e14\u0e49\u0e17\u0e31\u0e49\u0e07\u0e02\u0e35\u0e49\u0e44\u0e14\u0e49\u0e23\u0e31\u0e49\u0e07",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1726,11 +1834,12 @@
         "tl": 131.03615384615384,
         "fps": 30,
         "sub_text": "\u0e14\u0e2d\u0e23\u0e4c\u0e23\u0e31\u0e49\u0e21\u0e2e\u0e34\u0e27\u0e14\u0e31\u0e07\u0e1f\u0e49\u0e2d\u0e19\u0e17\u0e4c",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1742,11 +1851,12 @@
         "tl": 132.42,
         "fps": 30,
         "sub_text": "\u0e15\u0e49\u0e2d\u0e07\u0e40\u0e1b\u0e47\u0e19\u0e42\u0e2d\u0e40\u0e27\u0e2d\u0e23\u0e4c\u0e17\u0e35\u0e48\u0e17\u0e33\u0e01\u0e32\u0e23\u0e41\u0e17\u0e21\u0e1b\u0e39\u0e40\u0e01\u0e21\u0e48\u0e32",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1758,11 +1868,12 @@
         "tl": 134.21193548387095,
         "fps": 30,
         "sub_text": "\u0e43\u0e2b\u0e49\u0e02\u0e49\u0e32\u0e27\u0e14\u0e35\u0e1a\u0e33\u0e04\u0e27\u0e23\u0e1c\u0e21\u0e27\u0e48\u0e32\u0e44\u0e21\u0e48",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1774,11 +1885,12 @@
         "tl": 135.40655913978492,
         "fps": 30,
         "sub_text": "\u0e19\u0e48\u0e32\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e01\u0e23\u0e30\u0e2b\u0e31\u0e1a\u0e2a\u0e48\u0e27\u0e19\u0e15\u0e31\u0e27\u0e2a\u0e34\u0e40\u0e0a\u0e35\u0e22\u0e27\u0e19\u0e35\u0e49",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1790,11 +1902,12 @@
         "tl": 137.19849462365588,
         "fps": 30,
         "sub_text": "\u0e19\u0e30\u0e04\u0e48\u0e30",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1806,11 +1919,12 @@
         "tl": 137.88,
         "fps": 30,
         "sub_text": "\u0e2a\u0e27\u0e19\u0e40\u0e17\u0e49\u0e32\u0e40\u0e19\u0e35\u0e48\u0e22\u0e44\u0e14\u0e49\u0e15\u0e35\u0e01\u0e47\u0e15\u0e32\u0e22\u0e01\u0e31\u0e19",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1822,11 +1936,12 @@
         "tl": 139.2925,
         "fps": 30,
         "sub_text": "\u0e2b\u0e21\u0e14\u0e41\u0e15\u0e48\u0e1e\u0e27\u0e01\u0e19\u0e49\u0e2d\u0e07\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e04\u0e37\u0e2d\u0e2b\u0e34\u0e07\u0e2a\u0e1a\u0e32\u0e22",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1838,11 +1953,12 @@
         "tl": 140.9875,
         "fps": 30,
         "sub_text": "\u0e2a\u0e1a\u0e48\u0e32\u0e22",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1854,11 +1970,12 @@
         "tl": 141.93,
         "fps": 30,
         "sub_text": "\u0e2a\u0e27\u0e19\u0e42\u0e2d\u0e40\u0e27\u0e2d\u0e23\u0e4c\u0e41\u0e14\u0e07\u0e17\u0e31\u0e01\u0e27\u0e34\u0e14\u0e32\u0e17\u0e25\u0e38\u0e01",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1870,11 +1987,12 @@
         "tl": 143.21872727272728,
         "fps": 30,
         "sub_text": "\u0e41\u0e27\u0e19\u0e44\u0e14\u0e49\u0e2b\u0e23\u0e37\u0e2d\u0e40\u0e08\u0e49\u0e32\u0e1b\u0e23\u0e30\u0e14\u0e34\u0e29\u0e10\u0e4c\u0e14\u0e35\u0e01\u0e25\u0e38\u0e48\u0e01\u0e41\u0e27\u0e01\u0e25\u0e07\u0e44\u0e14\u0e49",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1886,11 +2004,12 @@
         "tl": 145.20551515151516,
         "fps": 30,
         "sub_text": "\u0e27\u0e48\u0e30\u0e04\u0e37\u0e2d\u0e16\u0e49\u0e32\u0e44\u0e21\u0e48\u0e43\u0e0a\u0e48\u0e40\u0e14\u0e47\u0e01\u0e02\u0e49\u0e2d\u0e04\u0e48\u0e2d",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1902,11 +2021,12 @@
         "tl": 146.5479393939394,
         "fps": 30,
         "sub_text": "\u0e01\u0e27\u0e48\u0e32\u0e40\u0e1b\u0e47\u0e19\u0e40\u0e14\u0e47\u0e14\u0e02\u0e2d\u0e07\u0e1b\u0e35\u0e40\u0e23\u0e47\u0e01\u0e01\u0e31\u0e19\u0e40\u0e25\u0e22",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1918,11 +2038,12 @@
         "tl": 147.9977575757576,
         "fps": 30,
         "sub_text": "\u0e40\u0e07\u0e34\u0e19\u0e01\u0e47\u0e1c\u0e21\u0e40\u0e02\u0e49\u0e32\u0e43\u0e2a\u0e48\u0e40\u0e2d\u0e32\u0e40\u0e27\u0e49\u0e2d\u0e40\u0e14\u0e48",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1934,11 +2055,12 @@
         "tl": 149.34018181818183,
         "fps": 30,
         "sub_text": "\u0e07\u0e17\u0e38\u0e01\u0e14\u0e34\u0e01\u0e41\u0e25\u0e49\u0e27\u0e44\u0e14\u0e49\u0e14\u0e35\u0e41\u0e19\u0e48\u0e14\u0e35\u0e19\u0e30",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1950,11 +2072,12 @@
         "tl": 150.57521212121213,
         "fps": 30,
         "sub_text": "\u0e1c\u0e21\u0e01\u0e47",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1966,11 +2089,12 @@
         "tl": 151.1,
         "fps": 30,
         "sub_text": "\u0e1b\u0e23\u0e30\u0e21\u0e32\u0e13\u0e19\u0e35\u0e49\u0e41\u0e25\u0e49\u0e27\u0e01\u0e31\u0e19\u0e2a\u0e31\u0e15\u0e27\u0e4c\u0e42\u0e2d\u0e40\u0e04\u0e2d\u0e23\u0e4c",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1982,11 +2106,12 @@
         "tl": 152.72,
         "fps": 30,
         "sub_text": "\u0e16\u0e49\u0e32\u0e43\u0e04\u0e23\u0e2d\u0e22\u0e48\u0e32\u0e25\u0e2d\u0e07\u0e43\u0e2a\u0e48\u0e2d\u0e30\u0e44\u0e23\u0e01\u0e47\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -1998,11 +2123,12 @@
         "tl": 154.12811594202898,
         "fps": 30,
         "sub_text": "\u0e44\u0e1b\u0e25\u0e2d\u0e07\u0e2b\u0e32\u0e08\u0e31\u0e1a\u0e08\u0e48\u0e2d\u0e07\u0e17\u0e35\u0e48\u0e17\u0e35\u0e48",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -2014,11 +2140,12 @@
         "tl": 155.13391304347826,
         "fps": 30,
         "sub_text": "\u0e40\u0e22\u0e47\u0e19\u0e2a\u0e38\u0e14\u0e2b\u0e49\u0e32\u0e44\u0e14\u0e49\u0e22\u0e34\u0e07\u0e19\u0e30\u0e04\u0e23\u0e39",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -2030,11 +2157,12 @@
         "tl": 156.67,
         "fps": 30,
         "sub_text": "\u0e01\u0e32\u0e23\u0e1b\u0e23\u0e30\u0e14\u0e31\u0e07\u0e02\u0e2d\u0e07\u0e44\u0e01\u0e48\u0e40\u0e08\u0e2d",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -2046,11 +2174,12 @@
         "tl": 157.7,
         "fps": 30,
         "sub_text": "\u0e16\u0e38\u0e07\u0e44\u0e21\u0e48\u0e40\u0e08\u0e2d\u0e01\u0e47\u0e42\u0e0a\u0e04\u0e14\u0e35\u0e19\u0e30\u0e44\u0e1b\u0e17\u0e35\u0e48\u0e2a\u0e32\u0e21",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -2062,11 +2191,12 @@
         "tl": 159.26490566037734,
         "fps": 30,
         "sub_text": "\u0e23\u0e49\u0e2d\u0e22\u0e43\u0e19\u0e01\u0e25\u0e38\u0e48\u0e21\u0e2a\u0e48\u0e32\u0e07\u0e0b\u0e37\u0e49\u0e2d\u0e01\u0e31\u0e19\u0e44\u0e14\u0e49\u0e19\u0e30",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       },
       {
         "path": "",
@@ -2078,11 +2208,12 @@
         "tl": 161.34,
         "fps": 30,
         "sub_text": "\u0e40\u0e01\u0e35\u0e48\u0e22\u0e27\u0e04\u0e23\u0e31\u0e1a\u0e40\u0e08\u0e49\u0e32\u0e01\u0e31\u0e19",
-        "font_name": "TH Sarabun New",
-        "font_size": 16,
-        "font_color": "#ffffff",
-        "bold": false,
-        "italic": false
+        "font_name": "Cordia New",
+        "font_size": 24,
+        "font_color": "#13ffeb",
+        "bold": true,
+        "italic": true,
+        "letter_spacing": 0
       }
     ],
     "audio_0": [
@@ -2090,7 +2221,7 @@
         "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e2d\u0e31\u0e14/1SoundEffect SFX/Breaking the ROCK!!.mp3",
         "name": "Breaking the ROCK!!.mp3",
         "start": 0,
-        "end": 242.86,
+        "end": 162.46666666666667,
         "speed": 1.0,
         "volume": 1.0,
         "tl": 0.0,
@@ -2105,7 +2236,7 @@
         "path": "D:/\u0e01\u0e33\u0e25\u0e31\u0e07\u0e15\u0e31\u0e14/Assets/618356300_1307970104709722_147720628458355222_n.jpg",
         "name": "618356300_1307970104709722_147720628458355222_n.jpg",
         "start": 0,
-        "end": 300.7717654079291,
+        "end": 162.46666666666667,
         "speed": 1.0,
         "volume": 1.0,
         "tl": 0.0,
@@ -2113,8 +2244,8 @@
         "fade_in": 0.0,
         "fade_out": 0.0,
         "source_dur": 999999.0,
-        "custom_x": 0.4851528384279476,
-        "custom_y": 0.4486652977412731
+        "custom_x": 0.48256885909978214,
+        "custom_y": 0.8027900462322187
       }
     ],
     "audio_1": []
@@ -2791,9 +2922,9 @@
   ],
   "ratio": "9:16",
   "style": {
-    "font_name": "Tahoma",
-    "font_size": 32,
-    "font_color": "#FFFFFF",
+    "font_name": "Cordia New",
+    "font_size": 24,
+    "font_color": "#13ffeb",
     "decoration": "outline",
     "animation": "fade_in",
     "position": "custom"

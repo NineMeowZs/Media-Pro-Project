@@ -188,7 +188,12 @@ class EditorPage(ctk.CTkFrame):
 
         # ── Proxy manager (smooth preview) ────────────────────────────────────
         self._proxy_mgr = ProxyManager()
-        self._proxy_mgr.cleanup_old()  # remove stale proxies on startup
+        threading.Thread(target=self._proxy_mgr.cleanup_old, daemon=True).start()
+
+        # ── Waveform worker queue (sequential background processing) ──────────
+        self._wf_queue = queue.Queue()
+        self._wf_thread = threading.Thread(target=self._wf_worker, daemon=True)
+        self._wf_thread.start()
 
         self._build_ui()
 
@@ -249,10 +254,22 @@ class EditorPage(ctk.CTkFrame):
         """Trigger async proxy build and report progress via status bar."""
         fname = os.path.basename(path)
         self._status(f"🔄 Building proxy for '{fname}'… 0%")
+        def _on_r(px):
+            try:
+                if self.winfo_exists():
+                    self.after(0, lambda: self._on_proxy_ready(path, px))
+            except Exception:
+                pass
+        def _on_p(pct):
+            try:
+                if self.winfo_exists():
+                    self.after(0, lambda: self._on_proxy_progress(fname, pct))
+            except Exception:
+                pass
         self._proxy_mgr.build_proxy_async(
             path,
-            on_ready_cb=lambda px: self.after(0, lambda: self._on_proxy_ready(path, px)),
-            on_progress_cb=lambda pct: self.after(0, lambda p=pct: self._on_proxy_progress(fname, p)),
+            on_ready_cb=_on_r,
+            on_progress_cb=_on_p,
         )
 
     def _on_proxy_progress(self, fname: str, pct: int):
@@ -416,7 +433,11 @@ class EditorPage(ctk.CTkFrame):
                     print("[Audio] output WAV missing/empty — audio will be silent")
             except Exception as e:
                 print(f"[Audio Error] {e}")
-            self.after(0, self._finish_load)
+            try:
+                if self.winfo_exists():
+                    self.after(0, self._finish_load)
+            except Exception:
+                pass
         threading.Thread(target=run, daemon=True).start()
 
     def _reload_audio(self):
@@ -538,12 +559,20 @@ class EditorPage(ctk.CTkFrame):
                 self._jkl_speed = -1.0
                 self._status("Reverse play (frame step)")
 
-    # ── Real waveform extraction ───────────────────────────────────────────────
+    # ── Real waveform extraction (queued in background) ───────────────────────
+    def _wf_worker(self):
+        while True:
+            try:
+                path = self._wf_queue.get()
+                if path:
+                    self._extract_waveform(path)
+                self._wf_queue.task_done()
+            except Exception as e:
+                pass
+
     def _extract_waveforms_bg(self, path):
-        def run():
-            try: self._extract_waveform(path)
-            except Exception as e: print(f"[Waveform] {e}")
-        threading.Thread(target=run, daemon=True).start()
+        if path and path not in self._waveforms:
+            self._wf_queue.put(path)
 
     def _extract_waveform(self, path, n_bars=200):
         if path in self._waveforms: return
@@ -1757,7 +1786,17 @@ class EditorPage(ctk.CTkFrame):
             export_segs.append({
                 "start": clip.get("tl", 0.0),
                 "end": clip.get("tl", 0.0) + dur,
-                "text": text
+                "text": text,
+                "font_name": clip.get("font_name", getattr(self.style, "font_name", "Tahoma")),
+                "font_size": clip.get("font_size", getattr(self.style, "font_size", 44)),
+                "font_color": clip.get("font_color", getattr(self.style, "font_color", "#ffffff")),
+                "bold": clip.get("bold", getattr(self.style, "bold", False)),
+                "italic": clip.get("italic", getattr(self.style, "italic", False)),
+                "decoration": clip.get("decoration", getattr(self.style, "decoration", "shadow")),
+                "decoration_color": clip.get("decoration_color", getattr(self.style, "decoration_color", "#000000")),
+                "letter_spacing": clip.get("letter_spacing", getattr(self.style, "letter_spacing", 0)),
+                "custom_x": clip.get("custom_x", getattr(self.style, "custom_x", 0.5)),
+                "custom_y": clip.get("custom_y", getattr(self.style, "custom_y", 0.85)),
             })
         export_segs.sort(key=lambda x: x["start"])
         return export_segs
@@ -1890,7 +1929,45 @@ class EditorPage(ctk.CTkFrame):
                 target_w, target_h = _RES_VALS[resolution]
 
             export_segs = self.get_export_segments()
+            
+            all_layer_clips = []
+            for lk in self._layer_keys():
+                all_layer_clips.extend(self.tracks.get(lk, []))
+            overlays = sorted(all_layer_clips, key=lambda c: c.get("tl", 0))
+            # Separate video/audio/image overlays from text overlays
+            media_overlays = [ov for ov in overlays if ov.get("path", "") != ""]
+            text_overlays = [ov for ov in overlays if ov.get("path", "") == ""]
+
+            # Merge text overlays and subtitles into all_export_subs for flawless burning
+            all_export_subs = []
             if burn_subs and export_segs:
+                all_export_subs.extend(export_segs)
+
+            for ov in text_overlays:
+                txt = ov.get("name", "Text").strip()
+                if not txt:
+                    continue
+                tl_start = ov.get("tl", 0.0)
+                dur = (ov["end"] - ov["start"]) / max(ov.get("speed", 1.0), 0.01)
+                all_export_subs.append({
+                    "start": tl_start,
+                    "end": tl_start + dur,
+                    "text": txt,
+                    "font_name": ov.get("font_name", "Tahoma"),
+                    "font_size": ov.get("font_size", 44),
+                    "font_color": ov.get("font_color", "#ffffff"),
+                    "bold": bool(ov.get("bold", False)),
+                    "italic": bool(ov.get("italic", False)),
+                    "decoration": ov.get("decoration", "shadow"),
+                    "decoration_color": ov.get("decoration_color", "#000000"),
+                    "letter_spacing": ov.get("letter_spacing", 0),
+                    "custom_x": ov.get("custom_x", 0.5),
+                    "custom_y": ov.get("custom_y", 0.2),
+                })
+            all_export_subs.sort(key=lambda x: x["start"])
+
+            need_burn = bool(all_export_subs)
+            if need_burn:
                 temp_out = out + "_temp_merge.mp4"
                 target_out = temp_out
             else:
@@ -1918,14 +1995,6 @@ class EditorPage(ctk.CTkFrame):
 
             if has_silent:
                 cmd += ["-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100"]
-
-            all_layer_clips = []
-            for lk in self._layer_keys():
-                all_layer_clips.extend(self.tracks.get(lk, []))
-            overlays = sorted(all_layer_clips, key=lambda c: c.get("tl", 0))
-            # Separate video/audio/image overlays from text overlays
-            media_overlays = [ov for ov in overlays if ov.get("path", "") != ""]
-            text_overlays = [ov for ov in overlays if ov.get("path", "") == ""]
 
             for ov in media_overlays:
                 ext_ov = os.path.splitext(ov["path"])[1].lower()
@@ -2013,42 +2082,6 @@ class EditorPage(ctk.CTkFrame):
                 fc.append(f"{curr_v}{ov_scaled}overlay=x=(W-w)*{cx:.3f}:y=(H-h)*{cy:.3f}:enable='between(t,{tl_start:.3f},{tl_end:.3f})'{next_v}")
                 curr_v = next_v
 
-            # Draw text overlays using FFmpeg drawtext filter
-            from video_exporter import _find_font_file
-            for ov in text_overlays:
-                txt = ov.get("name", "Text")
-                # Escape text for FFmpeg
-                escaped_txt = txt.replace("'", "'\\''").replace(":", "\\:")
-                fpath = _find_font_file(ov.get("font_name", "Tahoma"))
-                fpath_escaped = fpath.replace("\\", "/").replace(":", "\\:")
-                # Format color for FFmpeg drawtext: 0xRRGGBB
-                raw_col = str(ov.get("font_color", "#ffffff")).strip().lstrip("#")
-                if raw_col.startswith("0x") or raw_col.startswith("0X"):
-                    raw_col = raw_col[2:]
-                if len(raw_col) == 3:
-                    raw_col = "".join(c * 2 for c in raw_col)
-                if len(raw_col) < 6:
-                    raw_col = "FFFFFF"
-                color = "0x" + raw_col.upper()
-                size = ov.get("font_size", 36)
-                cx = ov.get("custom_x", 0.5)
-                cy = ov.get("custom_y", 0.2)
-                tl_start = ov.get("tl", 0.0)
-                dur = (ov["end"] - ov["start"]) / max(ov.get("speed", 1.0), 0.01)
-                tl_end = tl_start + dur
-
-                drawtext = f"drawtext=text='{escaped_txt}':fontsize={size}:fontcolor={color}"
-                if fpath_escaped:
-                    drawtext += f":fontfile='{fpath_escaped}'"
-                drawtext += f":x=(w-tw)*{cx:.3f}:y=(h-th)*{cy:.3f}:enable='between(t,{tl_start:.3f},{tl_end:.3f})'"
-                if ov.get("decoration") == "shadow":
-                    drawtext += ":shadowcolor=black:shadowx=2:shadowy=2"
-
-
-                next_v = f"[txt_out{len(fc)}]"
-                fc.append(f"{curr_v}{drawtext}{next_v}")
-                curr_v = next_v
-
             out_v = curr_v
 
             # ── Mix in separate audio tracks (audio_0, audio_1, …) ───────────
@@ -2114,11 +2147,11 @@ class EditorPage(ctk.CTkFrame):
                 err = "".join(stderr_lines)[-600:]
                 raise RuntimeError(f"FFmpeg error: {err}")
 
-            if burn_subs and export_segs:
-                self.after(0, lambda: self._status("Burning subtitles…"))
+            if need_burn and all_export_subs:
+                self.after(0, lambda: self._status("Burning subtitles & text…"))
                 from video_exporter import export_video_with_subtitles
                 export_video_with_subtitles(
-                    target_out, out, export_segs, self.style,
+                    target_out, out, all_export_subs, self.style,
                     progress_cb=lambda m: self.after(0, lambda ms=m: self._status(ms))
                 )
                 if os.path.exists(target_out):

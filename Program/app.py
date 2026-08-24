@@ -53,9 +53,8 @@ def _extract_thumb(path, w=160, h=100, cb=None):
                 img = img.crop((0, (ih - new_h) // 2, iw, (ih + new_h) // 2))
             img = img.resize((w, h), Image.LANCZOS)
 
-            photo = ImageTk.PhotoImage(img)
-            _thumb_cache[path] = photo
-            if cb: cb(photo)
+            _thumb_cache[path] = img
+            if cb: cb(img)
         except Exception:
             _thumb_cache[path] = None
             if cb: cb(None)
@@ -137,16 +136,24 @@ class ProjectCard(ctk.CTkFrame):
 
         video = proj.get("main_video", "")
         if video and os.path.exists(video):
-            def _on_ready(photo, tc=self._tc):
+            def _on_ready(img, tc=self._tc):
                 try:
-                    if photo:
+                    if img and tc.winfo_exists():
+                        photo = ImageTk.PhotoImage(img) if not isinstance(img, ImageTk.PhotoImage) else img
                         tc.delete("icon")
                         tc.create_image(THUMB_W // 2, THUMB_H // 2, anchor="center", image=photo, tags="thumb")
                         tc._photo = photo
                 except Exception:
                     pass
-            _extract_thumb(video, THUMB_W, THUMB_H,
-                           cb=lambda p: self.after(0, lambda: _on_ready(p)))
+
+            def _safe_cb(p):
+                try:
+                    if self.winfo_exists():
+                        self.after(0, lambda: _on_ready(p))
+                except Exception:
+                    pass
+
+            _extract_thumb(video, THUMB_W, THUMB_H, cb=_safe_cb)
 
 
         # ── Info row ──────────────────────────────────────────────────────
@@ -444,6 +451,15 @@ class App(ctk.CTk):
         self._page = None
         self._show_home()
         self.protocol("WM_DELETE_WINDOW", self._on_close_window)
+        threading.Thread(target=self._prewarm, daemon=True).start()
+
+    def _prewarm(self):
+        try:
+            import editor_page
+            import video_exporter
+            import subtitle_renderer
+        except Exception:
+            pass
 
     def _show_home(self):
         self.geometry("1100x720")

@@ -185,6 +185,18 @@ def _compute_xy(position: str, block_w: int, block_h: int,
     return x, y
 
 
+def _split_grapheme_clusters(text: str) -> list[str]:
+    """Split string into grapheme clusters keeping Thai combining marks attached to base consonant."""
+    clusters = []
+    for char in text:
+        code = ord(char)
+        if clusters and (0x0E31 <= code <= 0x0E3A or 0x0E47 <= code <= 0x0E4E):
+            clusters[-1] += char
+        else:
+            clusters.append(char)
+    return clusters
+
+
 # --------------------------------------------------------------------------- #
 #  Cached RGBA overlay renderer
 # --------------------------------------------------------------------------- #
@@ -200,47 +212,26 @@ def _render_subtitle_rgba(
     decoration: str,
     decoration_color: str,
     animation: str,
-    animation_step: int,   # quantized to 20 buckets (0..19) to avoid cache explosion
+    animation_step: int,   # quantized to 20 buckets (0..19)
     frame_w: int,
     frame_h: int,
     position: str,
     margin_x: int,
     margin_y: int,
-    custom_x_int: int,     # stored as int (x1000) to be hashable
+    custom_x_int: int,     # stored as int (x1000)
     custom_y_int: int,
     line_spacing: int,
+    letter_spacing: int,
     bg_opacity_int: int,   # stored as int (x100)
-) -> tuple:
+) -> np.ndarray:
     """
-    Render subtitle text to an RGBA numpy array and return:
-        (rgba_array, x_offset, y_offset)
-    The returned arrays are cached — callers must NOT modify them in-place.
-    animation_step is quantized so nearly-identical frames reuse the cache.
+    Render subtitle text to an RGBA numpy array.
+    Supports Thai characters, bold stroke fallback, italic slant, and custom letter spacing.
     """
-    progress = animation_step / 19.0   # map 0..19 → 0.0..1.0
+    progress = animation_step / 19.0
     custom_x = custom_x_int / 1000.0
     custom_y = custom_y_int / 1000.0
     bg_opacity = bg_opacity_int / 100.0
-
-    # Build a temporary style object for helpers
-    class _S:
-        pass
-    s = _S()
-    s.font_name = font_name
-    s.font_size = font_size
-    s.font_color = font_color
-    s.bold = bold
-    s.italic = italic
-    s.decoration = decoration
-    s.decoration_color = decoration_color
-    s.animation = animation
-    s.position = position
-    s.margin_x = margin_x
-    s.margin_y = margin_y
-    s.custom_x = custom_x
-    s.custom_y = custom_y
-    s.line_spacing = line_spacing
-    s.bg_opacity = bg_opacity
 
     font = _load_pil_font_cached(font_name, font_size, bold, italic)
     text_color_rgb = _hex_to_rgb(font_color)
@@ -250,13 +241,33 @@ def _render_subtitle_rgba(
     alpha_mul = _compute_alpha(animation, progress)
     dx, dy = _compute_offset(animation, progress, frame_h)
 
-    # Measure on a scratch image
+    # Measure lines with letter spacing
     scratch = Image.new("RGBA", (frame_w, frame_h), (0, 0, 0, 0))
     dummy_draw = ImageDraw.Draw(scratch)
     lines = display_text.split("\n")
-    line_sizes = [dummy_draw.textbbox((0, 0), line, font=font) for line in lines]
-    line_heights = [bb[3] - bb[1] for bb in line_sizes]
-    line_widths  = [bb[2] - bb[0] for bb in line_sizes]
+
+    line_widths = []
+    line_heights = []
+    line_clusters_list = []
+
+    for line in lines:
+        clusters = _split_grapheme_clusters(line)
+        line_clusters_list.append(clusters)
+        if letter_spacing > 0 and len(clusters) > 1:
+            w_total = 0
+            max_h = 10
+            for c in clusters:
+                bb = dummy_draw.textbbox((0, 0), c, font=font)
+                w_total += (bb[2] - bb[0]) + letter_spacing
+                max_h = max(max_h, bb[3] - bb[1])
+            w_total -= letter_spacing
+            line_widths.append(w_total)
+            line_heights.append(max_h)
+        else:
+            bb = dummy_draw.textbbox((0, 0), line, font=font)
+            line_widths.append(bb[2] - bb[0])
+            line_heights.append(max(10, bb[3] - bb[1]))
+
     block_w = max(line_widths) if line_widths else 1
     block_h = sum(line_heights) + line_spacing * (len(lines) - 1)
 
@@ -271,7 +282,7 @@ def _render_subtitle_rgba(
     layer = Image.new("RGBA", (frame_w, frame_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(layer)
 
-    pad = 10
+    pad = 12
     if decoration in ("box", "highlight"):
         box_alpha = int(bg_opacity * 255 * alpha_mul)
         box_color = (*deco_color_rgb, box_alpha)
@@ -281,26 +292,68 @@ def _render_subtitle_rgba(
             fill=box_color,
         )
 
+    stroke_w = max(1, int(font_size * 0.04)) if bold else 0
     cur_y = base_y
-    for line_idx, line in enumerate(lines):
+
+    def _draw_cluster_line(lx, y_pos, clusters, fill_col, deco_col=None, is_shadow=False, is_outline=False):
+        cx_pos = lx
+        for c in clusters:
+            bb = dummy_draw.textbbox((0, 0), c, font=font)
+            cw = bb[2] - bb[0]
+            if is_shadow:
+                draw.text((cx_pos + 2, y_pos + 2), c, font=font, fill=deco_col,
+                          stroke_width=stroke_w if bold else 0, stroke_fill=deco_col)
+            elif is_outline:
+                for ox, oy in [(-2, 0), (2, 0), (0, -2), (0, 2), (-1, -1), (1, -1), (-1, 1), (1, 1)]:
+                    draw.text((cx_pos + ox, y_pos + oy), c, font=font, fill=deco_col,
+                              stroke_width=stroke_w + 1 if bold else 2, stroke_fill=deco_col)
+            else:
+                draw.text((cx_pos, y_pos), c, font=font, fill=fill_col,
+                          stroke_width=stroke_w if bold else 0, stroke_fill=fill_col)
+            cx_pos += cw + letter_spacing
+
+    for line_idx, clusters in enumerate(line_clusters_list):
         lw = line_widths[line_idx]
         lx = base_x + (block_w - lw) // 2
+        line_str = lines[line_idx]
 
-        if decoration == "shadow":
-            draw.text((lx + 2, cur_y + 2), line, font=font,
-                      fill=(*deco_color_rgb, int(200 * alpha_mul)))
-        elif decoration == "outline":
-            for ox, oy in [(-2, 0), (2, 0), (0, -2), (0, 2),
-                           (-2, -2), (2, -2), (-2, 2), (2, 2)]:
-                draw.text((lx + ox, cur_y + oy), line, font=font,
-                          fill=(*deco_color_rgb, int(255 * alpha_mul)))
+        if letter_spacing > 0:
+            if decoration == "shadow":
+                _draw_cluster_line(lx, cur_y, clusters, None, (*deco_color_rgb, int(200 * alpha_mul)), is_shadow=True)
+            elif decoration == "outline":
+                _draw_cluster_line(lx, cur_y, clusters, None, (*deco_color_rgb, int(255 * alpha_mul)), is_outline=True)
 
-        draw.text((lx, cur_y), line, font=font,
-                  fill=(*text_color_rgb, int(255 * alpha_mul)))
+            _draw_cluster_line(lx, cur_y, clusters, (*text_color_rgb, int(255 * alpha_mul)))
+        else:
+            if decoration == "shadow":
+                draw.text((lx + 2, cur_y + 2), line_str, font=font,
+                          fill=(*deco_color_rgb, int(200 * alpha_mul)),
+                          stroke_width=stroke_w if bold else 0, stroke_fill=(*deco_color_rgb, int(200 * alpha_mul)))
+            elif decoration == "outline":
+                for ox, oy in [(-2, 0), (2, 0), (0, -2), (0, 2), (-1, -1), (1, -1), (-1, 1), (1, 1)]:
+                    draw.text((lx + ox, cur_y + oy), line_str, font=font,
+                              fill=(*deco_color_rgb, int(255 * alpha_mul)),
+                              stroke_width=stroke_w + 1 if bold else 2, stroke_fill=(*deco_color_rgb, int(255 * alpha_mul)))
+
+            draw.text((lx, cur_y), line_str, font=font,
+                      fill=(*text_color_rgb, int(255 * alpha_mul)),
+                      stroke_width=stroke_w if bold else 0, stroke_fill=(*text_color_rgb, int(255 * alpha_mul)))
+
         cur_y += line_heights[line_idx] + line_spacing
 
-    rgba_arr = np.array(layer, dtype=np.uint8)
-    return rgba_arr
+    # Synthesize Italic if requested
+    if italic:
+        try:
+            layer = layer.transform(
+                (frame_w, frame_h),
+                Image.AFFINE,
+                (1, 0.22, -int(frame_h * 0.05), 0, 1, 0),
+                resample=Image.BICUBIC
+            )
+        except Exception:
+            pass
+
+    return np.array(layer, dtype=np.uint8)
 
 
 def _composite_rgba_onto_bgr(bgr: np.ndarray, rgba: np.ndarray) -> np.ndarray:
@@ -324,8 +377,7 @@ def draw_subtitles_on_frame(
 ) -> np.ndarray:
     """
     Draw *text* onto *frame* (H×W×3 BGR numpy array) according to *style*.
-    Uses LRU-cached RGBA overlay + fast numpy composite for minimal CPU usage.
-    Returns modified frame.
+    Proportionally scales font size to frame resolution relative to 1080p baseline.
     """
     if not text.strip():
         return frame
@@ -335,10 +387,18 @@ def draw_subtitles_on_frame(
     # Quantize progress to 20 steps to maximise cache hits
     anim_step = min(19, int(progress * 20))
 
+    # Scale font size and letter spacing proportionally to frame height (1080p baseline)
+    scale_factor = h / 1080.0
+    scaled_font_size = max(10, int(getattr(style, "font_size", 44) * scale_factor))
+    scaled_letter_spacing = max(0, int(getattr(style, "letter_spacing", 0) * scale_factor))
+    scaled_margin_x = max(10, int(getattr(style, "margin_x", 40) * scale_factor))
+    scaled_margin_y = max(10, int(getattr(style, "margin_y", 40) * scale_factor))
+    scaled_line_spacing = max(2, int(getattr(style, "line_spacing", 8) * scale_factor))
+
     rgba = _render_subtitle_rgba(
         text=text,
         font_name=getattr(style, "font_name", "Tahoma"),
-        font_size=getattr(style, "font_size", 32),
+        font_size=scaled_font_size,
         font_color=getattr(style, "font_color", "#ffffff"),
         bold=bool(getattr(style, "bold", False)),
         italic=bool(getattr(style, "italic", False)),
@@ -349,11 +409,12 @@ def draw_subtitles_on_frame(
         frame_w=w,
         frame_h=h,
         position=getattr(style, "position", "bottom_center"),
-        margin_x=getattr(style, "margin_x", 40),
-        margin_y=getattr(style, "margin_y", 40),
+        margin_x=scaled_margin_x,
+        margin_y=scaled_margin_y,
         custom_x_int=int(getattr(style, "custom_x", 0.5) * 1000),
         custom_y_int=int(getattr(style, "custom_y", 0.85) * 1000),
-        line_spacing=getattr(style, "line_spacing", 8),
+        line_spacing=scaled_line_spacing,
+        letter_spacing=scaled_letter_spacing,
         bg_opacity_int=int(getattr(style, "bg_opacity", 0.5) * 100),
     )
 

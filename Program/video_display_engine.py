@@ -14,24 +14,6 @@ import cv2
 import numpy as np
 import ctypes
 
-# ── Pre-load PyTorch DLLs (same pattern as transcriber.py) ───────────────────
-# This ensures c10.dll / torch.dll are in memory before Decord tries GPU context.
-_torch_lib = r"C:\Users\User\AppData\Roaming\Python\Python314\site-packages\torch\lib"
-if os.path.exists(_torch_lib):
-    if hasattr(os, "add_dll_directory"):
-        try:
-            os.add_dll_directory(_torch_lib)
-        except Exception:
-            pass
-    for _dll in ["libiomp5md.dll", "c10.dll", "torch_cpu.dll", "torch.dll", "c10_cuda.dll", "torch_cuda.dll"]:
-        _dpath = os.path.join(_torch_lib, _dll)
-        if os.path.exists(_dpath):
-            try:
-                ctypes.WinDLL(_dpath)
-            except Exception:
-                pass
-
-
 # ── Lazy GPU state — populated on first use ───────────────────────────────────
 _GPU_CHECKED   = False
 _HAS_CUDA      = False
@@ -42,13 +24,29 @@ _HAS_DECORD    = False
 def _ensure_gpu_ready():
     """
     One-time GPU capability detection.
-    Called lazily so PyTorch DLLs are guaranteed to be loaded first.
+    Called lazily on first SmartVideoReader instantiation.
     """
     global _GPU_CHECKED, _HAS_CUDA, _DECORD_CTX, _HAS_DECORD
 
     if _GPU_CHECKED:
         return
     _GPU_CHECKED = True
+
+    # Pre-load PyTorch DLLs lazily
+    _torch_lib = r"C:\Users\User\AppData\Roaming\Python\Python314\site-packages\torch\lib"
+    if os.path.exists(_torch_lib):
+        if hasattr(os, "add_dll_directory"):
+            try:
+                os.add_dll_directory(_torch_lib)
+            except Exception:
+                pass
+        for _dll in ["libiomp5md.dll", "c10.dll", "torch_cpu.dll", "torch.dll", "c10_cuda.dll", "torch_cuda.dll"]:
+            _dpath = os.path.join(_torch_lib, _dll)
+            if os.path.exists(_dpath):
+                try:
+                    ctypes.WinDLL(_dpath)
+                except Exception:
+                    pass
 
     try:
         import decord
