@@ -1149,23 +1149,24 @@ class EditorPage(ctk.CTkFrame):
         fi          = self.fi
         cap_path    = None
         cap         = None
-        last_src_fi = -999   # tracks last decoded source-frame index
         try:
             while not self._dec_stop.is_set():
                 if self._fbuf.full():
-                    time.sleep(0.008)
+                    time.sleep(0.005)
                     continue
 
                 t    = fi / float(TARGET_FPS)
                 clip = self._at("main", t)
                 if not clip:
-                    time.sleep(0.01); continue
+                    # ถ้าไม่มีคลิปหลัก ให้ขยับเฟรมไปข้างหน้าเรื่อยๆ
+                    fi += 1
+                    time.sleep(0.01)
+                    continue
 
                 src_fps = clip.get("fps", TARGET_FPS)
                 src_t   = (t - clip.get("tl", 0.0)) * clip["speed"] + clip["start"]
-                src_fi  = int(src_t * src_fps)
+                src_fi  = int(round(src_t * src_fps))
 
-                # ── Use proxy for playback if available ───────────────────────
                 play_path = self._proxy_mgr.get_proxy(clip["path"]) or clip["path"]
 
                 if cap is None or cap_path != play_path:
@@ -1173,9 +1174,12 @@ class EditorPage(ctk.CTkFrame):
                     cap         = SmartVideoReader(play_path)
                     cap_path    = play_path
 
-                ok, fr = cap.get_frame_at_time(src_t)
+                # ดึงด้วย Exact Frame Index แทน Time Float
+                ok, fr = cap.get_frame_at_index(src_fi)
                 if not ok:
-                    time.sleep(0.01); continue
+                    fi += 1
+                    time.sleep(0.005)
+                    continue
 
                 sc = clip.get("scale", 1.0)
                 rot = clip.get("rotate", 0.0)
@@ -1194,54 +1198,51 @@ class EditorPage(ctk.CTkFrame):
                     fh, fw = fr_ready.shape[:2]
                     if fh > 360:
                         nw = int(fw * (360 / fh))
-                        # GPU bilinear resize (falls back to cv2 if no CUDA)
                         fr_ready = _gpu_resize_bgr(fr_ready, nw, 360)
-                    # GPU BGR→RGB flip (nearly free — just numpy view)
                     fr_ready = _gpu_bgr2rgb(fr_ready)
                 else:
                     fr_ready = fr
 
                 try:
                     self._fbuf.put((fi, fr_ready), timeout=0.05)
+                    fi += 1  # ขยับไปเฟรมถัดไปอย่างเคร่งครัด
                 except queue.Full:
-                    time.sleep(0.005)
                     continue
-                fi += 1
         finally:
             if cap: cap.release()
-            import gc; gc.collect()  # reclaim memory after decode thread exits
+            import gc; gc.collect()
 
     def _tick(self):
         if not self.playing: return
         if self._pt0 < 0:
-            self.after(33, self._tick); return
+            self.after(16, self._tick); return
 
         elapsed   = time.perf_counter() - self._pt0
-        # Scale elapsed by play_speed so 0.5x speed → half frame advance per second
         play_speed = getattr(self, "_play_speed", 1.0)
-        target_fi = max(self.fi, self._pfi0 + int(elapsed * TARGET_FPS * play_speed))
+        
+        # คำนวณว่า ณ เวลานี้ควรจะแสดงถึง frame index ไหน
+        target_fi = self._pfi0 + int(elapsed * TARGET_FPS * play_speed)
         total_fi  = int(self._dur() * TARGET_FPS)
 
         if target_fi >= total_fi:
             self.fi = 0; self._stop(); self._render(0); return
 
         shown = None
-        while True:
+        # ดึงเฟรมจากคิว และทิ้งเฟรมที่ตกรอบ (Frame Drop) เพื่อให้ทันเสียง
+        while not self._fbuf.empty():
             try:
-                fi, fr = self._fbuf.get_nowait()
-                if fi <= target_fi: shown = (fi, fr)
+                fi, fr = self._fbuf.queue[0]
+                if fi <= target_fi:
+                    shown = self._fbuf.get_nowait()
                 else:
-                    try: self._fbuf.put_nowait((fi, fr))
-                    except queue.Full: pass
                     break
-            except queue.Empty: break
+            except (queue.Empty, IndexError):
+                break
 
         if shown:
             self.fi = shown[0]
             self._show(shown[1])
 
-            # Throttle secondary widget redraws to ~100ms (10Hz) during playback
-            # to keep main thread free for frame display
             now = time.perf_counter()
             if not hasattr(self, "_last_ui_tick"):
                 self._last_ui_tick = 0.0
@@ -1252,8 +1253,7 @@ class EditorPage(ctk.CTkFrame):
                 self._fast_ph_update()
                 self._last_ui_tick = now
 
-        # Schedule at exactly 1/TARGET_FPS ≈ 33ms to match display frame rate
-        self.after(33, self._tick)
+        self.after(16, self._tick)
 
     def _fast_ph_update(self):
         if not (hasattr(self.timeline_panel, '_tl_ph_line') and hasattr(self.timeline_panel, '_tlc')): return

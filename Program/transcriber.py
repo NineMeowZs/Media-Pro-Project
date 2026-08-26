@@ -284,7 +284,7 @@ def _run_local_whisper(
             feature_extractor=processor.feature_extractor,
             torch_dtype=torch_dtype,
             device=0 if device_str == "cuda" else -1,
-            chunk_length_s=30,
+            # chunk_length_s=30,
             batch_size=8 if device_str == "cuda" else 1,
         )
     except Exception as pe:
@@ -304,16 +304,51 @@ def _run_local_whisper(
         if len(chunk) < 1600:   # < 0.1 วิ ข้าม
             continue
 
+        pad_samples = int(16000 * 0.3)
+        chunk_input = np.pad(chunk.astype(np.float32), (0, pad_samples), mode="constant")
+
         try:
+            # res = pipe(
+            #     chunk.astype(np.float32),
+            #     generate_kwargs={
+            #         "forced_decoder_ids": forced_decoder_ids,
+            #         "max_new_tokens": 225,
+            #         "no_repeat_ngram_size": 3,
+            #     } if forced_decoder_ids else {"max_new_tokens": 225},
+            #     return_timestamps=True
+            # )
             res = pipe(
-                chunk.astype(np.float32),
+                chunk_input,
                 generate_kwargs={
-                    "forced_decoder_ids": forced_decoder_ids,
+                    "language": "thai",
+                    "task": "transcribe",
                     "max_new_tokens": 225,
                     "no_repeat_ngram_size": 3,
-                } if forced_decoder_ids else {"max_new_tokens": 225},
+                },
                 return_timestamps=True
             )
+        #     chunks_list = res.get("chunks", [])
+        #     if chunks_list:
+        #         for c in chunks_list:
+        #             c_text = (c.get("text") or "").strip()
+        #             t_range = c.get("timestamp")
+        #             if c_text and t_range:
+        #                 c_start, c_end = t_range
+        #                 if c_start is None: c_start = 0.0
+        #                 if c_end is None: c_end = end_sec - start_sec
+        #                 raw.append({
+        #                     "start": start_sec + c_start,
+        #                     "end": start_sec + c_end,
+        #                     "text": c_text
+        #                 })
+        #     else:
+        #         text = (res.get("text") or "").strip()
+        #         if text:
+        #             raw.append({"start": start_sec, "end": end_sec, "text": text})
+        # except Exception as e:
+        #     if progress_cb:
+        #         progress_cb(f"chunk {i+1} error: {type(e).__name__}: {e}")
+        #     continue
             chunks_list = res.get("chunks", [])
             if chunks_list:
                 for c in chunks_list:
@@ -322,10 +357,13 @@ def _run_local_whisper(
                     if c_text and t_range:
                         c_start, c_end = t_range
                         if c_start is None: c_start = 0.0
-                        if c_end is None: c_end = end_sec - start_sec
+                        # ดักค่า None หรือเวลาที่เกินความยาวจริงก่อนเติม pad
+                        if c_end is None or c_end > (end_sec - start_sec):
+                            c_end = end_sec - start_sec
+                        
                         raw.append({
                             "start": start_sec + c_start,
-                            "end": start_sec + c_end,
+                            "end": min(start_sec + c_end, end_sec),
                             "text": c_text
                         })
             else:
