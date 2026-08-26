@@ -145,12 +145,32 @@ class MediaPanel(ctk.CTkFrame):
             self._acard(a)
 
     def _pt_text(self):
-        """Tab Panel: Text entry card builder."""
+        """Tab Panel: Text clip builder + ⚙ gear opens Global Text Style settings."""
+        from editor_utils import C_PINK, PANEL_MID, BORD, TXT_G
+
+        # ── Header row with title + gear button ───────────────────────────────
+        hdr = ctk.CTkFrame(self._pscroll, fg_color="transparent")
+        hdr.pack(fill="x", pady=(0, 4))
+
+        ctk.CTkLabel(
+            hdr, text="Text",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color=TXT_G
+        ).pack(side="left")
+
+        ctk.CTkButton(
+            hdr, text="⚙", width=30, height=26, corner_radius=8,
+            fg_color=PANEL_MID, hover_color=PANEL_MID,
+            font=ctk.CTkFont(size=14),
+            command=self._open_text_style_settings
+        ).pack(side="right")
+
+        # ── Text content entry ────────────────────────────────────────────────
         ctk.CTkLabel(
             self._pscroll, text="Text Content",
-            font=ctk.CTkFont(size=10, weight="bold"),
+            font=ctk.CTkFont(size=9, weight="bold"),
             text_color=TXT_G
-        ).pack(anchor="w", pady=(0, 4))
+        ).pack(anchor="w", pady=(4, 2))
 
         ctk.CTkEntry(
             self._pscroll, placeholder_text="Enter text…",
@@ -161,9 +181,19 @@ class MediaPanel(ctk.CTkFrame):
 
         ctk.CTkButton(
             self._pscroll, text="Add Text Clip",
-            height=30, corner_radius=6, fg_color=C_PINK,
+            height=34, corner_radius=8, fg_color=C_PINK,
+            font=ctk.CTkFont(size=11, weight="bold"),
             command=self.controller._add_text
         ).pack(fill="x")
+
+    def _open_text_style_settings(self):
+        """Open the Global Text Style dialog (gear ⚙ button handler)."""
+        try:
+            from editor_properties import GlobalTextStyleDialog
+            GlobalTextStyleDialog(self.winfo_toplevel(), self.controller)
+        except Exception as e:
+            print(f"[TextStyleDialog] {e}")
+
 
     def _pt_effects(self):
         """Tab Panel: Drag-and-drop styles (Future effects)."""

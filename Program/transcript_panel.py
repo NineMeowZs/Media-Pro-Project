@@ -62,30 +62,16 @@ class TranscriptPanel(ctk.CTkFrame):
         )
         self.import_btn.pack(side="left", padx=2)
 
-        # Persistent Auto Subtitle Button
-        self.regen_btn = ctk.CTkButton(
-            self.search_frame,
-            text="🎙 Auto",
-            height=28,
-            width=50,
-            corner_radius=6,
-            fg_color=C_BLUE,
-            hover_color="#1d4ed8",
-            font=ctk.CTkFont(size=9, weight="bold"),
-            command=self.controller._sub_dialog
-        )
-        self.regen_btn.pack(side="left", padx=2)
-
         # Persistent Delete All Subtitles Button (Red Trash Icon)
         self.del_all_btn = ctk.CTkButton(
             self.search_frame,
-            text="🗑",
+            text="🗑 Delete",
             height=28,
-            width=32,
+            width=76,
             corner_radius=6,
             fg_color=C_RED,
             hover_color="#dc2626",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(size=9, weight="bold"),
             command=self.controller._delete_all_subtitles
         )
         self.del_all_btn.pack(side="left", padx=2)

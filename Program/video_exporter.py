@@ -19,9 +19,19 @@ from subtitle_config import SubtitleStyle
 
 def _hex_to_ass_colour(hex_color: str, alpha: int = 0) -> str:
     """Convert #RRGGBB → ASS &HAABBGGRR (alpha 0 = fully opaque)."""
-    h = hex_color.lstrip("#")
-    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
-    return f"&H{alpha:02X}{b:02X}{g:02X}{r:02X}"
+    try:
+        h = str(hex_color).strip().lstrip("#")
+        if h.startswith("0x") or h.startswith("0X"):
+            h = h[2:]
+        if len(h) == 3:
+            h = "".join(c * 2 for c in h)
+        if len(h) >= 6:
+            r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+            return f"&H{alpha:02X}{b:02X}{g:02X}{r:02X}"
+    except Exception:
+        pass
+    return f"&H{alpha:02X}FFFFFF"
+
 
 
 def _position_to_ass_alignment(position: str) -> int:
@@ -87,17 +97,7 @@ def _secs_to_ass_time(t: float) -> str:
 
 
 def generate_ass_file(segments: list[dict], style: SubtitleStyle, out_path: str) -> None:
-    """Write an ASS subtitle file from segments and SubtitleStyle."""
-    alignment  = _position_to_ass_alignment(style.position)
-    border, outline, shadow, back_col = _style_to_ass_decoration(style)
-    pri_col    = _hex_to_ass_colour(style.font_color)
-    font_name  = style.font_name
-    font_size  = style.font_size
-    margin_v   = style.margin_y
-    margin_h   = style.margin_x
-    bold_flag  = -1 if style.bold else 0
-    italic_flag = -1 if style.italic else 0
-
+    """Write an ASS subtitle file from segments and SubtitleStyle with exact positioning, letter spacing, and font styling."""
     header = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: 1920
@@ -106,28 +106,82 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{font_name},{font_size},{pri_col},&H00FFFFFF,{_hex_to_ass_colour(style.decoration_color)},{back_col},{bold_flag},{italic_flag},0,0,100,100,0,0,{border},{outline},{shadow},{alignment},{margin_h},{margin_h},{margin_v},1
+Style: Default,{style.font_name},{int(style.font_size)},{_hex_to_ass_colour(style.font_color)},&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,5,40,40,40,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
+    pos_map = {
+        "bottom_center": (960, 950),
+        "bottom_left":   (360, 950),
+        "bottom_right":  (1560, 950),
+        "top_center":    (960, 130),
+        "top_left":      (360, 130),
+        "top_right":     (1560, 130),
+        "center":        (960, 540),
+        "custom":        (int(getattr(style, "custom_x", 0.5) * 1920), int(getattr(style, "custom_y", 0.85) * 1080)),
+    }
+
     lines = [header]
     for seg in segments:
         start = _secs_to_ass_time(seg["start"])
         end   = _secs_to_ass_time(seg["end"])
         text  = seg.get("text", "").replace("\n", "\\N")
+        if not text.strip():
+            continue
 
-        # Apply animation via ASS tags
-        anim = style.animation
+        # Extract per-segment overrides
+        fn   = seg.get("font_name", style.font_name)
+        fs   = int(seg.get("font_size", style.font_size))
+        fc   = seg.get("font_color", style.font_color)
+        bl   = seg.get("bold", style.bold)
+        it   = seg.get("italic", style.italic)
+        dc   = seg.get("decoration", style.decoration)
+        lsp  = int(seg.get("letter_spacing", getattr(style, "letter_spacing", 0)))
+        dcol = seg.get("decoration_color", getattr(style, "decoration_color", "#000000"))
+        bg_op = getattr(style, "bg_opacity", 0.5)
+
+        # Determine exact position coordinates
+        if "custom_x" in seg and "custom_y" in seg:
+            px = int(seg["custom_x"] * 1920)
+            py = int(seg["custom_y"] * 1080)
+        elif style.position == "custom":
+            px = int(getattr(style, "custom_x", 0.5) * 1920)
+            py = int(getattr(style, "custom_y", 0.85) * 1080)
+        else:
+            px, py = pos_map.get(style.position, (960, 950))
+
+        # Build inline ASS override tags
+        tags = [
+            f"\\an5\\pos({px},{py})",
+            f"\\fn{fn}",
+            f"\\fs{fs}",
+            f"\\1c{_hex_to_ass_colour(fc)}",
+            f"\\b{1 if bl else 0}",
+            f"\\i{1 if it else 0}",
+        ]
+
+        if lsp > 0:
+            tags.append(f"\\fsp{lsp}")
+
+        if dc == "outline":
+            tags.append(f"\\bord3\\shad0\\3c{_hex_to_ass_colour(dcol)}")
+        elif dc == "shadow":
+            tags.append(f"\\bord0\\shad3\\4c{_hex_to_ass_colour(dcol)}")
+        elif dc in ("box", "highlight"):
+            bg_alpha = int((1.0 - bg_op) * 255)
+            tags.append(f"\\bord4\\shad0\\3c{_hex_to_ass_colour(dcol, alpha=bg_alpha)}")
+        else:
+            tags.append("\\bord0\\shad0")
+
+        anim = getattr(style, "animation", "none")
         if anim == "fade_in":
-            text = r"{\fad(200,0)}" + text
+            tags.append(r"\fad(200,0)")
         elif anim == "slide_up":
-            # Move from below → position
-            text = r"{\move(960,1040,960,1000,0,300)}" + text
-        elif anim == "fade_in":
-            text = r"{\fad(200,0)}" + text
+            tags.append(f"\\move({px},{py + 40},{px},{py},0,250)")
 
-        lines.append(f"Dialogue: 0,{start},{end},Default,,0,0,0,,{text}")
+        tag_str = "{" + "".join(tags) + "}"
+        lines.append(f"Dialogue: 0,{start},{end},Default,,0,0,0,,{tag_str}{text}")
 
     with open(out_path, "w", encoding="utf-8-sig") as f:
         f.write("\n".join(lines))
@@ -281,12 +335,25 @@ def export_video_with_subtitles(
 # Slow fallback: render frame-by-frame via OpenCV + PIL
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _find_active_segment(t: float, segments: list[dict]) -> tuple[str, float]:
+def _find_active_segment_and_style(t: float, segments: list[dict], default_style: SubtitleStyle):
+    import copy
     for seg in segments:
         if seg["start"] <= t <= seg["end"]:
             dur = max(seg["end"] - seg["start"], 0.001)
-            return seg["text"], (t - seg["start"]) / dur
-    return "", 0.5
+            prog = (t - seg["start"]) / dur
+            st = copy.copy(default_style)
+            if "font_name" in seg: st.font_name = seg["font_name"]
+            if "font_size" in seg: st.font_size = seg["font_size"]
+            if "font_color" in seg: st.font_color = seg["font_color"]
+            if "bold" in seg: st.bold = seg["bold"]
+            if "italic" in seg: st.italic = seg["italic"]
+            if "decoration" in seg: st.decoration = seg["decoration"]
+            if "decoration_color" in seg: st.decoration_color = seg["decoration_color"]
+            if "letter_spacing" in seg: st.letter_spacing = seg["letter_spacing"]
+            if "custom_x" in seg: st.custom_x = seg["custom_x"]; st.position = "custom"
+            if "custom_y" in seg: st.custom_y = seg["custom_y"]; st.position = "custom"
+            return seg.get("text", ""), st, prog
+    return "", default_style, 0.5
 
 
 def _export_frame_by_frame(
@@ -320,9 +387,10 @@ def _export_frame_by_frame(
 
     for i, frame in enumerate(clip.iter_frames(fps=fps, dtype="uint8")):
         t = i / fps
-        text, progress = _find_active_segment(t, segments)
+        text, seg_style, progress = _find_active_segment_and_style(t, segments, style)
         bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        bgr = draw_subtitles_on_frame(bgr, text, style, progress)
+        if text.strip():
+            bgr = draw_subtitles_on_frame(bgr, text, seg_style, progress)
         rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
         writer.write_frame(rgb)
         if progress_cb and i % max(1, total // 20) == 0:

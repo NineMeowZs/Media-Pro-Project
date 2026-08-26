@@ -344,7 +344,17 @@ def _run_local_whisper(
 def _segment_thai(text: str, words_per_line: int = 8) -> list[str]:
     """
     ตัดคำภาษาไทยด้วย PyThaiNLP แล้วแบ่งเป็น chunk ตาม words_per_line
+    พร้อม smart sentence-boundary detection:
+    - ตัดที่ . ? ! ก่อนเป็นอันดับแรก (sentence ends)
+    - ตัดที่ token ที่ลงท้ายประโยค เช่น ครับ ค่ะ นะ แล้ว
+    - fallback: นับจำนวนคำ
     """
+    import re
+
+    # ── Sentence-boundary tokens (Thai polite particles / punctuation) ─────
+    SENTENCE_ENDERS = {"ครับ", "ค่ะ", "คะ", "นะ", "นะครับ", "นะคะ",
+                       "แล้วกัน", "เลย", "ด้วย", "เถอะ", "ละ"}
+
     try:
         from pythainlp.tokenize import word_tokenize
         words = word_tokenize(text.strip(), engine="newmm", keep_whitespace=False)
@@ -355,12 +365,37 @@ def _segment_thai(text: str, words_per_line: int = 8) -> list[str]:
     if not words:
         return [text.strip()]
 
-    chunks = []
-    for i in range(0, len(words), words_per_line):
-        chunk = "".join(words[i: i + words_per_line])
-        if chunk:
-            chunks.append(chunk)
+    # ── Group words into natural subtitle lines ───────────────────────────
+    chunks: list[str] = []
+    current: list[str] = []
+
+    for word in words:
+        current.append(word)
+        clean = word.strip().rstrip(".,!?")
+
+        # Check sentence boundary conditions
+        is_punct = re.search(r"[.!?。？！]", word)
+        is_ender = clean in SENTENCE_ENDERS
+
+        if is_punct or is_ender or len(current) >= words_per_line:
+            chunk = "".join(current).strip()
+            if chunk:
+                chunks.append(chunk)
+            current = []
+
+    # Flush remaining words
+    if current:
+        leftover = "".join(current).strip()
+        if leftover:
+            # Merge very short trailing fragment with last chunk if possible
+            if chunks and len(leftover) <= 3:
+                chunks[-1] = chunks[-1] + leftover
+            else:
+                chunks.append(leftover)
+
     return chunks or [text.strip()]
+
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
