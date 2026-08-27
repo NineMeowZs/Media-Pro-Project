@@ -1905,7 +1905,8 @@ class EditorPage(ctk.CTkFrame):
             clips = sorted(self.tracks["main"], key=lambda c: c.get("tl", 0))
             n     = len(clips)
             if n == 0:
-                self.after(0, lambda: messagebox.showwarning("Export", "No clips on main track!")); return
+                self.after(0, lambda: messagebox.showwarning("Export", "No clips on main track!"))
+                return
 
             # Determine target resolution
             target_w, target_h = 1920, 1080
@@ -1976,7 +1977,8 @@ class EditorPage(ctk.CTkFrame):
             def _has_audio(path):
                 try:
                     import subprocess
-                    r = subprocess.run([ff, "-i", path], capture_output=True, text=True, timeout=3)
+                    r = subprocess.run([ff, "-i", path], capture_output=True, text=True,
+                                       encoding="utf-8", errors="ignore", timeout=3)
                     info = (r.stderr or "") + (r.stdout or "")
                     return "Audio:" in info
                 except Exception:
@@ -2123,11 +2125,18 @@ class EditorPage(ctk.CTkFrame):
 
             self.after(0, lambda: self._status("Rendering… 0%"))
 
-            # Use Popen to stream stderr for live progress updates
             total_dur = self._dur()
             import re as _re
-            proc = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                    text=True, encoding="utf-8", errors="replace")
+            
+            # บังคับ UTF-8 และ errors="replace" เพื่อตัดปัญหา cp874 decoding crash
+            proc = subprocess.Popen(
+                cmd,
+                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                text=True,
+                encoding="utf-8",
+                errors="replace"
+            )
             stderr_lines = []
             while True:
                 line = proc.stderr.readline()
@@ -2135,7 +2144,6 @@ class EditorPage(ctk.CTkFrame):
                     break
                 if line:
                     stderr_lines.append(line)
-                    # Parse FFmpeg time= progress
                     m = _re.search(r'time=(\d+):(\d+):([\d.]+)', line)
                     if m and total_dur > 0:
                         h, mi, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
@@ -2162,12 +2170,15 @@ class EditorPage(ctk.CTkFrame):
                 self._status(f"Exported: {os.path.basename(out)}"),
                 messagebox.showinfo("Done", f"Saved:\n{out}")))
         except Exception as ex:
+            err_msg = str(ex)
             if temp_out and os.path.exists(temp_out):
                 try: os.remove(temp_out)
                 except: pass
-            self.after(0, lambda: (self._status("Export failed"),
-                                    messagebox.showerror("Export Error", str(ex))))
-
+            # Bind err_msg เข้ากับ Lambda เพื่อป้องกัน NameError
+            self.after(0, lambda msg=err_msg: (
+                self._status("Export failed"),
+                messagebox.showerror("Export Error", msg)
+            ))
     # ── Subtitles ─────────────────────────────────────────────────────────────
     def _sub_dialog(self):
         if not HAS_SUBTITLES:
