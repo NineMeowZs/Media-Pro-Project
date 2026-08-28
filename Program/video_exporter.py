@@ -151,9 +151,18 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         else:
             px, py = pos_map.get(style.position, (960, 950))
 
+        # Alignment tag (\an4=left, \an5=center, \an6=right)
+        align_mode = str(seg.get("align", getattr(style, "align", "center"))).lower()
+        if align_mode == "left":
+            an_tag = "\\an4"
+        elif align_mode == "right":
+            an_tag = "\\an6"
+        else:
+            an_tag = "\\an5"
+
         # Build inline ASS override tags
         tags = [
-            f"\\an5\\pos({px},{py})",
+            f"{an_tag}\\pos({px},{py})",
             f"\\fn{fn}",
             f"\\fs{fs}",
             f"\\1c{_hex_to_ass_colour(fc)}",
@@ -350,6 +359,7 @@ def _find_active_segment_and_style(t: float, segments: list[dict], default_style
             if "decoration" in seg: st.decoration = seg["decoration"]
             if "decoration_color" in seg: st.decoration_color = seg["decoration_color"]
             if "letter_spacing" in seg: st.letter_spacing = seg["letter_spacing"]
+            if "align" in seg: st.align = seg["align"]
             if "custom_x" in seg: st.custom_x = seg["custom_x"]; st.position = "custom"
             if "custom_y" in seg: st.custom_y = seg["custom_y"]; st.position = "custom"
             return seg.get("text", ""), st, prog

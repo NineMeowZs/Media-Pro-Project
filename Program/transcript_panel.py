@@ -2,7 +2,7 @@ import tkinter as tk
 import customtkinter as ctk
 from editor_utils import (
     PANEL_DARK, PANEL_MID, PANEL_LIGHT, PANEL_HOV,
-    TXT_W, TXT_G, TXT_L, BORD, C_BLUE, C_AMBER, C_RED, C_GREEN, TARGET_FPS
+    TXT_W, TXT_G, TXT_L, BORD, C_BLUE, C_AMBER, C_RED, C_GREEN, TARGET_FPS, _ft_ms
 )
 
 class TranscriptPanel(ctk.CTkFrame):
@@ -96,7 +96,11 @@ class TranscriptPanel(ctk.CTkFrame):
 
     def set_segments(self, segments):
         self._segments = segments or []
-        self.refresh()
+        import threading
+        if threading.current_thread() is threading.main_thread():
+            self.refresh()
+        else:
+            self.after(0, self.refresh)
 
     def refresh(self):
         # Stop inline editing if any
@@ -126,20 +130,18 @@ class TranscriptPanel(ctk.CTkFrame):
             row = ctk.CTkFrame(self.scroll_frame, fg_color="transparent", corner_radius=6)
             row.grid(row=idx, column=0, sticky="ew", padx=4, pady=2)
 
-            # Format start time mm:ss
+            # Format start time mm:ss.mmm with millisecond precision
             t = seg.get("start", 0)
-            mm = int(t // 60)
-            ss = int(t % 60)
-            time_str = f"{mm:02d}:{ss:02d}"
+            time_str = _ft_ms(t)
 
             time_lbl = ctk.CTkLabel(
                 row,
                 text=time_str,
-                font=ctk.CTkFont(family="Courier", size=10, weight="bold"),
+                font=ctk.CTkFont(family="Consolas", size=9, weight="bold"),
                 text_color=C_AMBER,
-                width=45
+                width=68
             )
-            time_lbl.pack(side="left", padx=(6, 4), pady=6)
+            time_lbl.pack(side="left", padx=(4, 2), pady=6)
 
             text_lbl = ctk.CTkLabel(
                 row,

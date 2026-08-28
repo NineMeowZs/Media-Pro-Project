@@ -223,10 +223,11 @@ def _render_subtitle_rgba(
     line_spacing: int,
     letter_spacing: int,
     bg_opacity_int: int,   # stored as int (x100)
+    align: str = "center", # left / center / right
 ) -> np.ndarray:
     """
     Render subtitle text to an RGBA numpy array.
-    Supports Thai characters, bold stroke fallback, italic slant, and custom letter spacing.
+    Supports Thai characters, bold stroke fallback, italic slant, custom letter spacing, and line alignment.
     """
     progress = animation_step / 19.0
     custom_x = custom_x_int / 1000.0
@@ -312,9 +313,15 @@ def _render_subtitle_rgba(
                           stroke_width=stroke_w if bold else 0, stroke_fill=fill_col)
             cx_pos += cw + letter_spacing
 
+    align_mode = str(align).lower()
     for line_idx, clusters in enumerate(line_clusters_list):
         lw = line_widths[line_idx]
-        lx = base_x + (block_w - lw) // 2
+        if align_mode == "left":
+            lx = base_x
+        elif align_mode == "right":
+            lx = base_x + (block_w - lw)
+        else:
+            lx = base_x + (block_w - lw) // 2
         line_str = lines[line_idx]
 
         if letter_spacing > 0:
@@ -416,6 +423,7 @@ def draw_subtitles_on_frame(
         line_spacing=scaled_line_spacing,
         letter_spacing=scaled_letter_spacing,
         bg_opacity_int=int(getattr(style, "bg_opacity", 0.5) * 100),
+        align=getattr(style, "align", "center"),
     )
 
     return _composite_rgba_onto_bgr(frame, rgba)

@@ -274,6 +274,12 @@ class PreviewPanel(ctk.CTkFrame):
             ch = max(self._cv_h, 360)
 
             h, w = frame.shape[:2]
+            sc = min(cw / w, ch / h)
+            ow, oh = max(1, int(w * sc)), max(1, int(h * sc))
+            if (w, h) != (ow, oh):
+                frame = cv2.resize(frame, (ow, oh), interpolation=cv2.INTER_LINEAR)
+                h, w = oh, ow
+
             try:
                 img_pil = Image.frombuffer("RGB", (w, h), frame, "raw", "RGB", 0, 1)
             except Exception:
@@ -339,6 +345,7 @@ class PreviewPanel(ctk.CTkFrame):
                             ts.bold = bool(tc.get("bold", False))
                             ts.italic = bool(tc.get("italic", False))
                             ts.letter_spacing = tc.get("letter_spacing", 0)
+                            ts.align = tc.get("align", "center")
                             ts.animation = "none"
                             ts.position = "custom"
                             ts.custom_x = tc.get("custom_x", 0.5)
@@ -369,6 +376,8 @@ class PreviewPanel(ctk.CTkFrame):
                                 render_style.decoration = sub_clip["decoration"]
                             if "letter_spacing" in sub_clip:
                                 render_style.letter_spacing = sub_clip["letter_spacing"]
+                            if "align" in sub_clip:
+                                render_style.align = sub_clip["align"]
                             render_style.position = "custom"
                             render_style.custom_x = sub_clip.get("custom_x", render_style.custom_x)
                             render_style.custom_y = sub_clip.get("custom_y", render_style.custom_y)
@@ -380,7 +389,7 @@ class PreviewPanel(ctk.CTkFrame):
         ch = max(self._cv_h, 360)
         h, w = bgr.shape[:2]
         sc = min(cw / w, ch / h)
-        ow, oh = int(w * sc), int(h * sc)
+        ow, oh = max(1, int(w * sc)), max(1, int(h * sc))
         bgr = cv2.resize(bgr, (ow, oh), interpolation=cv2.INTER_LINEAR)
         img = ImageTk.PhotoImage(Image.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)))
 
@@ -421,6 +430,7 @@ class PreviewPanel(ctk.CTkFrame):
         italic = bool(tc.get("italic", False))
         scale = float(tc.get("scale", 1.0))
         letter_spacing = tc.get("letter_spacing", 0)
+        align = str(tc.get("align", "center")).lower()
 
         try:
             if not color.startswith("#"):
@@ -442,18 +452,21 @@ class PreviewPanel(ctk.CTkFrame):
         if not text:
             return
 
+        anchor_val = "w" if align == "left" else "e" if align == "right" else "center"
+        justify_val = align if align in ("left", "right", "center") else "center"
+
         if decoration in ("outline", "shadow"):
             offsets = [(1, 1), (-1, 1), (1, -1), (-1, -1)] if decoration == "outline" else [(2, 2)]
             for dx, dy in offsets:
                 self.canvas.create_text(
                     x_px + dx, y_px + dy, text=text,
-                    fill="#000000", anchor="center",
+                    fill="#000000", anchor=anchor_val, justify=justify_val,
                     font=fspec, tags=tag
                 )
 
         self.canvas.create_text(
             x_px, y_px, text=text,
-            fill=color, anchor="center",
+            fill=color, anchor=anchor_val, justify=justify_val,
             font=fspec, tags=tag
         )
 
@@ -538,6 +551,7 @@ class PreviewPanel(ctk.CTkFrame):
             italic = bool(sub_clip.get("italic", style.italic))
             color = sub_clip.get("font_color", style.font_color)
             decoration = sub_clip.get("decoration", style.decoration)
+            align = str(sub_clip.get("align", getattr(style, "align", "center"))).lower()
         else:
             pos_map = {
                 "bottom_center": (0.5, 0.88), "bottom_left": (0.2, 0.88),
@@ -552,6 +566,7 @@ class PreviewPanel(ctk.CTkFrame):
             italic = bool(style.italic)
             color = style.font_color
             decoration = style.decoration
+            align = str(getattr(style, "align", "center")).lower()
 
         x_px = int(cx_pos * cw)
         y_px = int(cy_pos * ch)
@@ -568,19 +583,22 @@ class PreviewPanel(ctk.CTkFrame):
         except Exception:
             color = "#ffffff"
 
+        anchor_val = "w" if align == "left" else "e" if align == "right" else "center"
+        justify_val = align if align in ("left", "right", "center") else "center"
+
         if decoration in ("outline", "shadow"):
             offsets = [(1, 1), (-1, 1), (1, -1), (-1, -1)] if decoration == "outline" else [(2, 2)]
             for dx, dy in offsets:
                 self.canvas.create_text(
                     x_px + dx, y_px + dy, text=text,
-                    fill="#000000", anchor="center",
+                    fill="#000000", anchor=anchor_val, justify=justify_val,
                     font=fspec,
                     tags="sub_overlay"
                 )
 
         self.canvas.create_text(
             x_px, y_px, text=text,
-            fill=color, anchor="center",
+            fill=color, anchor=anchor_val, justify=justify_val,
             font=fspec,
             tags="sub_overlay"
         )
@@ -643,7 +661,7 @@ class PreviewPanel(ctk.CTkFrame):
 
     def _crop_ratio(self, frame):
         h, w = frame.shape[:2]
-        rm = {"16:9": 16 / 9, "9:16": 9 / 16, "1:1": 1.0, "4:3": 4 / 3, "2.35:1": 2.35}
+        rm = {"16:9": 16 / 9, "9:16": 9 / 16, "1:1": 1.0, "4:3": 4 / 3, "3:4": 3 / 4, "2.35:1": 2.35}
         r = rm.get(self.controller.v_ratio.get(), 16 / 9)
         cur = w / h
         if abs(cur - r) < 0.01:

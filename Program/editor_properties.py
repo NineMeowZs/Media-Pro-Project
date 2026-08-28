@@ -390,6 +390,14 @@ class GlobalTextStyleDialog(ctk.CTkToplevel):
                           button_color=PANEL_HOV, font=ctk.CTkFont(size=9)
                           ).pack(fill="x", pady=(0, 4))
 
+        # ── ALIGN ────────────────────────────────────────────────────────────
+        _sec("ALIGN")
+        self._alv = tk.StringVar(value=getattr(style, "align", "center"))
+        ctk.CTkOptionMenu(sc, values=["left", "center", "right"], variable=self._alv,
+                          height=26, corner_radius=6, fg_color=PANEL_MID,
+                          button_color=PANEL_HOV, font=ctk.CTkFont(size=9)
+                          ).pack(fill="x", pady=(0, 4))
+
         # ── Apply to ALL Subtitle Clips ───────────────────────────────────────
         ctk.CTkButton(
             sc, text="⊙ Apply Font/Style to ALL Subs",
@@ -475,12 +483,13 @@ class GlobalTextStyleDialog(ctk.CTkToplevel):
         style.decoration = self._dv.get()
         style.animation  = self._av.get()
         style.position   = self._pv.get()
+        style.align      = self._alv.get()
 
         # Update controller.style
         ctrl_style = getattr(self._ctrl, "style", None)
         if ctrl_style is not None:
             for attr in ("font_name", "font_size", "font_color", "bold", "italic",
-                          "decoration", "animation", "position"):
+                          "decoration", "animation", "position", "align"):
                 setattr(ctrl_style, attr, getattr(style, attr))
         self._ctrl._refresh_preview()
         self.destroy()
@@ -493,9 +502,10 @@ class GlobalTextStyleDialog(ctk.CTkToplevel):
         bl = getattr(self._ctrl.style, "bold",   False)
         it = getattr(self._ctrl.style, "italic", False)
         dc = getattr(self._ctrl.style, "decoration", "shadow")
+        al = getattr(self._ctrl.style, "align", "center")
         for sub_clip in self._ctrl.tracks.get("subtitle", []):
             sub_clip.update({"font_name": fn, "font_size": fs, "font_color": fc,
-                             "bold": bl, "italic": it, "decoration": dc})
+                             "bold": bl, "italic": it, "decoration": dc, "align": al})
         self._ctrl._push_undo()
         self._ctrl._refresh_preview()
         n = len(self._ctrl.tracks.get("subtitle", []))
@@ -1036,6 +1046,111 @@ class PropertiesPanel(ctk.CTkFrame):
         ce.bind("<Return>", lambda e: _apply_color_from_val(cv.get()))
         ce.bind("<FocusOut>", lambda e: _apply_color_from_val(cv.get()))
 
+        # Alignment (Left, Center, Right)
+        self._plbl(sc, "การจัดตำแหน่ง (Align)")
+        align_row = ctk.CTkFrame(sc, fg_color="transparent")
+        align_row.pack(fill="x", pady=2)
+
+        cur_align = clip.get("align", getattr(self.controller.style, "align", "center") if is_subtitle else "center")
+        align_var = tk.StringVar(value=cur_align)
+
+        def _set_align(mode):
+            align_var.set(mode)
+            clip["align"] = mode
+            if is_subtitle:
+                self.controller.style.align = mode
+            btn_l.configure(fg_color=accent if mode == "left" else PANEL_MID)
+            btn_c.configure(fg_color=accent if mode == "center" else PANEL_MID)
+            btn_r.configure(fg_color=accent if mode == "right" else PANEL_MID)
+            self.controller._push_undo()
+            self.controller._refresh_preview()
+
+        btn_l = ctk.CTkButton(
+            align_row, text="⬅ Left", width=68, height=26, corner_radius=6,
+            fg_color=accent if cur_align == "left" else PANEL_MID,
+            hover_color=PANEL_HOV, font=ctk.CTkFont(size=9, weight="bold"),
+            command=lambda: _set_align("left")
+        )
+        btn_l.pack(side="left", padx=(0, 3), fill="x", expand=True)
+
+        btn_c = ctk.CTkButton(
+            align_row, text="☰ Center", width=68, height=26, corner_radius=6,
+            fg_color=accent if cur_align == "center" else PANEL_MID,
+            hover_color=PANEL_HOV, font=ctk.CTkFont(size=9, weight="bold"),
+            command=lambda: _set_align("center")
+        )
+        btn_c.pack(side="left", padx=3, fill="x", expand=True)
+
+        btn_r = ctk.CTkButton(
+            align_row, text="➡ Right", width=68, height=26, corner_radius=6,
+            fg_color=accent if cur_align == "right" else PANEL_MID,
+            hover_color=PANEL_HOV, font=ctk.CTkFont(size=9, weight="bold"),
+            command=lambda: _set_align("right")
+        )
+        btn_r.pack(side="left", padx=(3, 0), fill="x", expand=True)
+
+        # Position X and Y
+        self._plbl(sc, "พิกัดตำแหน่ง (Position X, Y)")
+
+        # X Row
+        pos_x_row = ctk.CTkFrame(sc, fg_color="transparent")
+        pos_x_row.pack(fill="x", pady=2)
+        ctk.CTkLabel(pos_x_row, text="X (0-100%)", font=ctk.CTkFont(size=10), text_color=TXT_L, width=70).pack(side="left")
+
+        cur_x_pct = int(round(float(clip.get("custom_x", 0.5)) * 100))
+        x_ent = ctk.CTkEntry(pos_x_row, width=45, height=24, corner_radius=5, font=ctk.CTkFont(size=9, weight="bold"))
+        x_ent.insert(0, str(cur_x_pct))
+        x_ent.pack(side="right")
+
+        def _on_x_change(val):
+            try:
+                v = max(0, min(100, int(float(val))))
+                clip["custom_x"] = v / 100.0
+                if is_subtitle:
+                    self.controller.style.position = "custom"
+                    self.controller.style.custom_x = v / 100.0
+                x_ent.delete(0, "end"); x_ent.insert(0, str(v))
+                self.controller._refresh_preview()
+            except ValueError: pass
+
+        x_slider = ctk.CTkSlider(pos_x_row, from_=0, to=100, number_of_steps=100,
+                                progress_color=accent, button_color=accent, width=120)
+        x_slider.set(cur_x_pct)
+        x_slider.pack(side="left", fill="x", expand=True, padx=(2, 4))
+        x_slider.configure(command=lambda v: _on_x_change(v))
+        x_ent.bind("<Return>", lambda e: (_on_x_change(x_ent.get()), self.controller._push_undo()))
+        x_ent.bind("<FocusOut>", lambda e: (_on_x_change(x_ent.get()), self.controller._push_undo()))
+
+        # Y Row
+        pos_y_row = ctk.CTkFrame(sc, fg_color="transparent")
+        pos_y_row.pack(fill="x", pady=2)
+        ctk.CTkLabel(pos_y_row, text="Y (0-100%)", font=ctk.CTkFont(size=10), text_color=TXT_L, width=70).pack(side="left")
+
+        default_y = 0.85 if is_subtitle else 0.2
+        cur_y_pct = int(round(float(clip.get("custom_y", default_y)) * 100))
+        y_ent = ctk.CTkEntry(pos_y_row, width=45, height=24, corner_radius=5, font=ctk.CTkFont(size=9, weight="bold"))
+        y_ent.insert(0, str(cur_y_pct))
+        y_ent.pack(side="right")
+
+        def _on_y_change(val):
+            try:
+                v = max(0, min(100, int(float(val))))
+                clip["custom_y"] = v / 100.0
+                if is_subtitle:
+                    self.controller.style.position = "custom"
+                    self.controller.style.custom_y = v / 100.0
+                y_ent.delete(0, "end"); y_ent.insert(0, str(v))
+                self.controller._refresh_preview()
+            except ValueError: pass
+
+        y_slider = ctk.CTkSlider(pos_y_row, from_=0, to=100, number_of_steps=100,
+                                progress_color=accent, button_color=accent, width=120)
+        y_slider.set(cur_y_pct)
+        y_slider.pack(side="left", fill="x", expand=True, padx=(2, 4))
+        y_slider.configure(command=lambda v: _on_y_change(v))
+        y_ent.bind("<Return>", lambda e: (_on_y_change(y_ent.get()), self.controller._push_undo()))
+        y_ent.bind("<FocusOut>", lambda e: (_on_y_change(y_ent.get()), self.controller._push_undo()))
+
         ctk.CTkFrame(sc, height=1, fg_color=BORD).pack(fill="x", pady=(6, 4))
 
         # Apply to ALL subtitles button
@@ -1047,12 +1162,21 @@ class PropertiesPanel(ctk.CTkFrame):
                 bl  = clip.get("bold",   False)
                 it  = clip.get("italic", False)
                 lsp = clip.get("letter_spacing", 0)
+                al  = clip.get("align", "center")
+                cx  = clip.get("custom_x", 0.5)
+                cy  = clip.get("custom_y", 0.85)
+
                 self.controller.style.font_name      = fn
                 self.controller.style.font_size      = fs
                 self.controller.style.font_color     = fc
                 self.controller.style.bold           = bl
                 self.controller.style.italic         = it
                 self.controller.style.letter_spacing = lsp
+                self.controller.style.align          = al
+                self.controller.style.position       = "custom"
+                self.controller.style.custom_x       = cx
+                self.controller.style.custom_y       = cy
+
                 for sub_clip in self.controller.tracks.get("subtitle", []):
                     sub_clip["font_name"]      = fn
                     sub_clip["font_size"]      = fs
@@ -1060,9 +1184,13 @@ class PropertiesPanel(ctk.CTkFrame):
                     sub_clip["bold"]           = bl
                     sub_clip["italic"]         = it
                     sub_clip["letter_spacing"] = lsp
+                    sub_clip["align"]          = al
+                    sub_clip["custom_x"]       = cx
+                    sub_clip["custom_y"]       = cy
+
                 self.controller._push_undo()
                 self.controller._refresh_preview()
-                self.controller._status(f"✓ สไตล์ถูก apply ไปทุก subtitle ({len(self.controller.tracks.get('subtitle', []))} คลิป)")
+                self.controller._status(f"✓ สไตล์ & ตำแหน่งถูก apply ไปทุก subtitle ({len(self.controller.tracks.get('subtitle', []))} คลิป)")
 
             ctk.CTkButton(
                 sc,
@@ -1073,7 +1201,7 @@ class PropertiesPanel(ctk.CTkFrame):
                 command=_apply_to_all
             ).pack(fill="x", padx=4, pady=(0, 4))
 
-        self._plbl(sc, "◎ ลากบนวิดีโอเพื่อย้ายตำแหน่ง", C_AMBER)
+        self._plbl(sc, "◎ ลากบนวิดีโอหรือปรับแกน X,Y เพื่อเลื่อนตำแหน่ง", C_AMBER)
         self._props_info(sc, clip)
 
     # ── Info Block ────────────────────────────────────────────────────────────

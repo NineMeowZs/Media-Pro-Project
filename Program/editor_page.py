@@ -8,15 +8,36 @@ Layer order (top → bottom in timeline, matches CapCut):
   AUDIO 2        – SFX / voice-over                      (green)
 """
 
+import os, sys
+# Fix Windows DLL / OpenMP conflicts with PyTorch and OpenCV (WinError 1114)
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+try:
+    import site
+    packages = site.getsitepackages() + [site.getusersitepackages()]
+    for p in packages:
+        torch_lib = os.path.join(p, "torch", "lib")
+        if os.path.isdir(torch_lib) and hasattr(os, "add_dll_directory"):
+            try:
+                os.add_dll_directory(torch_lib)
+            except Exception:
+                pass
+except Exception:
+    pass
+
+# Safely pre-import torch on the main thread so c10.dll / OpenMP initialize cleanly
+try:
+    import torch
+except Exception:
+    pass
+
 import customtkinter as ctk
-import tkinter as tk
 from tkinter import messagebox, filedialog
+import tkinter as tk
 import threading
 import queue
 import math
 import random
 import cv2
-import os
 import subprocess
 from PIL import Image, ImageTk
 import pygame
@@ -40,13 +61,14 @@ from editor_properties import PropertiesPanel
 from transcript_panel import TranscriptPanel
 from editor_timeline import TimelinePanel
 
-# ── Optional subtitle modules ─────────────────────────────────────────────────
+from transcriber import transcribe_video, save_srt, detect_deadair_segments
+
+# ── Subtitle & AI Transcription modules ───────────────────────────────────────
 try:
     from subtitle_config import (SubtitleStyle, FONT_CHOICES,
                                   ANIMATION_CHOICES, POSITION_CHOICES,
                                   DECORATION_CHOICES, PRESETS)
     from subtitle_renderer import draw_subtitles_on_frame
-    from transcriber import transcribe_video
     from video_exporter import export_video_with_subtitles
     HAS_SUBTITLES = True
 except ImportError:
@@ -160,6 +182,7 @@ class EditorPage(ctk.CTkFrame):
         self._fbuf      = queue.Queue(maxsize=FRAME_BUF)
         self._dec_stop  = threading.Event()
         self._dec_th    = None
+        self._dec_gen   = 0
         self._disp_img  = None
         self._last_raw_bgr = None  # cache raw frame for live preview refresh
 
@@ -306,26 +329,27 @@ class EditorPage(ctk.CTkFrame):
         def run():
             try:
                 self._status("🔊 Processing audio...")
+                import imageio_ffmpeg
                 ff = imageio_ffmpeg.get_ffmpeg_exe()
 
-                # Collect all audio-bearing clips from main track and audio tracks
-                audio_clips = []
+                main_audio = []
                 for cl in self.tracks.get("main", []):
                     cp = cl.get("path", "")
                     if cp and os.path.exists(cp):
-                        audio_clips.append(cl)
+                        main_audio.append(cl)
 
+                other_audio = []
                 for ak in sorted(self._audio_keys()):
                     for cl in self.tracks.get(ak, []):
                         cp = cl.get("path", "")
                         if cp and os.path.exists(cp):
-                            audio_clips.append(cl)
+                            other_audio.append(cl)
 
                 fd, tmp = tempfile.mkstemp(suffix=".wav")
                 os.close(fd)
                 self._audio_tmp = tmp
 
-                if not audio_clips:
+                if not main_audio and not other_audio:
                     # Create 5s silent WAV if no clips
                     cmd = [ff, "-y", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-t", "5", tmp]
                     subprocess.run(cmd, capture_output=True, timeout=10)
@@ -337,83 +361,112 @@ class EditorPage(ctk.CTkFrame):
                         pass
                     return
 
-                inputs_args = []
-                filter_chains = []
-                n_inputs = 0
-
-                for cl in audio_clips:
-                    clip_path = cl.get("path", "")
-                    tl       = cl.get("tl", 0.0)
-                    st       = cl.get("start", 0.0)
-                    en       = cl.get("end", 0.0)
-                    spd      = max(cl.get("speed", 1.0), 0.01)
-                    vol      = cl.get("volume", 1.0)
-                    dur      = max(0.05, (en - st) / spd)
-                    delay_ms = max(0, int(tl * 1000))
-                    idx      = n_inputs
-
-                    inputs_args += ["-ss", str(st), "-t", str(dur), "-i", clip_path]
-                    # Build filter chain parts — no trailing comma, bracket names clear
-                    chain_parts = [f"[{idx}:a]"]
-                    if spd != 1.0:
-                        chain_parts.append(_build_atempo_filter(spd))
-                    if delay_ms > 0:
-                        chain_parts.append(f"adelay={delay_ms}|{delay_ms}:all=1")
-                    chain_parts.append(f"volume={vol}")
-                    chain = ",".join(chain_parts[1:]) if len(chain_parts) > 1 else "anull"
-                    filter_chains.append(f"[{idx}:a]{chain}[am{idx}]")
-                    n_inputs += 1
-
                 success = False
 
-                if n_inputs == 1:
-                    # Single clip path — apply speed (atempo), volume, and timeline delay
-                    cl0  = audio_clips[0]
-                    st0  = cl0.get("start", 0.0)
-                    en0  = cl0.get("end", 0.0)
+                # FAST PATH: Single Main Clip with no audio tracks
+                if len(main_audio) == 1 and not other_audio:
+                    cl0 = main_audio[0]
+                    c_path = cl0["path"]
+                    st0 = cl0.get("start", 0.0)
+                    en0 = cl0.get("end", 0.0)
                     spd0 = max(cl0.get("speed", 1.0), 0.01)
-                    vol0 = cl0.get("volume", 1.0)
-                    dur0 = max(0.05, en0 - st0)
-                    delay_ms0 = max(0, int(cl0.get("tl", 0.0) * 1000))
+                    vol0 = max(0.0, cl0.get("volume", 1.0))
+                    dur0 = max(0.01, (en0 - st0) / spd0)
 
-                    if spd0 == 1.0 and vol0 == 1.0 and delay_ms0 == 0:
-                        # Fastest path: no processing needed
-                        cmd = [ff, "-y", "-ss", str(st0), "-t", str(dur0),
-                               "-i", cl0["path"], "-vn", "-ar", "44100", "-ac", "2", tmp]
+                    if st0 == 0.0 and abs(spd0 - 1.0) < 0.01 and abs(vol0 - 1.0) < 0.01:
+                        cmd = [ff, "-y", "-i", c_path, "-vn", "-ar", "44100", "-ac", "2", tmp]
                     else:
-                        atempo_str = _build_atempo_filter(spd0)
-                        vol_f  = f",volume={vol0:.3f}" if abs(vol0 - 1.0) > 0.01 else ""
-                        delay_f = f",adelay={delay_ms0}|{delay_ms0}:all=1" if delay_ms0 > 0 else ""
-                        fc0 = f"[0:a]{atempo_str}{vol_f}{delay_f}[aout]"
-                        cmd = [ff, "-y", "-ss", str(st0), "-t", str(dur0),
-                               "-i", cl0["path"],
-                               "-filter_complex", fc0,
-                               "-map", "[aout]", "-vn", "-ar", "44100", "-ac", "2", tmp]
+                        atempo = _build_atempo_filter(spd0)
+                        vol_f = f",volume={vol0:.3f}" if abs(vol0 - 1.0) > 0.01 else ""
+                        cmd = [
+                            ff, "-y", "-ss", str(st0), "-t", str(dur0),
+                            "-i", c_path, "-vn",
+                            "-filter_complex", f"[0:a]{atempo}{vol_f}[aout]",
+                            "-map", "[aout]", "-ar", "44100", "-ac", "2", tmp
+                        ]
+                    proc = subprocess.run(cmd, capture_output=True, timeout=45)
+                    success = (proc.returncode == 0 and os.path.exists(tmp) and os.path.getsize(tmp) > 0)
+
+                # MULTI-CLIP PATH: Concat Main clips + mix audio tracks
+                if not success:
+                    inputs_args = []
+                    filter_chains = []
+                    inp_idx = 0
+
+                    main_tag = None
+                    if main_audio:
+                        main_chain_tags = []
+                        for cl in main_audio:
+                            c_path = cl["path"]
+                            st   = cl.get("start", 0.0)
+                            en   = cl.get("end", 0.0)
+                            spd  = max(cl.get("speed", 1.0), 0.01)
+                            dur  = max(0.01, (en - st) / spd)
+                            vol  = max(0.0, cl.get("volume", 1.0))
+                            inputs_args += ["-ss", str(st), "-t", str(dur), "-i", c_path]
+
+                            chain_parts = []
+                            if spd != 1.0:
+                                chain_parts.append(_build_atempo_filter(spd))
+                            if abs(vol - 1.0) > 0.01:
+                                chain_parts.append(f"volume={vol:.3f}")
+                            chain_str = ",".join(chain_parts) if chain_parts else "anull"
+                            filter_chains.append(f"[{inp_idx}:a]{chain_str}[ma{inp_idx}]")
+                            main_chain_tags.append(f"[ma{inp_idx}]")
+                            inp_idx += 1
+
+                        if len(main_chain_tags) == 1:
+                            main_tag = main_chain_tags[0]
+                        else:
+                            cat_str = "".join(main_chain_tags)
+                            filter_chains.append(f"{cat_str}concat=n={len(main_chain_tags)}:v=0:a=1[main_out]")
+                            main_tag = "[main_out]"
+
+                    other_tags = []
+                    for cl in other_audio:
+                        c_path   = cl["path"]
+                        st       = cl.get("start", 0.0)
+                        en       = cl.get("end", 0.0)
+                        tl       = cl.get("tl", 0.0)
+                        spd      = max(cl.get("speed", 1.0), 0.01)
+                        vol      = max(0.0, cl.get("volume", 1.0))
+                        dur      = max(0.01, (en - st) / spd)
+                        delay_ms = max(0, int(tl * 1000))
+                        inputs_args += ["-ss", str(st), "-t", str(dur), "-i", c_path]
+
+                        chain_parts = []
+                        if spd != 1.0:
+                            chain_parts.append(_build_atempo_filter(spd))
+                        if delay_ms > 0:
+                            chain_parts.append(f"adelay={delay_ms}|{delay_ms}:all=1")
+                        if abs(vol - 1.0) > 0.01:
+                            chain_parts.append(f"volume={vol:.3f}")
+                        chain_str = ",".join(chain_parts) if chain_parts else "anull"
+                        filter_chains.append(f"[{inp_idx}:a]{chain_str}[oa{inp_idx}]")
+                        other_tags.append(f"[oa{inp_idx}]")
+                        inp_idx += 1
+
+                    all_mix_tags = ([main_tag] if main_tag else []) + other_tags
+                    if len(all_mix_tags) == 1:
+                        filter_complex = ";".join(filter_chains) + f";{all_mix_tags[0]}anull[aout]"
+                    else:
+                        mix_str = "".join(all_mix_tags)
+                        filter_complex = ";".join(filter_chains) + f";{mix_str}amix=inputs={len(all_mix_tags)}:normalize=0[aout]"
+
+                    cmd = [ff, "-y"] + inputs_args + [
+                        "-filter_complex", filter_complex,
+                        "-map", "[aout]",
+                        "-ar", "44100", "-ac", "2",
+                        tmp
+                    ]
                     proc = subprocess.run(cmd, capture_output=True, timeout=60)
-                    success = (proc.returncode == 0 and
-                               os.path.exists(tmp) and os.path.getsize(tmp) > 0)
+                    success = (proc.returncode == 0 and os.path.exists(tmp) and os.path.getsize(tmp) > 0)
 
-                if not success and n_inputs >= 1:
-                    # Multi-clip: use amix filter
-                    mix_tag = "".join(f"[am{i}]" for i in range(n_inputs))
-                    filter_complex = ";".join(filter_chains) + f";{mix_tag}amix=inputs={n_inputs}:normalize=0[aout]"
-                    cmd = (
-                        [ff, "-y"]
-                        + inputs_args
-                        + ["-filter_complex", filter_complex,
-                           "-map", "[aout]",
-                           "-ar", "44100", "-ac", "2",
-                           tmp]
-                    )
-                    proc = subprocess.run(cmd, capture_output=True, timeout=120)
-                    success = (proc.returncode == 0 and
-                               os.path.exists(tmp) and os.path.getsize(tmp) > 0)
-
-                    if not success:
-                        # Last resort: decode first clip directly
-                        cl0 = audio_clips[0]
-                        cmd = [ff, "-y", "-i", cl0["path"], "-vn", "-ar", "44100", "-ac", "2", tmp]
-                        subprocess.run(cmd, capture_output=True, timeout=60)
+                # FALLBACK: Directly decode first available audio clip
+                if not success:
+                    first_clip = (main_audio or other_audio)[0]
+                    cmd_fb = [ff, "-y", "-i", first_clip["path"], "-vn", "-ar", "44100", "-ac", "2", tmp]
+                    subprocess.run(cmd_fb, capture_output=True, timeout=30)
 
                 if os.path.exists(tmp) and os.path.getsize(tmp) > 0:
                     try:
@@ -1090,6 +1143,12 @@ class EditorPage(ctk.CTkFrame):
 
     def _play(self):
         self.playing = True
+        self._dec_gen = getattr(self, "_dec_gen", 0) + 1
+        gen = self._dec_gen
+        self._dec_stop.set()  # signal any existing worker to exit immediately
+        time.sleep(0.01)
+        self._dec_stop.clear()
+
         if hasattr(self, "preview_panel"):
             self.preview_panel._pbtn.configure(text="⏸")
 
@@ -1100,22 +1159,25 @@ class EditorPage(ctk.CTkFrame):
         if self._play_speed <= 0:
             self._play_speed = 1.0
 
-        self._dec_stop.clear()
         # flush old buffer
         while not self._fbuf.empty():
             try: self._fbuf.get_nowait()
             except queue.Empty: break
 
-        self._dec_th = threading.Thread(target=self._dec_worker, daemon=True)
+        self._dec_th = threading.Thread(target=lambda g=gen: self._dec_worker(g), daemon=True)
         self._dec_th.start()
 
         start_sec = self.fi / float(TARGET_FPS)
         play_speed = self._play_speed
-        def _start_audio_and_clock():
-            min_frames = min(20, FRAME_BUF - 1)
+        def _start_audio_and_clock(g=gen):
+            min_frames = min(12, FRAME_BUF - 1)
             deadline   = time.perf_counter() + 0.35
             while self._fbuf.qsize() < min_frames and time.perf_counter() < deadline:
+                if not self.playing or g != getattr(self, "_dec_gen", 0):
+                    return
                 time.sleep(0.003)
+            if not self.playing or g != getattr(self, "_dec_gen", 0):
+                return
             try:
                 # Set pygame volume from active clip
                 _vol = 1.0
@@ -1132,6 +1194,7 @@ class EditorPage(ctk.CTkFrame):
 
     def _stop(self):
         self.playing = False
+        self._dec_gen = getattr(self, "_dec_gen", 0) + 1
         self._dec_stop.set()
         self._pt0 = -1.0  # reset clock sentinel
         if hasattr(self, "preview_panel"):
@@ -1141,16 +1204,23 @@ class EditorPage(ctk.CTkFrame):
             self.preview_panel._canvas_img_id = None
         try: pygame.mixer.music.pause()
         except: pass
+        # Flush queue on stop
+        while not self._fbuf.empty():
+            try: self._fbuf.get_nowait()
+            except queue.Empty: break
         # Re-render the current frame so preview shows the paused image
         self.after(60, lambda: self._render(self.fi))
         self.after(80, self._draw_tl)
 
-    def _dec_worker(self):
+    def _dec_worker(self, gen=None):
         fi          = self.fi
         cap_path    = None
         cap         = None
         try:
-            while not self._dec_stop.is_set():
+            while self.playing and not self._dec_stop.is_set():
+                if gen is not None and gen != getattr(self, "_dec_gen", 0):
+                    break
+
                 if self._fbuf.full():
                     time.sleep(0.005)
                     continue
@@ -1193,12 +1263,16 @@ class EditorPage(ctk.CTkFrame):
                 if self.playing:
                     if hasattr(self, "preview_panel"):
                         fr_ready = self.preview_panel._crop_ratio(fr)
+                        cw = max(getattr(self.preview_panel, "_cv_w", 640), 640)
+                        ch = max(getattr(self.preview_panel, "_cv_h", 360), 360)
                     else:
                         fr_ready = fr
+                        cw, ch = 640, 360
                     fh, fw = fr_ready.shape[:2]
-                    if fh > 360:
-                        nw = int(fw * (360 / fh))
-                        fr_ready = _gpu_resize_bgr(fr_ready, nw, 360)
+                    sc_disp = min(cw / fw, ch / fh)
+                    nw = max(1, int(fw * sc_disp))
+                    nh = max(1, int(fh * sc_disp))
+                    fr_ready = _gpu_resize_bgr(fr_ready, nw, nh)
                     fr_ready = _gpu_bgr2rgb(fr_ready)
                 else:
                     fr_ready = fr
@@ -1209,7 +1283,10 @@ class EditorPage(ctk.CTkFrame):
                 except queue.Full:
                     continue
         finally:
-            if cap: cap.release()
+            if cap is not None and hasattr(cap, "release"):
+                try: cap.release()
+                except Exception: pass
+            cap = None
             import gc; gc.collect()
 
     def _tick(self):
@@ -1495,6 +1572,194 @@ class EditorPage(ctk.CTkFrame):
                 "end": clip.get("tl", 0.0) + dur,
                 "text": clip.get("sub_text", clip.get("name", ""))
             })
+
+    def _cut_timeline_range(self, t0: float, t1: float):
+        """
+        Remove time range [t0, t1] from all tracks with ripple deletion.
+        Splits clips spanning across the range, trims boundary overlaps,
+        drops fully covered clips, shifts subsequent clips left by (t1 - t0),
+        and updates subtitles/segments, audio mixer, and undo history.
+        """
+        dt = t1 - t0
+        if dt <= 0.001:
+            return
+
+        for tk_key, clips in list(self.tracks.items()):
+            new_clips = []
+            for c in clips:
+                c_tl = c.get("tl", 0.0)
+                spd = max(c.get("speed", 1.0), 0.01)
+                c_dur = max(0.01, (c["end"] - c["start"]) / spd)
+                c_end = c_tl + c_dur
+
+                # 1. Clip completely before cut range -> unchanged
+                if c_end <= t0 + 0.001:
+                    new_clips.append(c)
+                # 2. Clip completely after cut range -> shift left by dt
+                elif c_tl >= t1 - 0.001:
+                    c_copy = copy.deepcopy(c)
+                    c_copy["tl"] = max(0.0, c_tl - dt)
+                    new_clips.append(c_copy)
+                # 3. Clip completely inside cut range -> dropped
+                elif c_tl >= t0 - 0.001 and c_end <= t1 + 0.001:
+                    continue
+                # 4. Cut range is strictly inside the clip -> split into 2 clips
+                elif c_tl < t0 and c_end > t1:
+                    part_a = copy.deepcopy(c)
+                    part_a["end"] = c["start"] + (t0 - c_tl) * spd
+                    new_clips.append(part_a)
+
+                    part_b = copy.deepcopy(c)
+                    part_b["start"] = c["start"] + (t1 - c_tl) * spd
+                    part_b["tl"] = max(0.0, t0)
+                    new_clips.append(part_b)
+                # 5. Overlaps left boundary (starts before t0, ends inside [t0, t1])
+                elif c_tl < t0 and c_end <= t1:
+                    part_a = copy.deepcopy(c)
+                    part_a["end"] = c["start"] + (t0 - c_tl) * spd
+                    new_clips.append(part_a)
+                # 6. Overlaps right boundary (starts inside [t0, t1], ends after t1)
+                elif c_tl >= t0 and c_end > t1:
+                    part_b = copy.deepcopy(c)
+                    part_b["start"] = c["start"] + (t1 - c_tl) * spd
+                    part_b["tl"] = max(0.0, t0)
+                    new_clips.append(part_b)
+
+            self.tracks[tk_key] = new_clips
+
+        self._sync_segments_from_tracks()
+        if hasattr(self, "transcript_panel"):
+            self.transcript_panel.set_segments(self.segments)
+
+        self._push_undo()
+        self._draw_tl()
+        self._reload_audio()
+        self._refresh_preview()
+        self._status(f"✂ ตัด Dead Air ช่วง {_ft(t0)} - {_ft(t1)} เรียบร้อย")
+
+    def _cut_all_deadair(self, deadair_list: list[dict]):
+        """
+        Cut all dead air silence intervals from timeline tracks in reverse chronological order.
+        """
+        if not deadair_list:
+            return
+        sorted_deadair = sorted(deadair_list, key=lambda x: x["start"], reverse=True)
+        for d in sorted_deadair:
+            t0 = d["start"]
+            t1 = d["end"]
+            dt = t1 - t0
+            if dt <= 0.001:
+                continue
+
+            for tk_key, clips in list(self.tracks.items()):
+                new_clips = []
+                for c in clips:
+                    c_tl = c.get("tl", 0.0)
+                    spd = max(c.get("speed", 1.0), 0.01)
+                    c_dur = max(0.01, (c["end"] - c["start"]) / spd)
+                    c_end = c_tl + c_dur
+
+                    if c_end <= t0 + 0.001:
+                        new_clips.append(c)
+                    elif c_tl >= t1 - 0.001:
+                        c_copy = copy.deepcopy(c)
+                        c_copy["tl"] = max(0.0, c_tl - dt)
+                        new_clips.append(c_copy)
+                    elif c_tl >= t0 - 0.001 and c_end <= t1 + 0.001:
+                        continue
+                    elif c_tl < t0 and c_end > t1:
+                        part_a = copy.deepcopy(c)
+                        part_a["end"] = c["start"] + (t0 - c_tl) * spd
+                        new_clips.append(part_a)
+
+                        part_b = copy.deepcopy(c)
+                        part_b["start"] = c["start"] + (t1 - c_tl) * spd
+                        part_b["tl"] = max(0.0, t0)
+                        new_clips.append(part_b)
+                    elif c_tl < t0 and c_end <= t1:
+                        part_a = copy.deepcopy(c)
+                        part_a["end"] = c["start"] + (t0 - c_tl) * spd
+                        new_clips.append(part_a)
+                    elif c_tl >= t0 and c_end > t1:
+                        part_b = copy.deepcopy(c)
+                        part_b["start"] = c["start"] + (t1 - c_tl) * spd
+                        part_b["tl"] = max(0.0, t0)
+                        new_clips.append(part_b)
+
+                self.tracks[tk_key] = new_clips
+
+        self._sync_segments_from_tracks()
+        if hasattr(self, "transcript_panel"):
+            self.transcript_panel.set_segments(self.segments)
+
+        self._push_undo()
+        self._draw_tl()
+        self._reload_audio()
+        self._refresh_preview()
+        self._status(f"✂ ลบ Dead Air ทั้งหมด {len(deadair_list)} ช่วงเรียบร้อย")
+
+    def _scroll_tl_to_time(self, t: float):
+        """Scroll timeline canvas so that timestamp t is centered in view."""
+        if hasattr(self, "timeline_panel") and hasattr(self.timeline_panel, "_tlc"):
+            try:
+                scale = self._scale()
+                px = t * scale
+                c = self.timeline_panel._tlc
+                W = c.winfo_width()
+                cw = getattr(self, "_cached_tl_cw", 0)
+                if cw > W:
+                    target_left = max(0.0, px - W / 2)
+                    c.xview_moveto(target_left / cw)
+            except Exception:
+                pass
+
+    def _render_main_track_audio(self) -> str:
+        """
+        Extract or render combined audio of all clips on main track to a temp 16kHz WAV file.
+        Applies exact start/end trimming, clip speed (atempo), and timeline position (adelay).
+        """
+        main_clips = self.tracks.get("main", [])
+        if not main_clips:
+            raise RuntimeError("ไม่พบวิดีโอหรือคลิปบน Main Track กรุณานำเข้าวิดีโอก่อน")
+
+        # Use raw file directly ONLY if 1 clip with 1.0x speed, 0 start, 0 tl
+        if (len(main_clips) == 1 
+            and main_clips[0].get("tl", 0.0) == 0.0 
+            and main_clips[0].get("start", 0.0) == 0.0 
+            and main_clips[0].get("speed", 1.0) == 1.0):
+            return main_clips[0]["path"]
+
+        try:
+            temp_wav = os.path.join(tempfile.gettempdir(), f"combined_main_audio_{os.getpid()}.wav")
+            import imageio_ffmpeg
+            ff = imageio_ffmpeg.get_ffmpeg_exe()
+            inputs = []
+            filter_chains = []
+
+            for idx, cl in enumerate(main_clips):
+                path  = cl["path"]
+                start = cl.get("start", 0.0)
+                end   = cl.get("end", 0.0)
+                speed = cl.get("speed", 1.0)
+                dur   = max(0.01, (end - start) / max(speed, 0.01))
+
+                inputs.extend(["-ss", str(start), "-t", str(dur), "-i", path])
+                atempo_str = _build_atempo_filter(speed)
+                filter_chains.append(f"[{idx}:a]{atempo_str}[a{idx}]")
+
+            if len(main_clips) == 1:
+                filter_complex = f"{filter_chains[0]};[a0]anull[aout]"
+            else:
+                cat_inputs = "".join([f"[a{i}]" for i in range(len(main_clips))])
+                filter_complex = f"{';'.join(filter_chains)};{cat_inputs}concat=n={len(main_clips)}:v=0:a=1[aout]"
+
+            cmd = [ff, "-y"] + inputs + ["-filter_complex", filter_complex, "-map", "[aout]", "-ac", "1", "-ar", "16000", temp_wav]
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            if proc.returncode == 0 and os.path.exists(temp_wav) and os.path.getsize(temp_wav) > 0:
+                return temp_wav
+        except Exception as e:
+            print(f"[AudioRender Error] {e}")
+        return main_clips[0]["path"]
 
     def _dup(self, tk_key, idx):
         items=self.tracks[tk_key]
@@ -1908,7 +2173,7 @@ class EditorPage(ctk.CTkFrame):
                 self.after(0, lambda: messagebox.showwarning("Export", "No clips on main track!"))
                 return
 
-            # Determine target resolution
+            # Determine target resolution & aspect ratio
             target_w, target_h = 1920, 1080
             if clips:
                 try:
@@ -1925,9 +2190,25 @@ class EditorPage(ctk.CTkFrame):
                 except:
                     pass
 
+            ratio_name = getattr(self.v_ratio, "get", lambda: "16:9")()
+            rm = {"16:9": 16 / 9, "9:16": 9 / 16, "1:1": 1.0, "4:3": 4 / 3, "3:4": 3 / 4, "2.35:1": 2.35}
+            r = rm.get(ratio_name, 16 / 9)
+
             _RES_VALS = {"1080p": (1920, 1080), "720p": (1280, 720), "480p": (854, 480)}
             if resolution in _RES_VALS:
-                target_w, target_h = _RES_VALS[resolution]
+                bw, bh = _RES_VALS[resolution]
+            else:
+                bw, bh = target_w, target_h
+
+            if r >= 1.0:
+                target_h = bh
+                target_w = int(round(bh * r))
+            else:
+                target_w = bh if bw >= bh else bw
+                target_h = int(round(target_w / r))
+
+            target_w = (max(2, target_w) // 2) * 2
+            target_h = (max(2, target_h) // 2) * 2
 
             export_segs = self.get_export_segments()
             
@@ -1962,6 +2243,7 @@ class EditorPage(ctk.CTkFrame):
                     "decoration": ov.get("decoration", "shadow"),
                     "decoration_color": ov.get("decoration_color", "#000000"),
                     "letter_spacing": ov.get("letter_spacing", 0),
+                    "align": ov.get("align", "center"),
                     "custom_x": ov.get("custom_x", 0.5),
                     "custom_y": ov.get("custom_y", 0.2),
                 })
@@ -2034,8 +2316,8 @@ class EditorPage(ctk.CTkFrame):
                 if sc != 1.0 and sc > 0.01:
                     vf += f",scale=iw*{sc:.3f}:ih*{sc:.3f}"
 
-                vf += (f",scale={target_w}:{target_h}:force_original_aspect_ratio=decrease"
-                       f",pad={target_w}:{target_h}:(ow-iw)/2+({cx:.3f}-0.5)*{target_w}:(oh-ih)/2+({cy:.3f}-0.5)*{target_h}")
+                crop_filter = f"crop='if(gt(iw/ih,{r:.4f}),ih*{r:.4f},iw)':'if(gt(iw/ih,{r:.4f}),ih,iw/{r:.4f})'"
+                vf += f",{crop_filter},scale={target_w}:{target_h}"
 
                 if bri != 0.0 or con != 1.0 or sat != 1.0:
                     vf += (f",eq=brightness={bri:.3f}"
@@ -2188,55 +2470,6 @@ class EditorPage(ctk.CTkFrame):
             messagebox.showwarning("Subtitles","No video on main track."); return
         _SubtitleDialog(self.master,self.style,self._on_sub)
 
-    def _render_main_track_audio(self) -> str:
-        """
-        Render combined audio of all video clips on main track to a temp wav file.
-        Applies exact start/end trimming, clip speed (atempo), and timeline position (adelay).
-        """
-        main_clips = self.tracks.get("main", [])
-        if not main_clips:
-            return ""
-
-        # Use raw file directly ONLY if 1 clip with 1.0x speed, 0 start, 0 tl
-        if (len(main_clips) == 1 
-            and main_clips[0].get("tl", 0.0) == 0.0 
-            and main_clips[0].get("start", 0.0) == 0.0 
-            and main_clips[0].get("speed", 1.0) == 1.0):
-            return main_clips[0]["path"]
-
-        try:
-            import tempfile, subprocess
-            temp_wav = os.path.join(tempfile.gettempdir(), "combined_main_audio.wav")
-            ff = imageio_ffmpeg.get_ffmpeg_exe()
-            inputs = []
-            filter_chains = []
-
-            for idx, cl in enumerate(main_clips):
-                path  = cl["path"]
-                tl    = cl.get("tl", 0.0)
-                start = cl.get("start", 0.0)
-                end   = cl.get("end", 0.0)
-                speed = cl.get("speed", 1.0)
-                delay_ms = max(0, int(tl * 1000))
-
-                inputs.extend(["-ss", str(start), "-to", str(end), "-i", path])
-                atempo_str = _build_atempo_filter(speed)
-                filter_chains.append(f"[{idx}:a]{atempo_str},adelay={delay_ms}|{delay_ms}[a{idx}]")
-
-            mix_inputs = "".join([f"[a{i}]" for i in range(len(main_clips))])
-            if len(main_clips) == 1:
-                filter_complex = f"{filter_chains[0]};[a0]anull[aout]"
-            else:
-                filter_complex = f"{';'.join(filter_chains)};{mix_inputs}amix=inputs={len(main_clips)}:normalize=0[aout]"
-
-            cmd = [ff, "-y"] + inputs + ["-filter_complex", filter_complex, "-map", "[aout]", "-ac", "1", "-ar", "16000", temp_wav]
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
-            if proc.returncode == 0 and os.path.exists(temp_wav) and os.path.getsize(temp_wav) > 0:
-                return temp_wav
-        except Exception as e:
-            print(f"[AudioRender Error] {e}")
-        return main_clips[0]["path"]
-
     def _on_sub(self, style, model_size, words_per_line=8, srt_path="", range_mode="full", t_start=0.0, t_end=0.0):
         self.style = style
         if not self.tracks.get("main"):
@@ -2265,40 +2498,46 @@ class EditorPage(ctk.CTkFrame):
                         seg["start"] += t_start
                         seg["end"] += t_start
 
-                self.after(0, self._push_undo)
-                self.segments = segs
-
-                if hasattr(self, "transcript_panel"):
-                    self.transcript_panel.set_segments(self.segments)
-
-                if range_mode == "full":
-                    self.tracks["subtitle"] = []
-
-                for seg in segs:
-                    self.tracks["subtitle"].append({
-                        "path": "",
-                        "name": seg["text"][:24],
-                        "start": 0,
-                        "end": max(seg["end"] - seg["start"], 0.05),
-                        "speed": 1.0,
-                        "volume": 1.0,
-                        "tl": seg["start"],
-                        "fps": TARGET_FPS,
-                        "sub_text": seg["text"],
-                    })
-
-                if srt_path and segs:
+                def _apply_results():
                     try:
-                        from transcriber import save_srt
-                        save_srt(segs, style, srt_path)
-                        self.after(0, lambda p=srt_path: self._status(
-                            f"Done: {len(segs)} segs – SRT saved: {os.path.basename(p)}"))
-                    except Exception as srt_ex:
-                        self.after(0, lambda ex=srt_ex: self._status(f"SRT save error: {ex}"))
-                else:
-                    self.after(0, lambda: self._status(f"Done: {len(segs)} segments"))
-                self.after(0, self._tab, "Captions")
-                self.after(0, self._draw_tl)
+                        self._push_undo()
+                        self.segments = segs
+
+                        if range_mode == "full":
+                            self.tracks["subtitle"] = []
+
+                        for seg in segs:
+                            self.tracks["subtitle"].append({
+                                "path": "",
+                                "name": seg["text"][:24],
+                                "start": 0,
+                                "end": max(seg["end"] - seg["start"], 0.05),
+                                "speed": 1.0,
+                                "volume": 1.0,
+                                "tl": seg["start"],
+                                "fps": TARGET_FPS,
+                                "sub_text": seg["text"],
+                            })
+
+                        if hasattr(self, "transcript_panel"):
+                            self.transcript_panel.set_segments(self.segments)
+
+                        if srt_path and segs:
+                            try:
+                                from transcriber import save_srt
+                                save_srt(segs, style, srt_path)
+                                self._status(f"Done: {len(segs)} segs – SRT saved: {os.path.basename(srt_path)}")
+                            except Exception as srt_ex:
+                                self._status(f"SRT save error: {srt_ex}")
+                        else:
+                            self._status(f"Done: {len(segs)} segments")
+
+                        self._tab("Captions")
+                        self._draw_tl()
+                    except Exception as apply_ex:
+                        print(f"[Subtitle Apply Error] {apply_ex}")
+
+                self.after(0, _apply_results)
             except Exception as ex:
                 self.after(0, lambda err=ex: (self._status(f"Error: {err}"),
                                               messagebox.showerror("Error", str(err))))
@@ -2550,13 +2789,18 @@ class _ExportDialog(ctk.CTkToplevel):
         self._on_done  = on_done
         self._has_subs = has_subs
 
+        import last_dirs as _ld
+        saved_export_dir = _ld.get(_ld.EXPORT_VIDEO, fallback="")
+        self._export_dir = saved_export_dir if (saved_export_dir and os.path.isdir(saved_export_dir)) else ""
+
         pname = proj_name if proj_name else getattr(master, "_proj_name", "Untitled Project")
         stem = os.path.splitext(pname)[0]
         fname = f"{stem}.mp4" if not stem.lower().endswith(".mp4") else stem
 
-        self._export_dir = r"D:\Folder_For_Work\Year4_1\Media Pro Project\Projects"
-        os.makedirs(self._export_dir, exist_ok=True)
-        self._default_path = os.path.join(self._export_dir, fname)
+        if self._export_dir:
+            self._default_path = os.path.join(self._export_dir, fname)
+        else:
+            self._default_path = ""  # Clean / blank by default
 
         self._build()
         self.after(100, self._raise)
@@ -2640,6 +2884,7 @@ class _ExportDialog(ctk.CTkToplevel):
                       command=self._submit).pack(side="right")
 
     def _browse(self):
+        import last_dirs as _ld
         stem = "Output_Video"
         if hasattr(self.master, "_proj_name") and self.master._proj_name:
             stem = os.path.splitext(self.master._proj_name)[0]
@@ -2647,7 +2892,7 @@ class _ExportDialog(ctk.CTkToplevel):
 
         path = filedialog.asksaveasfilename(
             title="Save Export As",
-            initialdir=self._export_dir,
+            initialdir=self._export_dir if (self._export_dir and os.path.isdir(self._export_dir)) else None,
             initialfile=init_file,
             filetypes=[("MP4 Video", "*.mp4"), ("All Files", "*.*")],
             defaultextension=".mp4"
@@ -2655,16 +2900,24 @@ class _ExportDialog(ctk.CTkToplevel):
         if path:
             self._path_v.set(path)
             self._export_dir = os.path.dirname(path)
+            _ld.remember(_ld.EXPORT_VIDEO, self._export_dir)
 
     def _submit(self):
         out = self._path_v.get().strip()
         if not out:
-            messagebox.showwarning("Export", "Please choose an output file."); return
-        crf        = self._CRF_MAP.get(self._q_v.get(), 20)
-        resolution = self._res_v.get()
-        burn_subs  = self._sub_v.get()
+            self._browse()
+            out = self._path_v.get().strip()
+            if not out:
+                return
+        import last_dirs as _ld
+        _ld.remember(_ld.EXPORT_VIDEO, os.path.dirname(out))
         self.destroy()
-        self._on_done(out, crf, resolution, burn_subs)
+        self._on_done(
+            out,
+            self._CRF_MAP.get(self._q_v.get(), 20),
+            self._res_v.get(),
+            self._sub_v.get()
+        )
 
 
 # ═════════════════════════════════════════════════════════════════════════════

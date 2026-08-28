@@ -273,17 +273,17 @@ class TimelinePanel(ctk.CTkFrame):
                 fade_in = item.get("fade_in", 0.0)
                 if fade_in > 0:
                     fx = x1 + fade_in * scale
-                    c.create_polygon(x1, ty2, fx, ty2, x1, ty1 + th // 2, fill="#000000", outline="", stipple="gray50")
+                    c.create_polygon(x1, ty2, fx, ty2, x1, ty1 + th // 2, fill="#0f172a", outline="")
 
                 # Fade-out triangle
                 fade_out = item.get("fade_out", 0.0)
                 if fade_out > 0:
                     fx = x2 - fade_out * scale
-                    c.create_polygon(x2, ty2, fx, ty2, x2, ty1 + th // 2, fill="#000000", outline="", stipple="gray50")
+                    c.create_polygon(x2, ty2, fx, ty2, x2, ty1 + th // 2, fill="#0f172a", outline="")
 
                 # Fade handles
                 c.create_polygon(x1, ty1, x1 + FADE_ZONE, ty1, x1, ty1 + FADE_ZONE, fill=_bright(clip_col, 60), outline="")
-                c.create_polygon(x2, ty1, x2 - FADE_ZONE, ty1, x2, ty1 + FADE_ZONE, fill=_bright(clip_col, 60), outline="")
+                c.create_polygon(x2, ty1, x2 - FADE_ZONE, ty1, x2, ty2 - FADE_ZONE, fill=_bright(clip_col, 60), outline="")
 
                 # Label texts
                 if x2 - x1 > 16:
@@ -301,7 +301,7 @@ class TimelinePanel(ctk.CTkFrame):
                     if x2 - x1 > 70:
                         et = _ft(tl + dur)
                         bw = len(et) * 5 + 4
-                        c.create_rectangle(x2 - bw - 2, ty1 + 2, x2 - 2, ty1 + 11, fill="#000000", outline="", stipple="gray50")
+                        c.create_rectangle(x2 - bw - 2, ty1 + 2, x2 - 2, ty1 + 11, fill="#0f172a", outline="")
                         c.create_text(x2 - 4, ty1 + 6, text=et, fill="#dddddd", anchor="e", font=("Courier", 6))
 
                 # Resize drag handles
@@ -310,31 +310,78 @@ class TimelinePanel(ctk.CTkFrame):
 
             y += row_h
 
-        # Playhead (ruler diamond indicator + center line)
-        px = (self.controller.fi / float(TARGET_FPS)) * scale
-        self._tl_ph_line = c.create_line(px, 0, px, max(H, y), fill=C_RED, width=1)
-        self._tl_ph_cap = c.create_polygon(px - 6, 0, px + 6, 0, px + 2, 10, px - 2, 10, fill=C_RED, outline="")
+        # ── Dead Air Highlights on Timeline ──────────────────────────────────
+        deadair_list = getattr(self.controller, "_deadair_segments", [])
+        selected_deadair_id = getattr(self.controller, "_selected_deadair_id", None)
 
-        # Update scrollregions of both canvases dynamically
-        total_h = y + 40
-        self._tlc.configure(scrollregion=(0, 0, cw, max(H, total_h)))
-        self._lcc.configure(scrollregion=(0, 0, LABEL_W, max(H, total_h)))
-        # Cache canvas width for _fast_ph_update (avoids Tk cget() IPC on every playback tick)
+        overlay_h = max(H, y)
+        left_ratio, right_ratio = c.xview()
+        vis_left = left_ratio * cw - 100
+        vis_right = right_ratio * cw + 100
+
+        for seg in deadair_list:
+            start_x = seg["start"] * scale
+            end_x = seg["end"] * scale
+
+            # Skip drawing if completely outside visible timeline
+            if end_x < vis_left or start_x > vis_right:
+                continue
+
+            rect_w = max(end_x - start_x, 4)
+            is_selected = (seg.get("id") == selected_deadair_id)
+
+            fill_color = "#f43f5e" if is_selected else "#ef4444"
+            outline_color = "#ffffff" if is_selected else "#fda4af"
+            border_width = 2 if is_selected else 1
+
+            # Soft background fill for Dead Air range
+            c.create_rectangle(
+                start_x, RULER_H, start_x + rect_w, overlay_h,
+                fill="#881337", outline="", tags="deadair_overlay"
+            )
+
+            # Top label badge on the ruler
+            c.create_rectangle(
+                start_x, 2, start_x + rect_w, RULER_H - 2,
+                fill=fill_color, outline=outline_color, width=border_width,
+                tags="deadair_overlay"
+            )
+
+            if rect_w > 30:
+                c.create_text(
+                    start_x + rect_w / 2, RULER_H / 2,
+                    text=f"🔇 {seg['duration']:.1f}s",
+                    fill="#ffffff",
+                    font=("Segoe UI", 7, "bold"),
+                    anchor="center",
+                    tags="deadair_overlay"
+                )
+
+        # Draw Playhead Red Line on main canvas
+        px = (self.controller.fi / float(TARGET_FPS)) * scale
+        self._tl_ph_line = c.create_line(px, 0, px, max(H, y), fill=C_RED, width=2)
+        c.create_polygon(
+            px - 5, 0, px + 5, 0, px + 5, 8, px, 13, px - 5, 8,
+            fill=C_RED, outline=""
+        )
+
+        c.config(scrollregion=(0, 0, cw, max(H, y)))
+        self._lcc.config(scrollregion=(0, 0, LABEL_W, max(H, y)))
         self.controller._cached_tl_cw = cw
 
-
     def _draw_waveform(self, c, item, x1, ty1, x2, ty2, col):
-        """Draw waveform amplitude bars for audio clips."""
+        """Draw waveform amplitude bars for audio clips with adaptive pixel downsampling."""
         path = item.get("path", "")
         bars = self.controller._waveforms.get(path)
 
         clip_w = x2 - x1
+        if clip_w <= 4:
+            return
         mid    = (ty1 + ty2) // 2
         amp    = (ty2 - ty1) // 2 - 3
 
         if bars is None:
-            # Real waveform not ready yet — draw subtle placeholder lines
-            bar_count = max(20, int(clip_w / 4))
+            bar_count = max(5, min(50, int(clip_w / 4)))
             bar_w = max(1.0, clip_w / bar_count)
             for i in range(bar_count):
                 bx = x1 + i * bar_w + bar_w / 2
@@ -343,8 +390,12 @@ class TimelinePanel(ctk.CTkFrame):
                 c.create_line(bx, mid - 2, bx, mid + 2, fill=_bright(col, 20))
             return
 
-        bar_w = max(1.0, clip_w / len(bars))
-        for i, a in enumerate(bars):
+        # Downsample to at most 1 bar every 3 pixels to keep canvas lightweight
+        max_bars = max(5, min(len(bars), int(clip_w / 3)))
+        step = max(1, len(bars) // max_bars)
+        sub_bars = bars[::step]
+        bar_w = max(1.0, clip_w / len(sub_bars))
+        for i, a in enumerate(sub_bars):
             bx = x1 + i * bar_w
             if bx > x2:
                 break

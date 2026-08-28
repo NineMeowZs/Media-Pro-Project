@@ -252,6 +252,7 @@ class SmartVideoReader:
             try:
                 frame_data = self._vr[target_idx]
                 bgr = frame_data.asnumpy()[:, :, ::-1].copy()
+                del frame_data
                 self._current_frame_idx = target_idx
                 self._last_frame = bgr
                 return True, bgr

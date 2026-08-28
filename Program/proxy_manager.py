@@ -186,6 +186,9 @@ class ProxyManager:
         ]
 
         try:
+            extra_kwargs = {}
+            if os.name == "nt":
+                extra_kwargs["creationflags"] = 0x08000000  # CREATE_NO_WINDOW
             proc = subprocess.Popen(
                 cmd,
                 stderr=subprocess.PIPE,
@@ -193,6 +196,7 @@ class ProxyManager:
                 text=True,
                 encoding="utf-8",
                 errors="ignore",
+                **extra_kwargs,
             )
 
             # Parse ffmpeg stderr for time= progress

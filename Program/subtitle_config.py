@@ -152,6 +152,9 @@ PRESETS = [
 ]
 
 
+ALIGN_CHOICES = ["left", "center", "right"]
+
+
 @dataclass
 class SubtitleStyle:
     font_name: str = "Tahoma"
@@ -163,6 +166,7 @@ class SubtitleStyle:
     decoration_color: str = "#000000"
     animation: str = "fade_in"           # see ANIMATION_CHOICES
     position: str = "bottom_center"      # see POSITION_CHOICES
+    align: str = "center"                # left / center / right
     max_chars_per_line: int = 40         # max chars before word-wrap
     max_lines: int = 2                   # max lines shown at once
     margin_x: int = 40                   # horizontal margin (px)

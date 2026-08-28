@@ -1,9 +1,31 @@
 """app.py – MediaPro · Launcher  (Minimal Dark — matches editor palette)"""
 
+import os, sys
+# Fix Windows DLL / OpenMP conflicts with PyTorch and OpenCV (WinError 1114)
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+try:
+    import site
+    packages = site.getsitepackages() + [site.getusersitepackages()]
+    for p in packages:
+        torch_lib = os.path.join(p, "torch", "lib")
+        if os.path.isdir(torch_lib) and hasattr(os, "add_dll_directory"):
+            try:
+                os.add_dll_directory(torch_lib)
+            except Exception:
+                pass
+except Exception:
+    pass
+
+# Safely pre-import torch on the main thread so c10.dll / OpenMP initialize cleanly
+try:
+    import torch
+except Exception:
+    pass
+
 import customtkinter as ctk
 from tkinter import filedialog, simpledialog
 import tkinter as tk
-import os, json, time, threading
+import json, time, threading
 from PIL import Image, ImageTk, ImageDraw
 import last_dirs as _ld
 
@@ -51,7 +73,7 @@ def _extract_thumb(path, w=160, h=100, cb=None):
             else:
                 new_h = int(iw / target_ratio)
                 img = img.crop((0, (ih - new_h) // 2, iw, (ih + new_h) // 2))
-            img = img.resize((w, h), Image.LANCZOS)
+            img = img.resize((w, h), Image.BILINEAR)
 
             _thumb_cache[path] = img
             if cb: cb(img)
@@ -451,7 +473,7 @@ class App(ctk.CTk):
         self._page = None
         self._show_home()
         self.protocol("WM_DELETE_WINDOW", self._on_close_window)
-        threading.Thread(target=self._prewarm, daemon=True).start()
+        self.after(2000, lambda: threading.Thread(target=self._prewarm, daemon=True).start())
 
     def _prewarm(self):
         try:

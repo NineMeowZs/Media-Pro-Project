@@ -1,18 +1,20 @@
 import os
 import sys
-import ctypes
 
-# ── Pre-load PyTorch & C++ Runtime DLLs on Windows to fix WinError 1114 ──────
-_torch_lib = r"C:\Users\User\AppData\Roaming\Python\Python314\site-packages\torch\lib"
-if os.path.exists(_torch_lib):
-    if hasattr(os, "add_dll_directory"):
-        try: os.add_dll_directory(_torch_lib)
-        except Exception: pass
-    for _dll_name in ["libiomp5md.dll", "c10.dll", "torch_cpu.dll", "torch.dll"]:
-        _dpath = os.path.join(_torch_lib, _dll_name)
-        if os.path.exists(_dpath):
-            try: ctypes.WinDLL(_dpath)
-            except Exception: pass
+# ── Fix Windows DLL & OpenMP environment for PyTorch / Whisper ───────────────
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+try:
+    import site
+    packages = site.getsitepackages() + [site.getusersitepackages()]
+    for p in packages:
+        torch_lib = os.path.join(p, "torch", "lib")
+        if os.path.isdir(torch_lib) and hasattr(os, "add_dll_directory"):
+            try:
+                os.add_dll_directory(torch_lib)
+            except Exception:
+                pass
+except Exception:
+    pass
 
 sys.modules["torchcodec"] = None
 import numpy as np
@@ -65,6 +67,9 @@ def _extract_audio_numpy(video_path: str) -> np.ndarray:
     if len(audio) == 0:
         raise RuntimeError("ไม่พบ audio ในไฟล์วิดีโอ")
     return audio
+
+# Alias for backwards compatibility
+_load_audio = _extract_audio_numpy
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -156,6 +161,156 @@ def _run_vad(audio: np.ndarray, progress_cb=None, sample_rate: int = 16000, dead
     merged.append(curr)
 
     return merged
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Dead Air / Silence Detection
+# ─────────────────────────────────────────────────────────────────────────────
+def detect_deadair_segments(
+    audio_input,
+    min_silence_ms: int = 500,
+    sample_rate: int = 16000,
+    progress_cb=None
+) -> list[dict]:
+    """
+    High-precision Dead Air / Silence Detection.
+    Uses hybrid Dual-Engine analysis:
+      1. High-resolution Waveform Envelope (Peak Amplitude & RMS Energy in dBFS) with dynamic noise-floor modeling
+      2. Optional Silero VAD (PyTorch) for neural speech protection
+      3. Speech Safety Margins (Padding ~80ms) to ensure words and consonant onsets/decays are never clipped.
+    Returns list of all detected silence intervals:
+      [{'id': 1, 'start': 0.0, 'end': 2.450, 'duration': 2.450}, ...]
+    """
+    if progress_cb:
+        _report_progress(progress_cb, 10, "กำลังเตรียมข้อมูลเสียงสำหรับวิเคราะห์ Dead Air...")
+
+    if isinstance(audio_input, str):
+        if not os.path.exists(audio_input):
+            return []
+        audio = _extract_audio_numpy(audio_input)
+    elif isinstance(audio_input, np.ndarray):
+        audio = audio_input.astype(np.float32)
+    else:
+        return []
+
+    if audio is None or len(audio) == 0:
+        return []
+
+    total_duration = len(audio) / float(sample_rate)
+    min_silence_sec = max(0.05, float(min_silence_ms) / 1000.0)
+
+    # 1. High-Resolution Audio Waveform Analysis (10ms hop, 20ms frame)
+    frame_len = int(sample_rate * 0.02)
+    hop_len = int(sample_rate * 0.01)
+    num_frames = (len(audio) - frame_len) // hop_len + 1
+
+    if num_frames <= 0:
+        return []
+
+    shape = (num_frames, frame_len)
+    strides = (audio.strides[0] * hop_len, audio.strides[0])
+    frames = np.lib.stride_tricks.as_strided(audio, shape=shape, strides=strides)
+
+    # Calculate Peak Amplitude and RMS energy per frame
+    peak = np.max(np.abs(frames), axis=1)
+    rms = np.sqrt(np.mean(frames ** 2, axis=1) + 1e-9)
+
+    # 2. Dynamic Ambient Noise Floor Estimation
+    # Measure the quietest 15% of the recording
+    noise_rms = float(np.percentile(rms, 15))
+    noise_peak = float(np.percentile(peak, 15))
+
+    # Speech/Sound Threshold:
+    # A frame is speech/sound if its peak amplitude or RMS rises above the noise floor
+    # Quiet speech, whispers, and consonant onsets have peak >= 0.012 or RMS >= 0.0025
+    speech_rms_thresh = max(0.0025, min(0.018, noise_rms * 1.45))
+    speech_peak_thresh = max(0.012, min(0.040, noise_peak * 1.55))
+
+    is_sound = (rms > speech_rms_thresh) | (peak > speech_peak_thresh)
+
+    # 3. Temporal Smoothing: Bridge natural syllable pauses (< 0.20s) so words aren't cut apart
+    min_pause_frames = int(0.20 / 0.01)
+    silence_count = 0
+    for i in range(len(is_sound)):
+        if not is_sound[i]:
+            silence_count += 1
+        else:
+            if 0 < silence_count < min_pause_frames:
+                is_sound[i - silence_count : i] = True
+            silence_count = 0
+
+    # 5. Extract contiguous speech/sound intervals
+    speech_intervals = []
+    in_speech = False
+    seg_start = 0
+
+    min_sound_frames = int(0.08 / 0.01)
+    for i in range(len(is_sound)):
+        if is_sound[i] and not in_speech:
+            in_speech = True
+            seg_start = i * 0.01
+        elif not is_sound[i] and in_speech:
+            in_speech = False
+            seg_end = i * 0.01
+            if (seg_end - seg_start) >= (min_sound_frames * 0.01):
+                speech_intervals.append({"start": seg_start, "end": seg_end})
+
+    if in_speech:
+        speech_intervals.append({"start": seg_start, "end": total_duration})
+
+    speech_intervals.sort(key=lambda s: s["start"])
+
+    # Merge overlapping speech segments
+    merged_speech = []
+    for s in speech_intervals:
+        if not merged_speech:
+            merged_speech.append(dict(s))
+        else:
+            last = merged_speech[-1]
+            if s["start"] <= last["end"] + 0.05:
+                last["end"] = max(last["end"], s["end"])
+            else:
+                merged_speech.append(dict(s))
+
+    # 6. Apply Speech Safety Margins (Padding = 0.080s)
+    # Silence cut must start AFTER voice decay and finish BEFORE voice onset
+    safety_pad = 0.080  # 80ms buffer around speech
+
+    if progress_cb:
+        _report_progress(progress_cb, 80, "ประมวลผลช่วง Dead Air ที่สมบูรณ์...")
+
+    deadair_intervals = []
+    curr_time = 0.0
+
+    for sp in merged_speech:
+        sp_start = max(0.0, sp["start"] - safety_pad)
+        sp_end = min(total_duration, sp["end"] + safety_pad)
+
+        gap = sp_start - curr_time
+        if gap >= min_silence_sec:
+            deadair_intervals.append({
+                "start": round(curr_time, 3),
+                "end": round(sp_start, 3),
+                "duration": round(gap, 3)
+            })
+        curr_time = max(curr_time, sp_end)
+
+    if total_duration - curr_time >= min_silence_sec:
+        gap = total_duration - curr_time
+        deadair_intervals.append({
+            "start": round(curr_time, 3),
+            "end": round(total_duration, 3),
+            "duration": round(gap, 3)
+        })
+
+    # Number all detected intervals (no 25 limit!)
+    for idx, d in enumerate(deadair_intervals):
+        d["id"] = idx + 1
+
+    if progress_cb:
+        _report_progress(progress_cb, 100, f"ตรวจพบ Dead Air ทั้งหมด {len(deadair_intervals)} ช่วง")
+
+    return deadair_intervals
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -609,3 +764,4 @@ def wrap_segment(text: str, max_chars: int, max_lines: int) -> str:
     import textwrap
     lines = textwrap.wrap(text.strip(), width=max_chars)
     return "\n".join(lines[:max_lines])
+

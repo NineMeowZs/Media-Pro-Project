@@ -11,6 +11,7 @@ except ImportError:
     class SubtitleStyle:
         font_name="Arial"; font_size=32; font_color="#ffffff"
         decoration="outline"; animation="none"; position="bottom_center"
+        align="center"
         margin_x=40; margin_y=40; custom_x=0.5; custom_y=0.85
         line_spacing=8; bg_opacity=0.5; max_chars_per_line=40; max_lines=2
 
@@ -64,7 +65,7 @@ KIND_STYLE = {
     "audio":    (C_TEAL,   32),
 }
 
-RATIO_OPT  = ["16:9", "9:16", "1:1", "4:3", "2.35:1"]
+RATIO_OPT  = ["16:9", "9:16", "1:1", "4:3", "3:4", "2.35:1"]
 TARGET_FPS = 30
 RULER_H    = 22
 TGAP       = 3     # gap between track rows (px)
@@ -89,6 +90,21 @@ def _ft(t: float) -> str:
     s = int(t % 60)
     cs = int((t % 1) * 100)
     return f"{m:02}:{s:02}.{cs:02}"
+
+
+def _ft_ms(t: float) -> str:
+    """Format seconds into mm:ss.mmm with millisecond precision."""
+    if t < 0: t = 0.0
+    m = int(t // 60)
+    s = int(t % 60)
+    ms = int(round((t % 1) * 1000))
+    if ms >= 1000:
+        s += 1
+        ms = 0
+        if s >= 60:
+            m += 1
+            s = 0
+    return f"{m:02d}:{s:02d}.{ms:03d}"
 
 
 def _bright(hx: str, d=40) -> str:
