@@ -1283,11 +1283,11 @@ class EditorPage(ctk.CTkFrame):
                 except queue.Full:
                     continue
         finally:
-            if cap is not None and hasattr(cap, "release"):
-                try: cap.release()
-                except Exception: pass
-            cap = None
-            import gc; gc.collect()
+            if cap is None or cap_path != play_path:
+                if hasattr(cap, "release"): 
+                    cap.release()
+                cap = SmartVideoReader(play_path)
+                cap_path = play_path
 
     def _tick(self):
         if not self.playing: return
