@@ -205,9 +205,16 @@ class EditorPage(ctk.CTkFrame):
         self._cv_h: int       = 360   # cached preview canvas height
         self._canvas_img_id   = None  # canvas image item ID
         self._muted:     dict = {}
+        self._locked_tracks: set = set()
+        self._hidden_tracks: set = set()
         self._solo_key:  str  = ""   # "" = none soloed
         self._multi_sel: list = []   # [(track_key, idx), ...]
         self._jkl_speed: float = 1.0 # J=rev/K=pause/L=fwd speed multiplier
+
+        # ── Audio reload debouncing and process cancellation ──────────────────
+        self._audio_reload_timer = None
+        self._active_audio_proc = None
+        self._audio_gen: int = 0
 
         # ── Proxy manager (smooth preview) ────────────────────────────────────
         self._proxy_mgr = ProxyManager()
@@ -244,6 +251,16 @@ class EditorPage(ctk.CTkFrame):
 
         self._autosave_start()
         self._bind_keys()
+
+    def _has_audio_stream(self, path: str) -> bool:
+        """Check if media file contains at least one audio stream using FFmpeg."""
+        try:
+            import imageio_ffmpeg
+            ff = imageio_ffmpeg.get_ffmpeg_exe()
+            res = subprocess.run([ff, "-i", path], stderr=subprocess.PIPE, stdout=subprocess.PIPE, text=True, errors="replace")
+            return "Audio:" in res.stderr
+        except Exception:
+            return True
 
     # ── load ──────────────────────────────────────────────────────────────────
     def _load_video(self, path):
@@ -325,40 +342,107 @@ class EditorPage(ctk.CTkFrame):
         """
         Build and load the timeline preview audio track into pygame mixer.
         Mixes all active main video clips and audio track clips on the timeline.
+        Guarded by debounce, generation tracking, and active process cancellation
+        to prevent CPU/memory stuttering and crashes when dragging sliders.
         """
-        def run():
+        self._audio_gen = getattr(self, "_audio_gen", 0) + 1
+        my_gen = self._audio_gen
+
+        # Cancel/kill any currently running FFmpeg audio process
+        old_proc = getattr(self, "_active_audio_proc", None)
+        if old_proc is not None:
             try:
+                old_proc.kill()
+            except Exception:
+                pass
+            self._active_audio_proc = None
+
+        def run():
+            tmp = None
+            try:
+                if my_gen != self._audio_gen:
+                    return
+
                 self._status("🔊 Processing audio...")
                 import imageio_ffmpeg
                 ff = imageio_ffmpeg.get_ffmpeg_exe()
 
                 main_audio = []
-                for cl in self.tracks.get("main", []):
-                    cp = cl.get("path", "")
-                    if cp and os.path.exists(cp):
-                        main_audio.append(cl)
+                if self._is_active("main"):
+                    for cl in self.tracks.get("main", []):
+                        cp = cl.get("path", "")
+                        if cp and os.path.exists(cp) and not cl.get("audio_muted") and not cl.get("video_only") and not cl.get("muted"):
+                            main_audio.append(cl)
 
                 other_audio = []
                 for ak in sorted(self._audio_keys()):
-                    for cl in self.tracks.get(ak, []):
-                        cp = cl.get("path", "")
-                        if cp and os.path.exists(cp):
-                            other_audio.append(cl)
+                    if self._is_active(ak):
+                        for cl in self.tracks.get(ak, []):
+                            cp = cl.get("path", "")
+                            if cp and os.path.exists(cp) and not cl.get("audio_muted") and not cl.get("muted"):
+                                other_audio.append(cl)
+
+                for lk in sorted(self._layer_keys()):
+                    if self._is_active(lk):
+                        for cl in self.tracks.get(lk, []):
+                            cp = cl.get("path", "")
+                            if cp and os.path.exists(cp) and not cl.get("audio_muted") and not cl.get("video_only") and not cl.get("muted"):
+                                other_audio.append(cl)
+
+                if my_gen != self._audio_gen:
+                    return
 
                 fd, tmp = tempfile.mkstemp(suffix=".wav")
                 os.close(fd)
-                self._audio_tmp = tmp
+
+                cflags = 0
+                if sys.platform == "win32":
+                    cflags = subprocess.CREATE_NO_WINDOW
+
+                def _run_cmd(cmd_list, timeout_sec):
+                    if my_gen != self._audio_gen:
+                        return False
+                    try:
+                        p = subprocess.Popen(
+                            cmd_list,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            creationflags=cflags
+                        )
+                        self._active_audio_proc = p
+                        p.communicate(timeout=timeout_sec)
+                        return p.returncode == 0
+                    except subprocess.TimeoutExpired:
+                        try:
+                            p.kill()
+                        except Exception:
+                            pass
+                        return False
+                    except Exception as pe:
+                        print(f"[Audio Proc Error] {pe}")
+                        return False
+                    finally:
+                        if getattr(self, "_active_audio_proc", None) is p:
+                            self._active_audio_proc = None
 
                 if not main_audio and not other_audio:
                     # Create 5s silent WAV if no clips
                     cmd = [ff, "-y", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-t", "5", tmp]
-                    subprocess.run(cmd, capture_output=True, timeout=10)
+                    _run_cmd(cmd, 10)
+                    if my_gen != self._audio_gen:
+                        if tmp and os.path.exists(tmp):
+                            try: os.unlink(tmp)
+                            except Exception: pass
+                        return
+                    self._audio_tmp = tmp
                     try:
                         if not pygame.mixer.get_init():
                             pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=2048)
                         pygame.mixer.music.load(tmp)
                     except Exception:
                         pass
+                    if self.winfo_exists() and my_gen == self._audio_gen:
+                        self.after(0, self._finish_load)
                     return
 
                 success = False
@@ -371,7 +455,7 @@ class EditorPage(ctk.CTkFrame):
                     en0 = cl0.get("end", 0.0)
                     spd0 = max(cl0.get("speed", 1.0), 0.01)
                     vol0 = max(0.0, cl0.get("volume", 1.0))
-                    dur0 = max(0.01, (en0 - st0) / spd0)
+                    src_dur0 = max(0.01, en0 - st0)
 
                     if st0 == 0.0 and abs(spd0 - 1.0) < 0.01 and abs(vol0 - 1.0) < 0.01:
                         cmd = [ff, "-y", "-i", c_path, "-vn", "-ar", "44100", "-ac", "2", tmp]
@@ -379,16 +463,16 @@ class EditorPage(ctk.CTkFrame):
                         atempo = _build_atempo_filter(spd0)
                         vol_f = f",volume={vol0:.3f}" if abs(vol0 - 1.0) > 0.01 else ""
                         cmd = [
-                            ff, "-y", "-ss", str(st0), "-t", str(dur0),
+                            ff, "-y", "-ss", str(st0), "-t", str(src_dur0),
                             "-i", c_path, "-vn",
                             "-filter_complex", f"[0:a]{atempo}{vol_f}[aout]",
                             "-map", "[aout]", "-ar", "44100", "-ac", "2", tmp
                         ]
-                    proc = subprocess.run(cmd, capture_output=True, timeout=45)
-                    success = (proc.returncode == 0 and os.path.exists(tmp) and os.path.getsize(tmp) > 0)
+                    ok = _run_cmd(cmd, 45)
+                    success = (ok and os.path.exists(tmp) and os.path.getsize(tmp) > 0)
 
                 # MULTI-CLIP PATH: Concat Main clips + mix audio tracks
-                if not success:
+                if not success and my_gen == self._audio_gen:
                     inputs_args = []
                     filter_chains = []
                     inp_idx = 0
@@ -401,9 +485,9 @@ class EditorPage(ctk.CTkFrame):
                             st   = cl.get("start", 0.0)
                             en   = cl.get("end", 0.0)
                             spd  = max(cl.get("speed", 1.0), 0.01)
-                            dur  = max(0.01, (en - st) / spd)
+                            src_dur = max(0.01, en - st)
                             vol  = max(0.0, cl.get("volume", 1.0))
-                            inputs_args += ["-ss", str(st), "-t", str(dur), "-i", c_path]
+                            inputs_args += ["-ss", str(st), "-t", str(src_dur), "-i", c_path]
 
                             chain_parts = []
                             if spd != 1.0:
@@ -430,9 +514,9 @@ class EditorPage(ctk.CTkFrame):
                         tl       = cl.get("tl", 0.0)
                         spd      = max(cl.get("speed", 1.0), 0.01)
                         vol      = max(0.0, cl.get("volume", 1.0))
-                        dur      = max(0.01, (en - st) / spd)
+                        src_dur  = max(0.01, en - st)
                         delay_ms = max(0, int(tl * 1000))
-                        inputs_args += ["-ss", str(st), "-t", str(dur), "-i", c_path]
+                        inputs_args += ["-ss", str(st), "-t", str(src_dur), "-i", c_path]
 
                         chain_parts = []
                         if spd != 1.0:
@@ -459,16 +543,23 @@ class EditorPage(ctk.CTkFrame):
                         "-ar", "44100", "-ac", "2",
                         tmp
                     ]
-                    proc = subprocess.run(cmd, capture_output=True, timeout=60)
-                    success = (proc.returncode == 0 and os.path.exists(tmp) and os.path.getsize(tmp) > 0)
+                    ok = _run_cmd(cmd, 60)
+                    success = (ok and os.path.exists(tmp) and os.path.getsize(tmp) > 0)
 
                 # FALLBACK: Directly decode first available audio clip
-                if not success:
+                if not success and my_gen == self._audio_gen and (main_audio or other_audio):
                     first_clip = (main_audio or other_audio)[0]
                     cmd_fb = [ff, "-y", "-i", first_clip["path"], "-vn", "-ar", "44100", "-ac", "2", tmp]
-                    subprocess.run(cmd_fb, capture_output=True, timeout=30)
+                    _run_cmd(cmd_fb, 30)
+
+                if my_gen != self._audio_gen:
+                    if tmp and os.path.exists(tmp):
+                        try: os.unlink(tmp)
+                        except Exception: pass
+                    return
 
                 if os.path.exists(tmp) and os.path.getsize(tmp) > 0:
+                    self._audio_tmp = tmp
                     try:
                         if not pygame.mixer.get_init():
                             pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=2048)
@@ -486,20 +577,81 @@ class EditorPage(ctk.CTkFrame):
                     print("[Audio] output WAV missing/empty — audio will be silent")
             except Exception as e:
                 print(f"[Audio Error] {e}")
+
             try:
-                if self.winfo_exists():
+                if self.winfo_exists() and my_gen == self._audio_gen:
                     self.after(0, self._finish_load)
             except Exception:
                 pass
+
         threading.Thread(target=run, daemon=True).start()
 
-    def _reload_audio(self):
+    def _schedule_reload_audio(self, delay_ms=350):
+        """Debounce audio reload requests so rapid changes (e.g. slider dragging)
+        only trigger a single background FFmpeg audio build after dragging settles."""
+        if hasattr(self, "_audio_reload_timer") and self._audio_reload_timer is not None:
+            try:
+                self.after_cancel(self._audio_reload_timer)
+            except Exception:
+                pass
+            self._audio_reload_timer = None
+        self._audio_reload_timer = self.after(delay_ms, self._reload_audio)
+
+    def _reload_audio(self, delay_ms=0):
         """Rebuild and reload mixed audio after track changes."""
+        if delay_ms > 0:
+            self._schedule_reload_audio(delay_ms)
+            return
+        if hasattr(self, "_audio_reload_timer") and self._audio_reload_timer is not None:
+            try:
+                self.after_cancel(self._audio_reload_timer)
+            except Exception:
+                pass
+            self._audio_reload_timer = None
         self._setup_audio()
 
     def _finish_load(self):
-        """Called when audio is ready – just update status."""
+        """Called when audio is ready – update status and resync playback if currently playing."""
         self._status("Ready")
+        if getattr(self, "playing", False):
+            try:
+                has_active = False
+                if self._is_active("main"):
+                    for c in self.tracks.get("main", []):
+                        if c.get("path") and not c.get("audio_muted") and not c.get("video_only") and not c.get("muted"):
+                            has_active = True
+                            break
+                if not has_active:
+                    for ak in self._audio_keys():
+                        if self._is_active(ak):
+                            for c in self.tracks.get(ak, []):
+                                if c.get("path") and not c.get("audio_muted") and not c.get("muted"):
+                                    has_active = True
+                                    break
+                            if has_active:
+                                break
+                if not has_active:
+                    for lk in self._layer_keys():
+                        if self._is_active(lk):
+                            for c in self.tracks.get(lk, []):
+                                if c.get("path") and not c.get("audio_muted") and not c.get("video_only") and not c.get("muted"):
+                                    has_active = True
+                                    break
+                            if has_active:
+                                break
+
+                cur_sec = self.fi / float(TARGET_FPS)
+                if has_active:
+                    pygame.mixer.music.play(start=cur_sec)
+                    self._pt0 = time.perf_counter()
+                    self._pfi0 = self.fi
+                else:
+                    try:
+                        pygame.mixer.music.pause()
+                    except Exception:
+                        pass
+            except Exception as e:
+                print(f"[Audio Resync Error] {e}")
 
 
     # ── keys ──────────────────────────────────────────────────────────────────
@@ -823,11 +975,13 @@ class EditorPage(ctk.CTkFrame):
     # ── Mute / Solo (real) ────────────────────────────────────────────────────
     def _toggle_mute_sel(self):
         k = self.sel_track
+        if not k: return
         self._muted[k] = not self._muted.get(k, False)
         lbl = TRACK_BY_KEY.get(k, {}).get("label", k)
         self._status(f"{'Muted' if self._muted[k] else 'Unmuted'}: {lbl}")
         self._rebuild_label_column(); self._draw_tl()
         self._build_track_controls()
+        self._schedule_reload_audio(100)
 
     def _toggle_mute_track(self, key):
         self._muted[key] = not self._muted.get(key, False)
@@ -835,6 +989,7 @@ class EditorPage(ctk.CTkFrame):
         self._status(f"{'Muted' if self._muted[key] else 'Unmuted'}: {lbl}")
         self._rebuild_label_column(); self._draw_tl()
         self._build_track_controls()
+        self._schedule_reload_audio(100)
 
     def _solo_track(self, key):
         self._solo_key = "" if self._solo_key == key else key
@@ -842,10 +997,47 @@ class EditorPage(ctk.CTkFrame):
         self._status(f"Solo: {lbl}" if self._solo_key else "Solo off")
         self._rebuild_label_column(); self._draw_tl()
         self._build_track_controls()
+        self._schedule_reload_audio(100)
+
+    def _is_muted(self, key):
+        return not self._is_active(key)
 
     def _is_active(self, key):
         if self._solo_key: return key == self._solo_key
         return not self._muted.get(key, False)
+
+    def _is_locked(self, key):
+        return key in self._locked_tracks
+
+    def _toggle_lock_track(self, key):
+        if key in self._locked_tracks:
+            self._locked_tracks.remove(key)
+            state = "Unlocked"
+        else:
+            self._locked_tracks.add(key)
+            state = "Locked"
+        lbl = TRACK_BY_KEY.get(key, {}).get("label", key)
+        self._status(f"{state}: {lbl}")
+        self._rebuild_label_column()
+        self._draw_tl()
+        self._build_track_controls()
+
+    def _is_hidden(self, key):
+        return key in self._hidden_tracks
+
+    def _toggle_video_visibility(self, key):
+        if key in self._hidden_tracks:
+            self._hidden_tracks.remove(key)
+            state = "Visible"
+        else:
+            self._hidden_tracks.add(key)
+            state = "Hidden"
+        lbl = TRACK_BY_KEY.get(key, {}).get("label", key)
+        self._status(f"{state}: {lbl}")
+        self._rebuild_label_column()
+        self._draw_tl()
+        self._build_track_controls()
+        self._refresh_preview()
 
     # ── Dynamic layer helpers ─────────────────────────────────────────────────
     def _layer_keys(self) -> list[str]:
@@ -1715,51 +1907,99 @@ class EditorPage(ctk.CTkFrame):
 
     def _render_main_track_audio(self) -> str:
         """
-        Extract or render combined audio of all clips on main track to a temp 16kHz WAV file.
-        Applies exact start/end trimming, clip speed (atempo), and timeline position (adelay).
+        Render all active audio/speech from timeline (main track and audio tracks)
+        into a single 16kHz mono WAV file for Whisper transcription.
+        Preserves exact start/end trimming, speed multiplier (atempo), and timeline position (adelay).
         """
-        main_clips = self.tracks.get("main", [])
-        if not main_clips:
-            raise RuntimeError("ไม่พบวิดีโอหรือคลิปบน Main Track กรุณานำเข้าวิดีโอก่อน")
+        import imageio_ffmpeg
+        ff = imageio_ffmpeg.get_ffmpeg_exe()
 
-        # Use raw file directly ONLY if 1 clip with 1.0x speed, 0 start, 0 tl
-        if (len(main_clips) == 1 
-            and main_clips[0].get("tl", 0.0) == 0.0 
-            and main_clips[0].get("start", 0.0) == 0.0 
-            and main_clips[0].get("speed", 1.0) == 1.0):
-            return main_clips[0]["path"]
+        main_audio = []
+        if self._is_active("main"):
+            for cl in self.tracks.get("main", []):
+                cp = cl.get("path", "")
+                if cp and os.path.exists(cp) and not cl.get("audio_muted") and not cl.get("video_only") and not cl.get("muted"):
+                    main_audio.append(cl)
+
+        other_audio = []
+        for ak in sorted(self._audio_keys()):
+            if self._is_active(ak):
+                for cl in self.tracks.get(ak, []):
+                    cp = cl.get("path", "")
+                    if cp and os.path.exists(cp) and not cl.get("audio_muted") and not cl.get("muted"):
+                        other_audio.append(cl)
+
+        clips_to_render = main_audio + other_audio
+        if not clips_to_render:
+            # Fallback to main track clips if all were marked video_only or audio_muted
+            clips_to_render = [c for c in self.tracks.get("main", []) if c.get("path") and os.path.exists(c["path"])]
+
+        if not clips_to_render:
+            raise RuntimeError("ไม่พบคลิปวิดีโอหรือเสียงบนไทม์ไลน์ กรุณานำเข้าสื่อก่อนสร้างซับไตเติล")
+
+        # Fast check: If exactly 1 clip, speed is 1.0, start is 0, tl is 0, and duration is full
+        if (len(clips_to_render) == 1 
+            and clips_to_render[0].get("tl", 0.0) == 0.0 
+            and clips_to_render[0].get("start", 0.0) == 0.0 
+            and abs(clips_to_render[0].get("speed", 1.0) - 1.0) < 0.001
+            and clips_to_render[0].get("end", 0.0) >= clips_to_render[0].get("source_dur", 0.0) - 0.05):
+            return clips_to_render[0]["path"]
 
         try:
-            temp_wav = os.path.join(tempfile.gettempdir(), f"combined_main_audio_{os.getpid()}.wav")
-            import imageio_ffmpeg
-            ff = imageio_ffmpeg.get_ffmpeg_exe()
+            fd, temp_wav = tempfile.mkstemp(suffix="_transcribe_16k.wav")
+            os.close(fd)
+
+            cflags = 0
+            if sys.platform == "win32":
+                cflags = subprocess.CREATE_NO_WINDOW
+
             inputs = []
             filter_chains = []
 
-            for idx, cl in enumerate(main_clips):
+            for idx, cl in enumerate(clips_to_render):
                 path  = cl["path"]
-                start = cl.get("start", 0.0)
-                end   = cl.get("end", 0.0)
-                speed = cl.get("speed", 1.0)
-                dur   = max(0.01, (end - start) / max(speed, 0.01))
+                start = max(0.0, float(cl.get("start", 0.0)))
+                end   = float(cl.get("end", 0.0))
+                speed = max(0.01, float(cl.get("speed", 1.0)))
+                src_dur = max(0.01, end - start) if end > start else None
+                tl    = max(0.0, float(cl.get("tl", 0.0)))
+                delay_ms = max(0, int(tl * 1000))
 
-                inputs.extend(["-ss", str(start), "-t", str(dur), "-i", path])
-                atempo_str = _build_atempo_filter(speed)
-                filter_chains.append(f"[{idx}:a]{atempo_str}[a{idx}]")
+                if src_dur is not None:
+                    inputs.extend(["-ss", str(start), "-t", str(src_dur), "-i", path])
+                else:
+                    inputs.extend(["-ss", str(start), "-i", path])
 
-            if len(main_clips) == 1:
+                chain_parts = []
+                if abs(speed - 1.0) > 0.001:
+                    chain_parts.append(_build_atempo_filter(speed))
+                if delay_ms > 0:
+                    chain_parts.append(f"adelay={delay_ms}|{delay_ms}:all=1")
+
+                chain_str = ",".join(chain_parts) if chain_parts else "anull"
+                filter_chains.append(f"[{idx}:a]{chain_str}[a{idx}]")
+
+            n_clips = len(clips_to_render)
+            if n_clips == 1:
                 filter_complex = f"{filter_chains[0]};[a0]anull[aout]"
             else:
-                cat_inputs = "".join([f"[a{i}]" for i in range(len(main_clips))])
-                filter_complex = f"{';'.join(filter_chains)};{cat_inputs}concat=n={len(main_clips)}:v=0:a=1[aout]"
+                cat_inputs = "".join([f"[a{i}]" for i in range(n_clips)])
+                filter_complex = f"{';'.join(filter_chains)};{cat_inputs}amix=inputs={n_clips}:normalize=0[aout]"
 
-            cmd = [ff, "-y"] + inputs + ["-filter_complex", filter_complex, "-map", "[aout]", "-ac", "1", "-ar", "16000", temp_wav]
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            cmd = [ff, "-y"] + inputs + [
+                "-filter_complex", filter_complex,
+                "-map", "[aout]",
+                "-ac", "1",
+                "-ar", "16000",
+                temp_wav
+            ]
+            proc = subprocess.run(cmd, capture_output=True, text=True, creationflags=cflags, timeout=90)
             if proc.returncode == 0 and os.path.exists(temp_wav) and os.path.getsize(temp_wav) > 0:
                 return temp_wav
         except Exception as e:
             print(f"[AudioRender Error] {e}")
-        return main_clips[0]["path"]
+
+        return clips_to_render[0]["path"]
 
     def _dup(self, tk_key, idx):
         items=self.tracks[tk_key]
@@ -1836,23 +2076,41 @@ class EditorPage(ctk.CTkFrame):
     def _apply_speed(self, val):
         if hasattr(self.properties_panel, "_spd_lbl") and self.properties_panel._spd_lbl.winfo_exists():
             self.properties_panel._spd_lbl.configure(text=f"{float(val):.2f}×")
-        items=self.tracks.get(self.sel_track,[])
-        if 0<=self.sel_idx<len(items):
-            items[self.sel_idx]["speed"]=float(val); self._draw_tl()
-            # Reload audio with the new speed applied via atempo
-            self.after(200, self._reload_audio)
+        items = self.tracks.get(self.sel_track, [])
+        if 0 <= self.sel_idx < len(items):
+            new_spd = float(val)
+            items[self.sel_idx]["speed"] = new_spd
+            self._draw_tl()
+            # Keep transport clock in step when active main clip is edited during playback
+            current_t = self.fi / float(TARGET_FPS)
+            if (self.sel_track == "main" and self.playing
+                    and self._at("main", current_t) is items[self.sel_idx]):
+                self._play_speed = max(0.01, new_spd)
+                self._pt0 = time.perf_counter()
+                self._pfi0 = self.fi
+            # Debounce audio reload with atempo so dragging slider doesn't freeze CPU
+            self._schedule_reload_audio(350)
+            self._refresh_preview()
 
     def _apply_vol(self, val):
         if hasattr(self.properties_panel, "_vol_lbl") and self.properties_panel._vol_lbl.winfo_exists():
             self.properties_panel._vol_lbl.configure(text=f"{int(float(val)*100)}%")
-        items=self.tracks.get(self.sel_track,[])
-        if 0<=self.sel_idx<len(items):
-            items[self.sel_idx]["volume"]=float(val)
-            # Apply volume to pygame immediately during playback
-            try:
-                pygame.mixer.music.set_volume(min(2.0, max(0.0, float(val))))
-            except Exception:
-                pass
+        items = self.tracks.get(self.sel_track, [])
+        if 0 <= self.sel_idx < len(items):
+            new_vol = float(val)
+            items[self.sel_idx]["volume"] = new_vol
+            # If playing, adjust Pygame mixer volume in real-time immediately for 0ms lag
+            if getattr(self, "playing", False):
+                try:
+                    current_t = self.fi / float(TARGET_FPS)
+                    active_clip = self._at(self.sel_track, current_t)
+                    if active_clip is items[self.sel_idx]:
+                        pygame.mixer.music.set_volume(min(1.0, max(0.0, new_vol)))
+                except Exception:
+                    pass
+            # Debounce audio mix rebuild so dragging slider doesn't spawn duplicate FFmpeg processes
+            self._schedule_reload_audio(350)
+            self._refresh_preview()
 
     # ── Import / asset management ─────────────────────────────────────────────
     def _import(self):
@@ -1969,7 +2227,7 @@ class EditorPage(ctk.CTkFrame):
             self._start_proxy_build(asset["path"])
         # Reload mixed audio whenever an audio/video clip is added
         if is_audio or ext in (".mp4", ".mov", ".avi", ".mkv", ".webm"):
-            self.after(300, self._reload_audio)
+            self._schedule_reload_audio(250)
         self._push_undo(); self._rebuild_label_column(); self._draw_tl()
         self._refresh_props()
         self._status(f"Added to [{tk}]: {asset['name']}")
@@ -2250,11 +2508,9 @@ class EditorPage(ctk.CTkFrame):
             all_export_subs.sort(key=lambda x: x["start"])
 
             need_burn = bool(all_export_subs)
-            if need_burn:
-                temp_out = out + "_temp_merge.mp4"
-                target_out = temp_out
-            else:
-                target_out = out
+            target_out = out
+            temp_out = None
+            tmp_ass = None
 
             def _has_audio(path):
                 try:
@@ -2271,16 +2527,24 @@ class EditorPage(ctk.CTkFrame):
                 cmd += ["-ss", str(cl["start"]), "-to", str(cl["end"]),
                         "-i", cl["path"]]
 
-            has_silent = False
-            for cl in clips:
-                if not _has_audio(cl["path"]):
-                    has_silent = True
-                    break
+            def _clip_has_audio(c):
+                if self._is_muted("main"):
+                    return False
+                if c.get("audio_muted") or c.get("video_only") or c.get("muted"):
+                    return False
+                if c.get("volume", 1.0) <= 0.001:
+                    return False
+                return _has_audio(c.get("path", ""))
 
+            has_main_audio = any(_clip_has_audio(cl) for cl in clips)
+            has_silent = has_main_audio and any(not _clip_has_audio(cl) for cl in clips)
+            silent_idx = None
             if has_silent:
+                silent_idx = cmd.count("-i")
                 cmd += ["-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100"]
 
             for ov in media_overlays:
+                ov["_export_idx"] = cmd.count("-i")
                 ext_ov = os.path.splitext(ov["path"])[1].lower()
                 is_img_ov = ext_ov in (".jpg", ".jpeg", ".png")
                 if is_img_ov:
@@ -2326,24 +2590,26 @@ class EditorPage(ctk.CTkFrame):
                 vf += _EFF.get(eff, "")
                 vf += f"[v{idx}]"
                 fc.append(vf)
-
-                at = min(max(sp, 0.5), 2.0)
-                duration = cl["end"] - cl["start"]
-                if _has_audio(cl["path"]):
-                    fc.append(f"[{idx}:a]atempo={at}[a{idx}]")
-                else:
-                    fc.append(f"[{n}:a]trim=duration={duration},asetpts=PTS-STARTPTS,atempo={at}[a{idx}]")
-
                 vp.append(f"[v{idx}]")
-                ap.append(f"[a{idx}]")
+
+                if has_main_audio:
+                    at = _build_atempo_filter(sp)
+                    duration = max(0.01, cl["end"] - cl["start"])
+                    if _clip_has_audio(cl):
+                        vol_val = max(0.0, cl.get("volume", 1.0))
+                        vol_f = f",volume={vol_val:.3f}" if abs(vol_val - 1.0) > 0.01 else ""
+                        fc.append(f"[{idx}:a]{at}{vol_f}[a{idx}]")
+                    else:
+                        fc.append(f"[{silent_idx}:a]atrim=duration={duration},asetpts=PTS-STARTPTS,{at}[a{idx}]")
+                    ap.append(f"[a{idx}]")
 
             fc.append("".join(vp) + f"concat=n={n}:v=1:a=0[vcat]")
-            fc.append("".join(ap) + f"concat=n={n}:v=0:a=1[aout]")
+            if has_main_audio:
+                fc.append("".join(ap) + f"concat=n={n}:v=0:a=1[aout]")
 
             curr_v = "[vcat]"
-            ov_start_idx = n + 1 if has_silent else n
             for idx_ov, ov in enumerate(media_overlays):
-                ov_idx = ov_start_idx + idx_ov
+                ov_in = f"[{ov['_export_idx']}:v]"
                 tl_start = ov.get("tl", 0.0)
                 dur = (ov["end"] - ov["start"]) / max(ov.get("speed", 1.0), 0.01)
                 tl_end = tl_start + dur
@@ -2352,7 +2618,6 @@ class EditorPage(ctk.CTkFrame):
                 cx  = ov.get("custom_x", 0.5)
                 cy  = ov.get("custom_y", 0.5)
 
-                ov_in = f"[{ov_idx}:v]"
                 if rot != 0.0:
                     rad = rot * 3.14159265 / 180.0
                     next_ov = f"[ov_rot_{idx_ov}]"
@@ -2366,16 +2631,30 @@ class EditorPage(ctk.CTkFrame):
                 fc.append(f"{curr_v}{ov_scaled}overlay=x=(W-w)*{cx:.3f}:y=(H-h)*{cy:.3f}:enable='between(t,{tl_start:.3f},{tl_end:.3f})'{next_v}")
                 curr_v = next_v
 
-            out_v = curr_v
+                out_v = curr_v
+            else:
+                out_v = curr_v
+
+            # ── Burn subtitles directly into filtergraph (ultra-fast single pass) ──
+            if need_burn and all_export_subs:
+                try:
+                    from video_exporter import generate_ass_file
+                    tmp_ass = out + "_tmp_subs.ass"
+                    generate_ass_file(all_export_subs, self.style, tmp_ass)
+                    ass_path_escaped = tmp_ass.replace("\\", "/").replace(":", "\\:")
+                    fc.append(f"{out_v}ass='{ass_path_escaped}'[vsub]")
+                    out_v = "[vsub]"
+                except Exception as ass_err:
+                    print(f"[ASS Subtitle Burn Direct Warning] {ass_err}")
 
             # ── Mix in separate audio tracks (audio_0, audio_1, …) ───────────
             extra_audio_labels: list[str] = []
-            extra_idx_offset = n + 1 + len(media_overlays)
-            if has_silent:
-                extra_idx_offset += 1
-
             for ak in self._audio_keys():
+                if not self._is_active(ak):
+                    continue
                 for ac in self.tracks.get(ak, []):
+                    if ac.get("audio_muted") or ac.get("muted") or ac.get("volume", 1.0) <= 0.001:
+                        continue
                     ap_path = ac.get("path", "")
                     if not ap_path or not os.path.exists(ap_path):
                         continue
@@ -2384,7 +2663,8 @@ class EditorPage(ctk.CTkFrame):
                     ac_tl    = ac.get("tl", 0.0)
                     ac_speed = max(ac.get("speed", 1.0), 0.01)
                     ac_vol   = ac.get("volume", 1.0)
-                    ext_idx  = extra_idx_offset + len(extra_audio_labels)
+                    
+                    ext_idx = cmd.count("-i")
                     cmd.extend(["-ss", str(ac_start), "-to", str(ac_end), "-i", ap_path])
                     delay_ms = max(0, int(ac_tl * 1000))
                     atempo_f = _build_atempo_filter(ac_speed)
@@ -2393,19 +2673,41 @@ class EditorPage(ctk.CTkFrame):
                     fc.append(f"[{ext_idx}:a]{atempo_f}{vol_f},adelay={delay_ms}|{delay_ms}[{lbl}]")
                     extra_audio_labels.append(f"[{lbl}]")
 
-            final_aout = "[aout]"
             if extra_audio_labels:
-                mix_in = "[aout]" + "".join(extra_audio_labels)
-                n_mix = 1 + len(extra_audio_labels)
-                fc.append(f"{mix_in}amix=inputs={n_mix}:normalize=0[amixed]")
-                final_aout = "[amixed]"
+                if has_main_audio:
+                    mix_in = "[aout]" + "".join(extra_audio_labels)
+                    n_mix = 1 + len(extra_audio_labels)
+                    fc.append(f"{mix_in}amix=inputs={n_mix}:normalize=0[amixed]")
+                    final_aout = "[amixed]"
+                else:
+                    if len(extra_audio_labels) == 1:
+                        final_aout = extra_audio_labels[0]
+                    else:
+                        mix_in = "".join(extra_audio_labels)
+                        n_mix = len(extra_audio_labels)
+                        fc.append(f"{mix_in}amix=inputs={n_mix}:normalize=0[amixed]")
+                        final_aout = "[amixed]"
+            else:
+                if has_main_audio:
+                    final_aout = "[aout]"
+                else:
+                    total_dur = max(0.1, self._dur())
+                    silent_idx = cmd.count("-i")
+                    cmd += ["-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100"]
+                    fc.append(f"[{silent_idx}:a]atrim=duration={total_dur:.3f},asetpts=PTS-STARTPTS[aout]")
+                    final_aout = "[aout]"
+
+            from video_exporter import _detect_gpu_encoder
+            enc_name, enc_args = _detect_gpu_encoder()
+            gpu_msg = f"GPU ({enc_name})" if enc_name != "libx264" else "CPU (libx264)"
+            v_codec_args = enc_args if enc_name != "libx264" else ["-c:v", "libx264", "-crf", str(crf), "-preset", "fast"]
 
             cmd += ["-filter_complex", ";".join(fc),
                     "-map", out_v, "-map", final_aout,
-                    "-c:v", "libx264", "-crf", str(crf), "-preset", "fast",
+                    *v_codec_args,
                     "-c:a", "aac", "-b:a", "192k", target_out]
 
-            self.after(0, lambda: self._status("Rendering… 0%"))
+            self.after(0, lambda: self._status(f"Rendering ({gpu_msg})… 0%"))
 
             total_dur = self._dur()
             import re as _re
@@ -2431,28 +2733,27 @@ class EditorPage(ctk.CTkFrame):
                         h, mi, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
                         elapsed = h * 3600 + mi * 60 + s
                         pct = min(99, int(elapsed / total_dur * 100))
-                        self.after(0, lambda p=pct: self._status(f"Rendering… {p}%"))
+                        self.after(0, lambda p=pct: self._status(f"Rendering ({gpu_msg})… {p}%"))
             ret = proc.wait()
-            if ret != 0:
-                err = "".join(stderr_lines)[-600:]
-                raise RuntimeError(f"FFmpeg error: {err}")
 
-            if need_burn and all_export_subs:
-                self.after(0, lambda: self._status("Burning subtitles & text…"))
-                from video_exporter import export_video_with_subtitles
-                export_video_with_subtitles(
-                    target_out, out, all_export_subs, self.style,
-                    progress_cb=lambda m: self.after(0, lambda ms=m: self._status(ms))
-                )
-                if os.path.exists(target_out):
-                    try: os.remove(target_out)
-                    except: pass
+            # Clean up temp ASS if created
+            if tmp_ass and os.path.exists(tmp_ass):
+                try: os.remove(tmp_ass)
+                except: pass
+
+            if ret != 0:
+                full_err = "".join(stderr_lines)
+                err = full_err[-1200:] if len(full_err) > 1200 else full_err
+                raise RuntimeError(f"FFmpeg error: {err}")
 
             self.after(0, lambda: (
                 self._status(f"Exported: {os.path.basename(out)}"),
                 messagebox.showinfo("Done", f"Saved:\n{out}")))
         except Exception as ex:
             err_msg = str(ex)
+            if tmp_ass and os.path.exists(tmp_ass):
+                try: os.remove(tmp_ass)
+                except: pass
             if temp_out and os.path.exists(temp_out):
                 try: os.remove(temp_out)
                 except: pass
@@ -2541,6 +2842,12 @@ class EditorPage(ctk.CTkFrame):
             except Exception as ex:
                 self.after(0, lambda err=ex: (self._status(f"Error: {err}"),
                                               messagebox.showerror("Error", str(err))))
+            finally:
+                if vpath and vpath.endswith("_transcribe_16k.wav") and os.path.exists(vpath):
+                    try:
+                        os.remove(vpath)
+                    except Exception:
+                        pass
         threading.Thread(target=run, daemon=True).start()
 
     def _export_subs(self):

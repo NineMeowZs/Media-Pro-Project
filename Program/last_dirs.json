@@ -1,6 +1,7 @@
 {
-  "import_media": "D:/KMUTT/MDT370/test vid",
+  "import_media": "D:/กำลังตัด",
   "save_project": "D:/Folder_For_Work/Year4_1/Media Pro Project/Projects",
   "browse_project": "D:/Folder_For_Work/Year4_1/Media Pro Project/Projects",
-  "export_video": "D:/KMUTT/MDT370/test vid/export"
+  "export_video": "D:/Folder_For_Work/Year4_1/Media Pro Project/Projects",
+  "whisper_model": "D:/Folder_For_Work/Year4_1/best"
 }

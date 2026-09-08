@@ -176,3 +176,50 @@ class SubtitleStyle:
     line_spacing: int = 8               # extra px between lines
     letter_spacing: int = 0             # extra px between characters
     bg_opacity: float = 0.5             # used only for box / highlight decoration
+
+
+def verify_font_for_render(font_name: str) -> tuple[bool, str]:
+    """Check if font_name exists in Windows Fonts or local fonts/ folder.
+    Returns (is_available: bool, effective_font_name: str).
+    If missing, returns (False, 'Tahoma').
+    """
+    if not font_name:
+        return False, "Tahoma"
+
+    # 1. Check local fonts directory
+    local_path = get_custom_font_path(font_name)
+    if local_path and os.path.exists(local_path):
+        return True, font_name
+
+    # 2. Check Windows Fonts directory
+    windows_fonts = "C:/Windows/Fonts"
+    if os.path.isdir(windows_fonts):
+        candidates = [
+            font_name + ".ttf",
+            font_name + ".otf",
+            font_name.lower() + ".ttf",
+            font_name.lower() + ".otf",
+        ]
+        # Common mappings
+        font_map = {
+            "Arial": "arial.ttf",
+            "Tahoma": "tahoma.ttf",
+            "TH Sarabun New": "THSarabunNew.ttf",
+            "Angsana New": "angsau32.ttf",
+            "Cordia New": "cordia.ttf",
+            "Leelawadee": "leelawad.ttf",
+            "Courier New": "cour.ttf",
+            "Times New Roman": "times.ttf",
+            "Verdana": "verdana.ttf",
+            "Impact": "impact.ttf",
+        }
+        if font_name in font_map:
+            candidates.insert(0, font_map[font_name])
+
+        for c in candidates:
+            if os.path.exists(os.path.join(windows_fonts, c)):
+                return True, font_name
+
+    # Fallback to Tahoma
+    return False, "Tahoma"
+

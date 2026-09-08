@@ -300,7 +300,7 @@ def export_video_with_subtitles(
         "-i", input_path,
         "-vf", f"ass='{ass_path_escaped}'",
         *enc_args,
-        "-c:a", "aac", "-b:a", "192k",
+        "-c:a", "copy",
         output_path,
     ]
 
@@ -311,7 +311,8 @@ def export_video_with_subtitles(
 
     # Clean up temp ASS
     if os.path.exists(tmp_ass):
-        os.remove(tmp_ass)
+        try: os.remove(tmp_ass)
+        except: pass
 
     if result.returncode == 0:
         if progress_cb:
@@ -326,7 +327,7 @@ def export_video_with_subtitles(
                 "-i", input_path,
                 "-vf", f"ass='{ass_path_escaped}'",
                 "-c:v", "libx264", "-crf", "18", "-preset", "fast",
-                "-c:a", "aac", "-b:a", "192k",
+                "-c:a", "copy",
                 output_path,
             ]
             res_cpu = subprocess.run(cpu_cmd, capture_output=True, text=True)

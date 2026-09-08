@@ -280,6 +280,53 @@ class PreviewPanel(ctk.CTkFrame):
                 frame = cv2.resize(frame, (ow, oh), interpolation=cv2.INTER_LINEAR)
                 h, w = oh, ow
 
+            # ── Draw text and subtitles with the same PIL renderer used by
+            # paused preview and export BEFORE sending frame to Canvas!
+            self.canvas.delete("text_overlay")
+            self.canvas.delete("sub_overlay")
+            if HAS_SUBTITLES:
+                import copy
+                t = self.controller.fi / float(TARGET_FPS)
+                bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
+                for lk in self.controller._layer_keys():
+                    for tc in self.controller.tracks.get(lk, []):
+                        if tc.get("path", "") != "":
+                            continue
+                        dur = max(tc["end"] - tc["start"], 0.05) / max(tc.get("speed", 1.0), 0.01)
+                        tl = tc.get("tl", 0.0)
+                        if tl <= t <= tl + dur and tc.get("name", "").strip():
+                            ts = SubtitleStyle()
+                            ts.font_name = tc.get("font_name", "Tahoma")
+                            ts.font_size = tc.get("font_size", 44)
+                            ts.font_color = tc.get("font_color", "#ffffff")
+                            ts.decoration = tc.get("decoration", "shadow")
+                            ts.decoration_color = tc.get("decoration_color", "#000000")
+                            ts.bold = bool(tc.get("bold", False))
+                            ts.italic = bool(tc.get("italic", False))
+                            ts.letter_spacing = tc.get("letter_spacing", 0)
+                            ts.align = tc.get("align", "center")
+                            ts.animation = "none"
+                            ts.position = "custom"
+                            ts.custom_x = tc.get("custom_x", 0.5)
+                            ts.custom_y = tc.get("custom_y", 0.2)
+                            bgr = draw_subtitles_on_frame(bgr, tc["name"], ts, 0.5)
+
+                if getattr(self.controller, "_sub_visible", True):
+                    sub, prog, sub_clip = self._find_sub(t)
+                    if sub:
+                        render_style = copy.copy(self.controller.style)
+                        if sub_clip is not None:
+                            for attr in ("font_name", "font_size", "font_color", "bold", "italic",
+                                         "decoration", "decoration_color", "letter_spacing", "align"):
+                                if attr in sub_clip:
+                                    setattr(render_style, attr, sub_clip[attr])
+                            render_style.position = "custom"
+                            render_style.custom_x = sub_clip.get("custom_x", render_style.custom_x)
+                            render_style.custom_y = sub_clip.get("custom_y", render_style.custom_y)
+                        bgr = draw_subtitles_on_frame(bgr, sub, render_style, prog)
+                frame = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
+
             try:
                 img_pil = Image.frombuffer("RGB", (w, h), frame, "raw", "RGB", 0, 1)
             except Exception:
@@ -297,28 +344,6 @@ class PreviewPanel(ctk.CTkFrame):
                 self.canvas.coords(self._canvas_img_id, cw // 2, ch // 2)
 
             self._disp_img = img
-
-            # ── Draw text clips in fast playback path ──────────────────────
-            self.canvas.delete("text_overlay")
-            t = self.controller.fi / float(TARGET_FPS)
-            for lk in self.controller._layer_keys():
-                for tc in self.controller.tracks.get(lk, []):
-                    if tc.get("path", "") != "":
-                        continue
-                    dur = max(tc["end"] - tc["start"], 0.05) / max(tc.get("speed", 1.0), 0.01)
-                    tl = tc.get("tl", 0.0)
-                    if tl <= t <= tl + dur and tc.get("name", "").strip():
-                        self._draw_text_on_canvas(tc, cw, ch, tag="text_overlay")
-
-            # ── Draw subtitles ─────────────────────────────────────────────
-            if HAS_SUBTITLES:
-                sub_visible = getattr(self.controller, "_sub_visible", True)
-                if sub_visible:
-                    sub, prog, sub_clip = self._find_sub(t)
-                    if sub:
-                        self.canvas.delete("sub_overlay")
-                        self._draw_sub_on_canvas(sub, sub_clip, cw, ch)
-
             self._draw_transform_overlay()
             return
 
@@ -342,6 +367,7 @@ class PreviewPanel(ctk.CTkFrame):
                             ts.font_size = tc.get("font_size", 44)
                             ts.font_color = tc.get("font_color", "#ffffff")
                             ts.decoration = tc.get("decoration", "shadow")
+                            ts.decoration_color = tc.get("decoration_color", "#000000")
                             ts.bold = bool(tc.get("bold", False))
                             ts.italic = bool(tc.get("italic", False))
                             ts.letter_spacing = tc.get("letter_spacing", 0)
@@ -676,6 +702,8 @@ class PreviewPanel(ctk.CTkFrame):
             return frame[y:y + nh, :]
 
     def _find_sub(self, t):
+        if hasattr(self.controller, "_is_hidden") and self.controller._is_hidden("subtitle"):
+            return "", 0.5, None
         for clip in self.controller.tracks.get("subtitle", []):
             dur = max(clip["end"] - clip["start"], 0.05) / max(clip.get("speed", 1.0), 0.01)
             tl = clip.get("tl", 0.0)
@@ -691,6 +719,8 @@ class PreviewPanel(ctk.CTkFrame):
         """Overlay image/video elements from timeline layers at timestamp t."""
         active_overlays = []
         for lk in self.controller._layer_keys():
+            if hasattr(self.controller, "_is_hidden") and self.controller._is_hidden(lk):
+                continue
             for item in self.controller.tracks.get(lk, []):
                 dur = (item["end"] - item["start"]) / max(item.get("speed", 1.0), 0.01)
                 tl = item.get("tl", 0.0)

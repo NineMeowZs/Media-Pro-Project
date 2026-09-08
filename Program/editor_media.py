@@ -214,6 +214,12 @@ class MediaPanel(ctk.CTkFrame):
                 except Exception as ex:
                     err_msg = str(ex)
                     self.controller.after(0, lambda: _on_detect_error(err_msg))
+                finally:
+                    if audio_path and audio_path.endswith("_transcribe_16k.wav") and os.path.exists(audio_path):
+                        try:
+                            os.remove(audio_path)
+                        except Exception:
+                            pass
 
             threading.Thread(target=_worker, daemon=True).start()
 

@@ -1,0 +1,21 @@
+{
+  "active_preset": "Standard",
+  "custom_shortcuts": {
+    "play_pause": "Space",
+    "split": "Ctrl+B",
+    "delete": "Delete",
+    "ripple_delete": "G",
+    "undo": "Ctrl+Z",
+    "redo": "Ctrl+Shift+Z",
+    "mute": "M",
+    "selection_tool": "V",
+    "split_tool": "S",
+    "step_back": "Left",
+    "step_forward": "Right",
+    "save": "Ctrl+S",
+    "save_as": "Ctrl+Shift+S",
+    "open_project": "Ctrl+O",
+    "import_media": "Ctrl+I",
+    "export_video": "Ctrl+E"
+  }
+}

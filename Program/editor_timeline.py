@@ -12,6 +12,7 @@ from editor_utils import (
     RULER_H, TGAP, LABEL_W, EDGE_PX, TARGET_FPS, SNAP_PX, FADE_ZONE,
     _ft, _bright, _dark, _nice_step
 )
+from tooltip import ToolTip
 
 
 class TimelinePanel(ctk.CTkFrame):
@@ -32,27 +33,128 @@ class TimelinePanel(ctk.CTkFrame):
         self._rb_x0 = 0.0
         self._rb_y0 = 0.0
         self._rb_rect = None  # canvas item ID
+        self._lcc_buttons = []  # interactive track control buttons on label canvas [(x1,y1,x2,y2,key,action)]
 
         self._build_ui()
 
     def _build_ui(self):
-        # 1. Timeline Toolbar
-        tb = ctk.CTkFrame(self, height=26, fg_color=BG_DARK, corner_radius=0)
+        # 1. Timeline Toolbar (CapCut-style action & shortcut toolbar)
+        tb = ctk.CTkFrame(self, height=36, fg_color="#0e131a", corner_radius=0)
         tb.pack(fill="x")
         tb.pack_propagate(False)
 
+        # Left label badge
         ctk.CTkLabel(
             tb, text="TIMELINE",
             font=ctk.CTkFont(family="Segoe UI", size=9, weight="bold"),
-            text_color=TXT_G
-        ).pack(side="left", padx=12)
+            text_color="#8b949e"
+        ).pack(side="left", padx=(10, 6))
 
-        ctk.CTkLabel(tb, text="Zoom", font=ctk.CTkFont(size=9), text_color=TXT_G).pack(side="right", padx=(0, 4))
+        # Helper to create toolbar buttons
+        def _add_tb_btn(parent, text, cmd, title, desc, shortcut, fg="#161b22", hov="#21262d", txt_col="#e6edf3", width=None):
+            w = width or (max(28, len(text) * 8 + 14))
+            btn = ctk.CTkButton(
+                parent, text=text, width=w, height=24, corner_radius=6,
+                fg_color=fg, hover_color=hov, text_color=txt_col,
+                font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+                command=cmd
+            )
+            btn.pack(side="left", padx=2, pady=6)
+            ToolTip(btn, title=title, description=desc, shortcut=shortcut)
+            return btn
+
+        # Divider helper
+        def _add_div(parent):
+            d = ctk.CTkFrame(parent, width=1, height=18, fg_color="#30363d")
+            d.pack(side="left", padx=4, pady=9)
+
+        # ── Primary Edit Tools ───────────────────────────────────────────────
+        _add_tb_btn(tb, "✂ Split", self.controller._split, "Split Clip", "Split active clip at playhead position", "Ctrl+B / S", fg="#1f2937", hov="#374151", txt_col="#60a5fa")
+        _add_tb_btn(tb, "🗑 Delete", self.controller._del_sel, "Delete Clip", "Delete selected clip or text segment", "Del", fg="#1f1618", hov="#3a1c22", txt_col="#f87171")
+        _add_tb_btn(tb, "⏩ Ripple", self.controller._ripple_delete, "Ripple Delete", "Delete clip and shift remaining clips left", "G", fg="#241b12", hov="#3d2c18", txt_col="#fbbf24")
+
+        _add_div(tb)
+
+        # ── Content Creation ─────────────────────────────────────────────────
+        _add_tb_btn(tb, "💬 +Text", self.controller._add_text, "Add Text Clip", "Create a new text overlay clip at playhead", "", fg="#231526", hov="#3b1d42", txt_col="#f472b6")
+        if hasattr(self.controller, "_sub_dialog"):
+            _add_tb_btn(tb, "🎙 Auto Sub", self.controller._sub_dialog, "Auto Subtitles", "Transcribe speech with Whisper AI", "", fg="#132328", hov="#1e3a42", txt_col="#38bdf8")
+
+        # ── Right Side: Zoom Controls & Undo/Redo ────────────────────────────
+        # Zoom In [+]
+        def _zoom_in():
+            cur = self.controller.v_zoom.get()
+            self.controller.v_zoom.set(min(14.0, cur * 1.25))
+            self._draw_tl()
+
+        zin_btn = ctk.CTkButton(
+            tb, text="+", width=24, height=24, corner_radius=6,
+            fg_color="#161b22", hover_color="#21262d", text_color="#c9d1d9",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            command=_zoom_in
+        )
+        zin_btn.pack(side="right", padx=(2, 10), pady=6)
+        ToolTip(zin_btn, title="Zoom In", description="Zoom into timeline clips", shortcut="Ctrl+Wheel")
+
+        # Zoom Slider
         ctk.CTkSlider(
-            tb, from_=0.2, to=14.0, width=100, variable=self.controller.v_zoom,
-            progress_color=C_BLUE, button_color=C_BLUE,
+            tb, from_=0.2, to=14.0, width=75, height=14, variable=self.controller.v_zoom,
+            progress_color=C_BLUE, button_color=C_BLUE, button_hover_color="#3b82f6",
             command=lambda v: self._draw_tl()
-        ).pack(side="right", padx=(0, 10), pady=4)
+        ).pack(side="right", padx=2, pady=6)
+
+        # Zoom Out [-]
+        def _zoom_out():
+            cur = self.controller.v_zoom.get()
+            self.controller.v_zoom.set(max(0.2, cur * 0.8))
+            self._draw_tl()
+
+        zout_btn = ctk.CTkButton(
+            tb, text="-", width=24, height=24, corner_radius=6,
+            fg_color="#161b22", hover_color="#21262d", text_color="#c9d1d9",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            command=_zoom_out
+        )
+        zout_btn.pack(side="right", padx=(2, 2), pady=6)
+        ToolTip(zout_btn, title="Zoom Out", description="Zoom out timeline clips", shortcut="Ctrl+Wheel")
+
+        # Fit Timeline Zoom
+        def _on_fit():
+            self.controller.v_zoom.set(1.0)
+            self._draw_tl()
+
+        fit_btn = ctk.CTkButton(
+            tb, text="↔ Fit", width=42, height=24, corner_radius=6,
+            fg_color="#161b22", hover_color="#21262d", text_color="#8b949e",
+            font=ctk.CTkFont(family="Segoe UI", size=9, weight="bold"),
+            command=_on_fit
+        )
+        fit_btn.pack(side="right", padx=2, pady=6)
+        ToolTip(fit_btn, title="Fit Timeline", description="Reset zoom level to default view", shortcut="")
+
+        # Divider between Zoom and Undo/Redo
+        d_right = ctk.CTkFrame(tb, width=1, height=18, fg_color="#30363d")
+        d_right.pack(side="right", padx=6, pady=9)
+
+        # Redo [ ↪ Redo ]
+        btn_redo = ctk.CTkButton(
+            tb, text="↪ Redo", width=56, height=24, corner_radius=6,
+            fg_color="#161b22", hover_color="#21262d", text_color="#e6edf3",
+            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+            command=self.controller._redo_do
+        )
+        btn_redo.pack(side="right", padx=2, pady=6)
+        ToolTip(btn_redo, title="Redo", description="Redo previously undone change", shortcut="Ctrl+Y")
+
+        # Undo [ ↩ Undo ]
+        btn_undo = ctk.CTkButton(
+            tb, text="↩ Undo", width=56, height=24, corner_radius=6,
+            fg_color="#161b22", hover_color="#21262d", text_color="#e6edf3",
+            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+            command=self.controller._undo_do
+        )
+        btn_undo.pack(side="right", padx=2, pady=6)
+        ToolTip(btn_undo, title="Undo", description="Revert last timeline change", shortcut="Ctrl+Z")
 
         # 2. Main Timeline Body
         body = tk.Frame(self, bg=PANEL_DARK)
@@ -104,6 +206,9 @@ class TimelinePanel(ctk.CTkFrame):
             lambda e: self._tlc.xview_scroll(int(-1 * (e.delta / 120)), "units"))
         self._lcc.bind("<MouseWheel>",
             lambda e: self._tlc.yview_scroll(int(-1 * (e.delta / 120)), "units"))
+        self._lcc.bind("<Button-1>", self._lcc_press)
+        self._lcc.bind("<Motion>",   self._lcc_motion)
+        self._lcc.bind("<Leave>",    lambda e: self._lcc.configure(cursor="arrow"))
 
     def _scale(self):
         W = self._tlc.winfo_width()
@@ -160,6 +265,9 @@ class TimelinePanel(ctk.CTkFrame):
         )
         self._lcc.create_line(0, RULER_H, LABEL_W, RULER_H, fill=BORD)
 
+        # Clear interactive buttons on label canvas
+        self._lcc_buttons = []
+
         # Tracks — dynamic rows via _all_track_rows()
         y = RULER_H + 2
         for key, lbl, col, th, kind in self.controller._all_track_rows():
@@ -167,54 +275,105 @@ class TimelinePanel(ctk.CTkFrame):
                 continue
             row_h = th + TGAP * 2
             active = self.controller._is_active(key)
-            row_bg = "#0a0a0d" if not active else TL_ROW_BG
-            lbl_bg = "#0a0a0d" if not active else PANEL_MID
+            is_locked = getattr(self.controller, "_is_locked", lambda k: False)(key)
+            is_hidden = getattr(self.controller, "_is_hidden", lambda k: False)(key)
+            is_muted  = self.controller._muted.get(key, False)
+
+            row_bg = "#07070a" if (not active or is_hidden) else TL_ROW_BG
+            if is_locked:
+                lbl_bg = "#181408"
+            elif not active or is_hidden:
+                lbl_bg = "#0a0a0d"
+            else:
+                lbl_bg = PANEL_MID
 
             # Draw row background on main canvas
             c.create_rectangle(0, y, cw, y + row_h, fill=row_bg, outline="")
             c.create_line(0, y + row_h, cw, y + row_h, fill=BORD)
-            if key == "main":
+            if is_locked:
+                c.create_line(0, y, cw, y, fill="#45310e", width=1)
+            elif key == "main":
                 c.create_line(0, y, cw, y, fill="#252535", width=1)
 
-            # Draw row background & icon label on label canvas
+            # Draw row background on label canvas
             self._lcc.create_rectangle(0, y, LABEL_W, y + row_h, fill=lbl_bg, outline="")
             self._lcc.create_line(0, y + row_h, LABEL_W, y + row_h, fill=BORD)
+            if is_locked:
+                self._lcc.create_rectangle(0, y, 3, y + row_h, fill="#f59e0b", outline="")
 
-            # Icon + small label instead of long text
-            ICONS = {
-                "main":     ("\u25b6", C_BLUE),      # ▶ VIDEO
-                "subtitle": ("T",      C_AMBER),     # T SUBTITLE
-                "audio":    ("\u266b", C_TEAL),      # ♫ AUDIO
-                "layer":    ("\u25a0", C_PURPLE),    # ■ OVERLAY
-                "empty":    ("+",      TXT_G),
-            }
-            icon_char, icon_col = ICONS.get(kind, ("?", TXT_G))
-            cx_lbl = LABEL_W // 2
+            # ── Label Canvas Content (Section 7 & 8: V1 👁 🔒 / A1 🔊 🔒) ────────
             cy_lbl = y + row_h // 2
-            # Large icon
-            self._lcc.create_text(
-                cx_lbl - 14, cy_lbl, text=icon_char,
-                fill=icon_col, font=("Segoe UI", 13, "bold"), anchor="center"
-            )
-            # Small track number for audio/layer tracks
-            if kind == "audio":
-                n = int(key.split("_")[1]) + 1
-                self._lcc.create_text(
-                    cx_lbl + 8, cy_lbl, text=str(n),
-                    fill=icon_col, font=("Segoe UI", 9, "bold"), anchor="center"
-                )
-            elif kind == "layer":
-                n = int(key.split("_")[1]) + 1
-                self._lcc.create_text(
-                    cx_lbl + 8, cy_lbl, text=str(n),
-                    fill=icon_col, font=("Segoe UI", 9, "bold"), anchor="center"
-                )
 
-            # Muted/Solo badge on row
-            if self.controller._muted.get(key):
+            # 1. Track Name / Identifier on Left
+            if key == "main":
+                tname = "V1"
+                tcol  = C_BLUE
+            elif kind == "layer":
+                n = int(key.split("_")[1]) + 2
+                tname = f"V{n}"
+                tcol  = C_PURPLE
+            elif kind == "audio":
+                n = int(key.split("_")[1]) + 1
+                tname = f"A{n}"
+                tcol  = C_TEAL if n == 1 else C_GREEN
+            elif kind == "subtitle":
+                tname = "Sub"
+                tcol  = C_AMBER
+            else:
+                tname = lbl[:4]
+                tcol  = TXT_W
+
+            self._lcc.create_text(
+                10, cy_lbl, text=tname,
+                fill=tcol, font=("Segoe UI", 10, "bold"), anchor="w"
+            )
+
+            # 2. Middle Control: Visibility or Mute
+            bx1, bx2 = 46, 78
+            by1, by2 = cy_lbl - 11, cy_lbl + 11
+            if kind in ("main", "layer", "subtitle"):
+                eye_icon = "👁" if not is_hidden else "⊘"
+                eye_color = "#f0f6fc" if not is_hidden else "#ef4444"
+                btn_bg = "#161b22" if not is_hidden else "#2a1215"
+                btn_outline = "#30363d" if not is_hidden else "#ef4444"
+                self._lcc.create_rectangle(bx1, by1, bx2, by2, fill=btn_bg, outline=btn_outline, width=1)
+                self._lcc.create_text((bx1 + bx2) // 2, cy_lbl, text=eye_icon, fill=eye_color, font=("Segoe UI", 9))
+                self._lcc_buttons.append((bx1, by1, bx2, by2, key, "toggle_visibility"))
+            elif kind == "audio":
+                mute_icon = "🔊" if not is_muted else "🔇"
+                mute_color = "#f0f6fc" if not is_muted else "#ef4444"
+                btn_bg = "#161b22" if not is_muted else "#2a1215"
+                btn_outline = "#30363d" if not is_muted else "#ef4444"
+                self._lcc.create_rectangle(bx1, by1, bx2, by2, fill=btn_bg, outline=btn_outline, width=1)
+                self._lcc.create_text((bx1 + bx2) // 2, cy_lbl, text=mute_icon, fill=mute_color, font=("Segoe UI", 9))
+                self._lcc_buttons.append((bx1, by1, bx2, by2, key, "toggle_mute"))
+
+            # 3. Right Control: Lock Toggle
+            lx1, lx2 = 86, 118
+            ly1, ly2 = cy_lbl - 11, cy_lbl + 11
+            lock_icon = "🔒" if is_locked else "🔓"
+            lock_color = "#f59e0b" if is_locked else "#6b7280"
+            btn_bg = "#2b1f0c" if is_locked else "#161b22"
+            btn_outline = "#f59e0b" if is_locked else "#30363d"
+            self._lcc.create_rectangle(lx1, ly1, lx2, ly2, fill=btn_bg, outline=btn_outline, width=1)
+            self._lcc.create_text((lx1 + lx2) // 2, cy_lbl, text=lock_icon, fill=lock_color, font=("Segoe UI", 9))
+            self._lcc_buttons.append((lx1, ly1, lx2, ly2, key, "toggle_lock"))
+
+            # Status text overlay on row
+            if is_locked:
                 c.create_text(
-                    8, y + row_h // 2, text="MUTED",
+                    8, y + row_h // 2, text="🔒 LOCKED",
+                    fill="#f59e0b", anchor="w", font=("Helvetica", 7, "bold")
+                )
+            elif is_muted:
+                c.create_text(
+                    8, y + row_h // 2, text="🔇 MUTED",
                     fill=C_RED, anchor="w", font=("Helvetica", 7, "bold")
+                )
+            elif is_hidden:
+                c.create_text(
+                    8, y + row_h // 2, text="⊘ HIDDEN",
+                    fill="#8b949e", anchor="w", font=("Helvetica", 7, "bold")
                 )
             elif self.controller._solo_key == key:
                 c.create_text(
@@ -477,6 +636,20 @@ class TimelinePanel(ctk.CTkFrame):
                 self.controller._multi_sel = []
             self.controller.sel_track = hit_k
             self.controller.sel_idx = hit_i
+
+            # If track is locked, block editing and drag mode (Section 9)
+            if getattr(self.controller, "_is_locked", lambda k: False)(hit_k):
+                self.controller._status(f"Track [{hit_k}] is locked 🔒 — editing disabled")
+                self._dm = None
+                self._dtk = None
+                self._di = -1
+                if hit_k == "subtitle" and hasattr(self.controller, "transcript_panel"):
+                    self.controller.transcript_panel.select_segment(hit_i)
+                    self.controller.transcript_panel.scroll_to_segment(hit_i)
+                self.controller._refresh_props()
+                self._draw_tl()
+                return
+
             self._dm = mode
             self._dtk = hit_k
             self._di = hit_i
@@ -548,6 +721,9 @@ class TimelinePanel(ctk.CTkFrame):
             return
 
         if not self._dm or not self._dtk:
+            return
+
+        if getattr(self.controller, "_is_locked", lambda k: False)(self._dtk):
             return
 
         cl = self.controller.tracks[self._dtk][self._di]
@@ -768,10 +944,16 @@ class TimelinePanel(ctk.CTkFrame):
             activebackground=C_BLUE, activeforeground=TXT_W,
             relief="flat", bd=0, font=("Helvetica", 10)
         )
-        m.add_command(label=" Split Here  [Ctrl+B]",   command=self.controller._split)
-        m.add_command(label=" Delete",                  command=self.controller._del_sel)
-        m.add_command(label=" Ripple Delete [G]",        command=self.controller._ripple_delete)
-        m.add_command(label=" Duplicate",               command=lambda: self.controller._dup(tk_key, idx))
+        is_locked = getattr(self.controller, "_is_locked", lambda k: False)(tk_key)
+        if is_locked:
+            m.add_command(label=" 🔒 Track is Locked (Editing Disabled)", state="disabled")
+            m.add_separator()
+
+        split_state = "disabled" if is_locked else "normal"
+        m.add_command(label=" Split Here  [Ctrl+B]",   command=self.controller._split, state=split_state)
+        m.add_command(label=" Delete",                  command=self.controller._del_sel, state=split_state)
+        m.add_command(label=" Ripple Delete [G]",        command=self.controller._ripple_delete, state=split_state)
+        m.add_command(label=" Duplicate",               command=lambda: self.controller._dup(tk_key, idx), state=split_state)
         m.add_separator()
         # Detach audio — only shown for video clips on main/layer tracks
         clip_path = self.controller.tracks.get(tk_key, [{}])[idx].get("path", "") if idx < len(self.controller.tracks.get(tk_key, [])) else ""
@@ -803,3 +985,31 @@ class TimelinePanel(ctk.CTkFrame):
         d = 1.13 if e.delta > 0 else 0.88
         self.controller.v_zoom.set(max(0.2, min(14.0, self.controller.v_zoom.get() * d)))
         self._draw_tl()
+
+    def _lcc_press(self, e):
+        """Handle clicks on interactive track buttons (Visibility, Mute, Lock) on label canvas."""
+        cy = self._lcc.canvasy(e.y)
+        cx = e.x
+        for (x1, y1, x2, y2, key, action) in self._lcc_buttons:
+            if x1 <= cx <= x2 and y1 <= cy <= y2:
+                if action == "toggle_visibility":
+                    if hasattr(self.controller, "_toggle_video_visibility"):
+                        self.controller._toggle_video_visibility(key)
+                elif action == "toggle_mute":
+                    if hasattr(self.controller, "_toggle_mute_track"):
+                        self.controller._toggle_mute_track(key)
+                elif action == "toggle_lock":
+                    if hasattr(self.controller, "_toggle_lock_track"):
+                        self.controller._toggle_lock_track(key)
+                self._draw_tl()
+                return "break"
+
+    def _lcc_motion(self, e):
+        """Change cursor to hand2 when hovering over track buttons on label canvas."""
+        cy = self._lcc.canvasy(e.y)
+        cx = e.x
+        for (x1, y1, x2, y2, key, action) in self._lcc_buttons:
+            if x1 <= cx <= x2 and y1 <= cy <= y2:
+                self._lcc.configure(cursor="hand2")
+                return
+        self._lcc.configure(cursor="arrow")
