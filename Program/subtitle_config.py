@@ -177,6 +177,31 @@ class SubtitleStyle:
     letter_spacing: int = 0             # extra px between characters
     bg_opacity: float = 0.5             # used only for box / highlight decoration
 
+    def to_dict(self) -> dict:
+        from dataclasses import asdict
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "SubtitleStyle":
+        if not isinstance(data, dict):
+            return cls()
+        inst = cls()
+        for k, v in data.items():
+            if hasattr(inst, k):
+                # Type coerce if needed
+                cur_val = getattr(inst, k)
+                if isinstance(cur_val, bool):
+                    setattr(inst, k, bool(v))
+                elif isinstance(cur_val, int):
+                    try: setattr(inst, k, int(v))
+                    except (ValueError, TypeError): pass
+                elif isinstance(cur_val, float):
+                    try: setattr(inst, k, float(v))
+                    except (ValueError, TypeError): pass
+                else:
+                    setattr(inst, k, str(v))
+        return inst
+
 
 def verify_font_for_render(font_name: str) -> tuple[bool, str]:
     """Check if font_name exists in Windows Fonts or local fonts/ folder.

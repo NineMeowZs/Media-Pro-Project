@@ -16,24 +16,39 @@ from modal_system import BaseModal, ConflictDialog, ConfirmDialog
 
 _SHORTCUTS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "shortcuts.json")
 
-# Standard actions registry: (action_key, display_name, description)
+# Standard actions registry: (action_key, display_name, description, category)
 ACTIONS_REGISTRY = [
-    ("play_pause",       "Play / Pause",       "Toggle timeline video and audio playback"),
-    ("split",            "Split Clip",         "Cut selected clip at playhead position"),
-    ("delete",           "Delete",             "Delete selected clip(s) from timeline"),
-    ("ripple_delete",    "Ripple Delete",      "Delete selected clip and pull following clips left"),
-    ("undo",             "Undo",               "Revert previous timeline or property action"),
-    ("redo",             "Redo",               "Reapply previously undone action"),
-    ("mute",             "Mute Track / Clip",  "Toggle mute status on active track or clip"),
-    ("selection_tool",   "Selection Tool",     "Activate normal clip selection and move tool"),
-    ("split_tool",       "Split Tool",         "Quick split tool shortcut"),
-    ("step_back",        "Step 1 Frame Back",  "Move playhead back by one frame (Shift=1s)"),
-    ("step_forward",     "Step 1 Frame Fwd",   "Move playhead forward by one frame (Shift=1s)"),
-    ("save",             "Save Project",       "Save current project to file"),
-    ("save_as",          "Save Project As",    "Save project with new filename"),
-    ("open_project",     "Open Project",       "Open existing project JSON file"),
-    ("import_media",     "Import Media",       "Import video, audio, or image asset"),
-    ("export_video",     "Export Video",       "Open video export render dialog"),
+    # Playback
+    ("play_pause",       "Play / Pause",       "Toggle timeline video and audio playback", "Playback"),
+    ("step_back",        "Step 1 Frame Back",  "Move playhead back by one frame (Shift=1s)", "Playback"),
+    ("step_forward",     "Step 1 Frame Fwd",   "Move playhead forward by one frame (Shift=1s)", "Playback"),
+
+    # Timeline navigation
+    ("selection_tool",   "Selection Tool",     "Activate normal clip selection and move tool", "Timeline navigation"),
+    ("split_tool",       "Split Tool",         "Quick split tool shortcut", "Timeline navigation"),
+
+    # Clip editing
+    ("split",            "Split Clip",         "Cut selected clip at playhead position", "Clip editing"),
+    ("delete",           "Delete Clip",        "Delete selected clip(s) from timeline", "Clip editing"),
+    ("ripple_delete",    "Ripple Delete",      "Delete selected clip and pull following clips left", "Clip editing"),
+    ("mute",             "Mute Track / Clip",  "Toggle mute status on active track or clip", "Clip editing"),
+
+    # Selection
+    ("select_all",       "Select All",         "Select all clips on the active timeline", "Selection"),
+
+    # Undo and redo
+    ("undo",             "Undo",               "Revert previous timeline or property action", "Undo and redo"),
+    ("redo",             "Redo",               "Reapply previously undone action", "Undo and redo"),
+
+    # Media management
+    ("import_media",     "Import Media",       "Import video, audio, or image asset", "Media management"),
+    ("export_video",     "Export Video",       "Open video export render dialog", "Media management"),
+    ("open_project",     "Open Project",       "Open existing project JSON file", "Media management"),
+    ("save",             "Save Project",       "Save current project to file", "Media management"),
+    ("save_as",          "Save Project As",    "Save project with new filename", "Media management"),
+
+    # Application settings
+    ("open_settings",    "Open Settings",      "Open application settings and shortcuts", "Application settings"),
 ]
 
 # Presets according to PDF Sections 3 & 4
@@ -49,11 +64,13 @@ PRESET_STANDARD = {
     "split_tool":     "S",
     "step_back":      "Left",
     "step_forward":   "Right",
+    "select_all":     "Ctrl+A",
     "save":           "Ctrl+S",
     "save_as":        "Ctrl+Shift+S",
     "open_project":   "Ctrl+O",
     "import_media":   "Ctrl+I",
     "export_video":   "Ctrl+E",
+    "open_settings":  "Ctrl+,",
 }
 
 PRESET_PREMIERE = {
@@ -68,11 +85,13 @@ PRESET_PREMIERE = {
     "split_tool":     "C",
     "step_back":      "Left",
     "step_forward":   "Right",
+    "select_all":     "Ctrl+A",
     "save":           "Ctrl+S",
     "save_as":        "Ctrl+Shift+S",
     "open_project":   "Ctrl+O",
     "import_media":   "Ctrl+I",
     "export_video":   "Ctrl+M",
+    "open_settings":  "Ctrl+Alt+K",
 }
 
 PRESET_CAPCUT = {
@@ -87,11 +106,13 @@ PRESET_CAPCUT = {
     "split_tool":     "B",
     "step_back":      "Left",
     "step_forward":   "Right",
+    "select_all":     "Ctrl+A",
     "save":           "Ctrl+S",
     "save_as":        "Ctrl+Shift+S",
     "open_project":   "Ctrl+O",
     "import_media":   "Ctrl+I",
     "export_video":   "Ctrl+E",
+    "open_settings":  "Ctrl+,",
 }
 
 PRESET_DICT = {
@@ -99,6 +120,7 @@ PRESET_DICT = {
     "Premiere": PRESET_PREMIERE,
     "CapCut":   PRESET_CAPCUT,
 }
+
 
 
 class ShortcutManager:
@@ -163,6 +185,14 @@ class ShortcutManager:
         self.custom_shortcuts[action_key] = new_shortcut
         self.shortcuts[action_key] = new_shortcut
         self.active_preset = "Custom"
+        self._save()
+
+    def reset_shortcut(self, action_key: str):
+        """Reset a single shortcut to its default in active preset (or Standard)."""
+        preset = PRESET_DICT.get(self.active_preset, PRESET_STANDARD)
+        default_val = preset.get(action_key, PRESET_STANDARD.get(action_key, ""))
+        self.shortcuts[action_key] = default_val
+        self.custom_shortcuts[action_key] = default_val
         self._save()
 
     def reset_to_default(self):
@@ -261,155 +291,355 @@ def get_shortcut_manager() -> ShortcutManager:
 # ═════════════════════════════════════════════════════════════════════════════
 
 class ShortcutSettingsDialog(BaseModal):
-    """Shortcut Settings Modal Dialog with table layout, Preset dropdown,
-    inline key editor, conflict detection, and reset to default button.
-    """
+    """Settings Modal Dialog with Tabs for Keyboard Shortcuts and General & Model Folder."""
 
-    def __init__(self, parent, on_change_callback=None):
+    def __init__(self, parent, on_change_callback=None, initial_tab="shortcuts"):
         super().__init__(
             parent,
-            title="Keyboard Shortcuts",
-            subtitle="Configure action shortcuts and presets",
-            width=580, height=640
+            title="Application Settings",
+            subtitle="Configure keyboard shortcuts, presets, and AI model directory",
+            width=640, height=680
         )
         self._on_change_callback = on_change_callback
         self._editing_action = None
-        self._build_table()
+        self._active_tab = initial_tab
+        self._search_text = ""
+        self._build_dialog()
 
-    def _build_table(self):
+    def _build_dialog(self):
         # Clear existing content
         for w in self.content.winfo_children():
             w.destroy()
         for w in self.footer.winfo_children():
             w.destroy()
 
-        # ── Top Bar: Preset Dropdown ───────────────────────────────────────────
+        # ── Navigation Tabs ───────────────────────────────────────────────────
+        nav_row = ctk.CTkFrame(self.content, height=36, fg_color="#10141a", corner_radius=8)
+        nav_row.pack(fill="x", pady=(0, 10), padx=2)
+        nav_row.pack_propagate(False)
+
+        def _switch_tab(tab_name):
+            self._active_tab = tab_name
+            self._build_dialog()
+
+        is_sc = (self._active_tab == "shortcuts")
+        sc_btn = ctk.CTkButton(
+            nav_row, text="⌨ Keyboard Shortcuts", height=28, corner_radius=6,
+            fg_color="#3b82f6" if is_sc else "transparent",
+            hover_color="#2563eb" if is_sc else "#21262d",
+            text_color="#ffffff" if is_sc else "#8b949e",
+            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+            command=lambda: _switch_tab("shortcuts")
+        )
+        sc_btn.pack(side="left", padx=4, pady=4)
+
+        is_gen = (self._active_tab == "general")
+        gen_btn = ctk.CTkButton(
+            nav_row, text="⚙ AI Models & Folders", height=28, corner_radius=6,
+            fg_color="#3b82f6" if is_gen else "transparent",
+            hover_color="#2563eb" if is_gen else "#21262d",
+            text_color="#ffffff" if is_gen else "#8b949e",
+            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+            command=lambda: _switch_tab("general")
+        )
+        gen_btn.pack(side="left", padx=4, pady=4)
+
+        if self._active_tab == "shortcuts":
+            self._render_shortcuts_tab()
+        else:
+            self._render_general_tab()
+
+        self.add_footer_button("Done", command=self.close, style="primary", width=90)
+
+    def _render_shortcuts_tab(self):
+        # ── Presets & Reset Row ───────────────────────────────────────────────
         top_frame = ctk.CTkFrame(self.content, fg_color="#10141a", corner_radius=8)
-        top_frame.pack(fill="x", pady=(0, 10), padx=2)
+        top_frame.pack(fill="x", pady=(0, 8), padx=2)
 
         ctk.CTkLabel(
-            top_frame, text="Shortcut Preset:",
+            top_frame, text="Preset:",
             font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
             text_color="#f0f6fc"
-        ).pack(side="left", padx=12, pady=10)
+        ).pack(side="left", padx=10, pady=8)
 
         presets = ["Standard", "Premiere", "CapCut", "Custom"]
         self._preset_var = tk.StringVar(value=shortcut_mgr.active_preset)
 
         def _on_preset_select(choice):
             shortcut_mgr.apply_preset(choice)
-            self._build_table()
+            self._render_shortcuts_tab_body()
             if self._on_change_callback:
                 self._on_change_callback()
+
+        preset_menu = ctk.CTkOptionMenu(
+            top_frame, values=presets, variable=self._preset_var,
+            width=120, height=28, corner_radius=6,
+            fg_color="#21262d", button_color="#30363d",
+            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+            command=_on_preset_select
+        )
+        preset_menu.pack(side="left", padx=(0, 8), pady=8)
 
         def _on_reset():
             ConfirmDialog(
                 self.top_container,
                 title="Reset Shortcuts",
-                message="Are you sure you want to reset all shortcuts to Standard defaults?",
-                confirm_text="Reset to Default",
+                message=f"Reset all shortcuts to the '{shortcut_mgr.active_preset}' preset defaults?",
+                confirm_text="Reset All",
                 on_confirm=lambda: (
                     shortcut_mgr.reset_to_default(),
-                    self._build_table(),
+                    self._build_dialog(),
                     self._on_change_callback() if self._on_change_callback else None
                 )
             )
 
-        preset_menu = ctk.CTkOptionMenu(
-            top_frame, values=presets, variable=self._preset_var,
-            width=130, height=30, corner_radius=6,
-            fg_color="#21262d", button_color="#30363d",
-            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
-            command=_on_preset_select
-        )
-        preset_menu.pack(side="right", padx=12, pady=10)
-
         reset_btn = ctk.CTkButton(
-            top_frame, text="🔄 Reset to Default", width=130, height=30, corner_radius=6,
+            top_frame, text="🔄 Reset All", width=100, height=28, corner_radius=6,
             fg_color="#21262d", hover_color="#30363d", text_color="#f0f6fc",
-            border_width=1, border_color="#30363d",
             font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
             command=_on_reset
         )
-        reset_btn.pack(side="right", padx=(0, 4), pady=10)
+        reset_btn.pack(side="right", padx=10, pady=8)
 
-        # ── Table Header ───────────────────────────────────────────────────────
-        tbl_hdr = ctk.CTkFrame(self.content, height=28, fg_color="#1c2128", corner_radius=6)
-        tbl_hdr.pack(fill="x", padx=2, pady=(0, 4))
-        tbl_hdr.pack_propagate(False)
-
-        ctk.CTkLabel(
-            tbl_hdr, text="Action",
-            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
-            text_color="#8b949e", anchor="w"
-        ).pack(side="left", padx=14)
+        # ── Search Input Box ──────────────────────────────────────────────────
+        search_frame = ctk.CTkFrame(self.content, fg_color="#10141a", corner_radius=8)
+        search_frame.pack(fill="x", pady=(0, 8), padx=2)
 
         ctk.CTkLabel(
-            tbl_hdr, text="Edit",
-            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
-            text_color="#8b949e", anchor="e"
-        ).pack(side="right", padx=24)
+            search_frame, text="🔍", font=ctk.CTkFont(size=11), text_color="#8b949e"
+        ).pack(side="left", padx=(10, 4))
 
-        ctk.CTkLabel(
-            tbl_hdr, text="Shortcut",
-            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
-            text_color="#8b949e", anchor="e"
-        ).pack(side="right", padx=30)
+        search_ent = ctk.CTkEntry(
+            search_frame, height=28, corner_radius=6,
+            fg_color="#161b22", border_color="#30363d",
+            placeholder_text="Search shortcuts (e.g. Split, Play, Delete, Undo)…",
+            font=ctk.CTkFont(family="Segoe UI", size=10)
+        )
+        search_ent.pack(side="left", fill="x", expand=True, padx=(0, 8), pady=4)
+        if self._search_text:
+            search_ent.insert(0, self._search_text)
 
-        # ── Table Rows ─────────────────────────────────────────────────────────
-        rows_container = ctk.CTkFrame(self.content, fg_color="transparent")
-        rows_container.pack(fill="both", expand=True, padx=2)
+        def _on_search(*args):
+            self._search_text = search_ent.get().strip().lower()
+            self._render_shortcuts_tab_body()
 
-        for idx, (act_key, act_name, desc) in enumerate(ACTIONS_REGISTRY):
+        search_ent.bind("<KeyRelease>", _on_search)
+
+        # Container for the dynamic list
+        self._table_container = ctk.CTkFrame(self.content, fg_color="transparent")
+        self._table_container.pack(fill="both", expand=True, padx=2)
+        self._render_shortcuts_tab_body()
+
+    def _render_shortcuts_tab_body(self):
+        for w in self._table_container.winfo_children():
+            w.destroy()
+
+        # Group by category
+        filtered = []
+        for act_tuple in ACTIONS_REGISTRY:
+            act_key, act_name, desc = act_tuple[0], act_tuple[1], act_tuple[2]
+            cat = act_tuple[3] if len(act_tuple) > 3 else "General"
+            if self._search_text:
+                if self._search_text not in act_name.lower() and self._search_text not in desc.lower() and self._search_text not in act_key.lower():
+                    continue
+            filtered.append((act_key, act_name, desc, cat))
+
+        if not filtered:
+            ctk.CTkLabel(
+                self._table_container, text="No shortcuts matching your search.",
+                text_color="#8b949e", font=ctk.CTkFont(size=11)
+            ).pack(pady=30)
+            return
+
+        current_cat = None
+        cat_colors = {
+            "Playback": "#38bdf8",
+            "Timeline navigation": "#a855f7",
+            "Clip editing": "#f59e0b",
+            "Selection": "#10b981",
+            "Undo and redo": "#6366f1",
+            "Media management": "#ec4899",
+            "Application settings": "#64748b",
+        }
+
+        for idx, (act_key, act_name, desc, cat) in enumerate(filtered):
+            if cat != current_cat:
+                current_cat = cat
+                cat_hdr = ctk.CTkFrame(self._table_container, height=24, fg_color="#161b22", corner_radius=5)
+                cat_hdr.pack(fill="x", pady=(8, 3))
+                cat_hdr.pack_propagate(False)
+                pill_col = cat_colors.get(cat, "#8b949e")
+                ctk.CTkLabel(
+                    cat_hdr, text=f"●  {cat.upper()}",
+                    font=ctk.CTkFont(family="Segoe UI", size=9, weight="bold"),
+                    text_color=pill_col
+                ).pack(side="left", padx=10)
+
             sc_val = shortcut_mgr.get_shortcut(act_key)
-            row_bg = "#12171f" if idx % 2 == 0 else "#161b22"
+            row_bg = "#10141a" if idx % 2 == 0 else "#141922"
 
-            row = ctk.CTkFrame(rows_container, height=36, fg_color=row_bg, corner_radius=6)
-            row.pack(fill="x", pady=2)
+            row = ctk.CTkFrame(self._table_container, height=36, fg_color=row_bg, corner_radius=6)
+            row.pack(fill="x", pady=1)
             row.pack_propagate(False)
 
-            # Action name
-            ctk.CTkLabel(
-                row, text=act_name,
-                font=ctk.CTkFont(family="Segoe UI", size=11),
+            # Left: action title
+            title_fr = ctk.CTkFrame(row, fg_color="transparent")
+            title_fr.pack(side="left", padx=10, fill="y")
+            lbl = ctk.CTkLabel(
+                title_fr, text=act_name,
+                font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
                 text_color="#e6edf3", anchor="w"
-            ).pack(side="left", padx=14)
+            )
+            lbl.pack(anchor="w")
+
+            # Right controls: Reset single, Edit, Key Badge
+            r_fr = ctk.CTkFrame(row, fg_color="transparent")
+            r_fr.pack(side="right", padx=6)
+
+            # Reset single shortcut button (↺)
+            def _reset_single(k=act_key):
+                shortcut_mgr.reset_shortcut(k)
+                self._render_shortcuts_tab_body()
+                if self._on_change_callback:
+                    self._on_change_callback()
+
+            rst_single = ctk.CTkButton(
+                r_fr, text="↺", width=24, height=24, corner_radius=5,
+                fg_color="#1c2128", hover_color="#30363d", text_color="#8b949e",
+                font=ctk.CTkFont(size=11, weight="bold"),
+                command=_reset_single
+            )
+            rst_single.pack(side="right", padx=(4, 0))
 
             # Edit button
             edit_btn = ctk.CTkButton(
-                row, text="Edit", width=54, height=24, corner_radius=6,
+                r_fr, text="Edit", width=46, height=24, corner_radius=5,
                 fg_color="#21262d", hover_color="#30363d",
                 text_color="#58a6ff", font=ctk.CTkFont(size=9, weight="bold"),
                 command=lambda a=act_key, n=act_name: self._start_capture(a, n)
             )
-            edit_btn.pack(side="right", padx=10)
+            edit_btn.pack(side="right", padx=(6, 0))
 
             # Shortcut key badge
-            badge_frame = ctk.CTkFrame(row, fg_color="#21262d", corner_radius=5)
-            badge_frame.pack(side="right", padx=10)
-
+            badge_frame = ctk.CTkFrame(r_fr, fg_color="#1c2128", corner_radius=5, border_width=1, border_color="#30363d")
+            badge_frame.pack(side="right")
             ctk.CTkLabel(
                 badge_frame, text=sc_val or "None",
                 font=ctk.CTkFont(family="Consolas", size=9, weight="bold"),
                 text_color="#58a6ff" if sc_val else "#484f58"
             ).pack(padx=8, pady=2)
 
-        # ── Footer: Reset to Default + Close ──────────────────────────────────
-        def _on_reset():
-            ConfirmDialog(
-                self.top_container,
-                title="Reset Shortcuts",
-                message="Are you sure you want to reset all shortcuts to Standard defaults?",
-                confirm_text="Reset to Default",
-                on_confirm=lambda: (
-                    shortcut_mgr.reset_to_default(),
-                    self._build_table(),
-                    self._on_change_callback() if self._on_change_callback else None
-                )
-            )
+    def _render_general_tab(self):
+        import settings_manager as _sm
+        import last_dirs as _ld
 
-        self.add_footer_button("Done", command=self.close, style="primary", width=90)
-        self.add_footer_button("Reset to Default", command=_on_reset, style="secondary", width=130)
+        panel = ctk.CTkFrame(self.content, fg_color="transparent")
+        panel.pack(fill="both", expand=True, padx=4, pady=4)
+
+        # ── AI Model Folder Section (Requirement F) ───────────────────────────
+        m_box = ctk.CTkFrame(panel, fg_color="#10141a", corner_radius=10, border_width=1, border_color="#30363d")
+        m_box.pack(fill="x", pady=(0, 12))
+
+        ctk.CTkLabel(
+            m_box, text="🤖 AI Whisper Model Directory",
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            text_color="#f0f6fc"
+        ).pack(anchor="w", padx=14, pady=(12, 4))
+
+        curr_folder = _sm.get_model_folder()
+        is_valid = bool(curr_folder and os.path.isdir(curr_folder))
+
+        stat_fr = ctk.CTkFrame(m_box, fg_color="transparent")
+        stat_fr.pack(fill="x", padx=14, pady=(0, 6))
+
+        stat_text = "🟢 Active & Verified" if is_valid else "🔴 Directory Not Found"
+        stat_col = "#22c55e" if is_valid else "#ef4444"
+        ctk.CTkLabel(
+            stat_fr, text=stat_text,
+            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+            text_color=stat_col
+        ).pack(side="left")
+
+        clean_name = _sm.format_clean_path(curr_folder)
+        ctk.CTkLabel(
+            stat_fr, text=f"({clean_name})",
+            font=ctk.CTkFont(family="Segoe UI", size=10),
+            text_color="#8b949e"
+        ).pack(side="left", padx=6)
+
+        path_disp = ctk.CTkFrame(m_box, fg_color="#161b22", corner_radius=6, border_width=1, border_color="#30363d")
+        path_disp.pack(fill="x", padx=14, pady=(0, 10))
+
+        ctk.CTkLabel(
+            path_disp, text=curr_folder or "No model folder configured",
+            font=ctk.CTkFont(family="Consolas", size=9),
+            text_color="#c9d1d9" if is_valid else "#8b949e",
+            wraplength=480, justify="left"
+        ).pack(side="left", padx=10, pady=8)
+
+        def _locate_model_folder():
+            from tkinter import filedialog as _fd
+            folder = _fd.askdirectory(
+                title="Select Whisper Model Directory",
+                initialdir=curr_folder if is_valid else _ld.get(_ld.WHISPER_MODEL)
+            )
+            if folder:
+                _sm.set_model_folder(folder)
+                self._build_dialog()
+                if self._on_change_callback:
+                    self._on_change_callback()
+
+        btn_row = ctk.CTkFrame(m_box, fg_color="transparent")
+        btn_row.pack(fill="x", padx=14, pady=(0, 12))
+
+        ctk.CTkButton(
+            btn_row, text="📁 Locate / Change Model Folder",
+            height=30, corner_radius=6,
+            fg_color="#21262d", hover_color="#30363d", text_color="#58a6ff",
+            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+            command=_locate_model_folder
+        ).pack(side="left")
+
+        # Discovered Models in current folder
+        models = _sm.discover_available_models(curr_folder)
+        if models:
+            d_box = ctk.CTkFrame(m_box, fg_color="#161b22", corner_radius=6)
+            d_box.pack(fill="x", padx=14, pady=(0, 12))
+            ctk.CTkLabel(
+                d_box, text=f"Discovered Model Components ({len(models)}):",
+                font=ctk.CTkFont(family="Segoe UI", size=9, weight="bold"),
+                text_color="#8b949e"
+            ).pack(anchor="w", padx=8, pady=(6, 2))
+            for m in models[:4]:
+                ctk.CTkLabel(
+                    d_box, text=f"  ✓ {m.get('folder_name', m.get('name'))}",
+                    font=ctk.CTkFont(family="Consolas", size=8),
+                    text_color="#38bdf8"
+                ).pack(anchor="w", padx=8)
+
+        # ── Audio Track Separation Setting (Requirement C) ────────────────────
+        s_box = ctk.CTkFrame(panel, fg_color="#10141a", corner_radius=10, border_width=1, border_color="#30363d")
+        s_box.pack(fill="x", pady=(0, 12))
+
+        ctk.CTkLabel(
+            s_box, text="🎬 Media Import & Timeline Tracks",
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            text_color="#f0f6fc"
+        ).pack(anchor="w", padx=14, pady=(12, 4))
+
+        auto_sep_v = tk.BooleanVar(value=_sm.get_setting("auto_separate_audio", True))
+
+        def _on_sep_toggle():
+            _sm.set_setting("auto_separate_audio", auto_sep_v.get())
+
+        ctk.CTkCheckBox(
+            s_box,
+            text="Automatically separate video and audio into linked tracks (V1 & A1) on import",
+            variable=auto_sep_v,
+            command=_on_sep_toggle,
+            font=ctk.CTkFont(family="Segoe UI", size=10),
+            text_color="#e6edf3"
+        ).pack(anchor="w", padx=14, pady=(4, 12))
 
     def _start_capture(self, act_key: str, act_name: str):
         """Show non-draggable modal to capture new key combination with conflict detection."""
@@ -458,7 +688,7 @@ class ShortcutSettingsDialog(BaseModal):
             if shift: mods.append("Shift")
 
             special_map = {"space": "Space", "backspace": "Backspace", "delete": "Delete",
-                           "left": "Left", "right": "Right", "up": "Up", "down": "Down"}
+                           "left": "Left", "right": "Right", "up": "Up", "down": "Down", "comma": ","}
             key_name = special_map.get(keysym.lower(), keysym.upper() if len(keysym) == 1 else keysym)
 
             combo = "+".join(mods + [key_name]) if mods else key_name
@@ -477,7 +707,8 @@ class ShortcutSettingsDialog(BaseModal):
 
             has_conflict, existing_act = shortcut_mgr.check_conflict(act_key, new_key)
             if has_conflict:
-                existing_name = dict(ACTIONS_REGISTRY).get(existing_act, existing_act)
+                _name_map = {k: name for k, name, _, _ in ACTIONS_REGISTRY}
+                existing_name = _name_map.get(existing_act, existing_act)
                 ConflictDialog(
                     self.top_container,
                     key_str=new_key,
@@ -487,7 +718,7 @@ class ShortcutSettingsDialog(BaseModal):
                 )
             else:
                 shortcut_mgr.assign_shortcut(act_key, new_key)
-                self._build_table()
+                self._build_dialog()
                 if self._on_change_callback:
                     self._on_change_callback()
 
@@ -499,6 +730,7 @@ class ShortcutSettingsDialog(BaseModal):
         shortcut_mgr.shortcuts[conflicting_act] = ""
         shortcut_mgr.custom_shortcuts[conflicting_act] = ""
         shortcut_mgr.assign_shortcut(act_key, new_key)
-        self._build_table()
+        self._build_dialog()
         if self._on_change_callback:
             self._on_change_callback()
+

@@ -451,17 +451,33 @@ class TimelinePanel(ctk.CTkFrame):
                     dur_str = _ft(dur)
                     dark_txt = key in ("main",)
                     tc_color = "#00111f" if dark_txt else "#ffffff"
+
+                    # Offset label if link badge is displayed
+                    has_link = bool(item.get("link_id"))
+                    text_x_offset = 24 if has_link and (x2 - x1) > 40 else 7
+
                     c.create_text(
-                        x1 + 7, ty1 + th // 2 - (5 if th > 30 else 0),
+                        x1 + text_x_offset, ty1 + th // 2 - (5 if th > 30 else 0),
                         text=name, fill=tc_color, anchor="w", font=("Helvetica", 7, "bold")
                     )
                     if th > 28:
-                        c.create_text(x1 + 7, ty1 + th // 2 + 8, text=dur_str, fill=tc_color, anchor="w", font=("Courier", 6))
+                        c.create_text(x1 + text_x_offset, ty1 + th // 2 + 8, text=dur_str, fill=tc_color, anchor="w", font=("Courier", 6))
                     if x2 - x1 > 70:
                         et = _ft(tl + dur)
                         bw = len(et) * 5 + 4
                         c.create_rectangle(x2 - bw - 2, ty1 + 2, x2 - 2, ty1 + 11, fill="#0f172a", outline="")
                         c.create_text(x2 - 4, ty1 + 6, text=et, fill="#dddddd", anchor="e", font=("Courier", 6))
+
+                # Linked clip badge near upper-left
+                if item.get("link_id") and (x2 - x1) > 28:
+                    badge_w = 46 if sel else 18
+                    badge_h = 13
+                    c.create_rectangle(x1 + 3, ty1 + 2, x1 + 3 + badge_w, ty1 + 2 + badge_h,
+                                       fill="#0f172a", outline="#60a5fa", width=1, tags="link_badge")
+                    badge_txt = "🔗Unlink" if sel else "🔗"
+                    c.create_text(x1 + 3 + badge_w // 2, ty1 + 2 + badge_h // 2,
+                                  text=badge_txt, fill="#93c5fd", font=("Segoe UI", 7, "bold"),
+                                  tags="link_badge")
 
                 # Resize drag handles
                 for ex in (x1, x2):
@@ -516,12 +532,12 @@ class TimelinePanel(ctk.CTkFrame):
                     tags="deadair_overlay"
                 )
 
-        # Draw Playhead Red Line on main canvas
+        # Draw Playhead Red Line and Cap Handle on main canvas
         px = (self.controller.fi / float(TARGET_FPS)) * scale
-        self._tl_ph_line = c.create_line(px, 0, px, max(H, y), fill=C_RED, width=2)
-        c.create_polygon(
-            px - 5, 0, px + 5, 0, px + 5, 8, px, 13, px - 5, 8,
-            fill=C_RED, outline=""
+        self._tl_ph_line = c.create_line(px, 0, px, max(H, y), fill=C_RED, width=2, tags="playhead")
+        self._tl_ph_cap = c.create_polygon(
+            px - 6, 0, px + 6, 0, px + 6, 8, px, 14, px - 6, 8,
+            fill=C_RED, outline="", tags="playhead"
         )
 
         c.config(scrollregion=(0, 0, cw, max(H, y)))
@@ -654,10 +670,37 @@ class TimelinePanel(ctk.CTkFrame):
             self._dtk = hit_k
             self._di = hit_i
             cl = self.controller.tracks[hit_k][hit_i]
+
+            # Check if clicked directly on the link badge to unlink
+            if cl.get("link_id"):
+                badge_w = 46 if (self.controller.sel_track == hit_k and self.controller.sel_idx == hit_i) else 20
+                clip_x1 = cl.get("tl", 0.0) * sc
+                if (clip_x1 + 3) <= cx <= (clip_x1 + 3 + badge_w) and (ty1 + 2) <= cy <= (ty1 + 2 + 16):
+                    self.controller._unlink_clip(hit_k, hit_i)
+                    self._dm = None
+                    return
+
             self._tl0 = cl.get("tl", 0.0)
             self._st0 = cl["start"]
             self._en0 = cl["end"]
             self._dx0 = cx
+
+            # Track linked partner clips for synchronized editing
+            self._linked_partners = []
+            lid = cl.get("link_id")
+            if lid:
+                for k, track_clips in self.controller.tracks.items():
+                    for idx, other_cl in enumerate(track_clips):
+                        if (k != hit_k or idx != hit_i) and other_cl.get("link_id") == lid:
+                            self._linked_partners.append({
+                                "track": k,
+                                "idx": idx,
+                                "clip": other_cl,
+                                "tl0": other_cl.get("tl", 0.0),
+                                "st0": other_cl.get("start", 0.0),
+                                "en0": other_cl.get("end", 0.0),
+                            })
+
             # Cache current timeline total so scale stays locked during drag
             self._drag_total_cache = max(20.0, self.controller._dur() * 1.3 + 5)
             self.controller.v_speed.set(cl.get("speed", 1.0))
@@ -732,6 +775,11 @@ class TimelinePanel(ctk.CTkFrame):
             # Compute new tl position — NO auto-zoom, scale stays fixed
             raw = max(0.0, self._tl0 + dx)
             cl["tl"] = self.controller._snap(raw, self._dtk, self._di)
+
+            # Synchronize linked partners
+            d_tl = cl["tl"] - self._tl0
+            for p in getattr(self, "_linked_partners", []):
+                p["clip"]["tl"] = max(0.0, p["tl0"] + d_tl)
 
             # If clip is dragged past visible area, scroll canvas to follow (no zoom)
             clip_x2 = (cl["tl"] + (cl["end"] - cl["start"]) / max(cl.get("speed", 1.0), 0.01)) * sc
@@ -813,15 +861,10 @@ class TimelinePanel(ctk.CTkFrame):
                 or self._dtk == "subtitle"
             )
             if is_unlimited:
-                # Unlimited clips (image/audio/subtitle): ขยาย/หดจากด้านซ้ายได้อิสระ
-                # dx < 0 = ดึงซ้าย (ขยาย), dx > 0 = ดัน (หด)
                 new_tl = max(0.0, self._tl0 + dx)
                 delta_tl = new_tl - self._tl0
-                # end stays fixed, start/end adjust together to change duration
-                # Actually: tl moves, end = end - delta (duration changes)
                 new_dur = max(0.05, (self._en0 - self._st0) - delta_tl / max(cl.get("speed", 1.0), 0.01))
                 cl["tl"] = new_tl
-                # Keep start at 0 for unlimited, adjust end to maintain desired visual duration
                 cl["start"] = 0.0
                 cl["end"] = max(0.05, new_dur)
             else:
@@ -830,6 +873,15 @@ class TimelinePanel(ctk.CTkFrame):
                 d = ns - self._st0
                 cl["start"] = ns
                 cl["tl"] = max(0.0, self._tl0 + d / max(cl.get("speed", 1.0), 0.01))
+
+            # Synchronize linked partners on trim_l
+            d_tl = cl["tl"] - self._tl0
+            d_st = cl["start"] - self._st0
+            for p in getattr(self, "_linked_partners", []):
+                pcl = p["clip"]
+                pcl["tl"] = max(0.0, p["tl0"] + d_tl)
+                pcl["start"] = max(0.0, min(p["st0"] + d_st, pcl["end"] - 0.05))
+
             self._draw_tl()
             self.controller._refresh_preview()
         elif self._dm == "trim_r":
@@ -837,6 +889,14 @@ class TimelinePanel(ctk.CTkFrame):
             is_unlimited = ext in (".jpg", ".jpeg", ".png", ".wav", ".mp3", ".aac", ".ogg", "") or self._dtk.startswith("audio_") or self._dtk == "subtitle"
             max_dur = 999999.0 if is_unlimited else cl.get("source_dur", 999999.0)
             cl["end"] = min(max_dur, max(cl["start"] + 0.05, self._en0 + dx))
+
+            # Synchronize linked partners on trim_r
+            d_en = cl["end"] - self._en0
+            for p in getattr(self, "_linked_partners", []):
+                pcl = p["clip"]
+                p_max = 999999.0 if p["track"].startswith("audio_") else pcl.get("source_dur", 999999.0)
+                pcl["end"] = min(p_max, max(pcl["start"] + 0.05, p["en0"] + d_en))
+
             self._draw_tl()
             self.controller._refresh_preview()
 
@@ -881,6 +941,7 @@ class TimelinePanel(ctk.CTkFrame):
             self.controller._push_undo()
         self._dm = None
         self._dtk = None
+        self._linked_partners = []
         # Clear cached total so next render uses live duration
         self._drag_total_cache = None
 
@@ -950,6 +1011,20 @@ class TimelinePanel(ctk.CTkFrame):
             m.add_separator()
 
         split_state = "disabled" if is_locked else "normal"
+
+        # Linked audio/video status
+        clip = self.controller.tracks.get(tk_key, [{}])[idx] if idx < len(self.controller.tracks.get(tk_key, [])) else {}
+        if clip.get("link_id"):
+            m.add_command(label=" 🔗 Unlink Audio and Video",
+                          command=lambda: self.controller._unlink_clip(tk_key, idx),
+                          state=split_state)
+            m.add_separator()
+        else:
+            m.add_command(label=" 🔗 Link Audio and Video",
+                          command=self.controller._link_selected_clips,
+                          state=split_state)
+            m.add_separator()
+
         m.add_command(label=" Split Here  [Ctrl+B]",   command=self.controller._split, state=split_state)
         m.add_command(label=" Delete",                  command=self.controller._del_sel, state=split_state)
         m.add_command(label=" Ripple Delete [G]",        command=self.controller._ripple_delete, state=split_state)

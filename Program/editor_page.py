@@ -51,6 +51,9 @@ import imageio_ffmpeg
 from proxy_manager import ProxyManager
 from video_display_engine import SmartVideoReader
 import last_dirs as _ld
+import uuid
+from modal_system import BaseModal, DetachResultDialog
+from settings_manager import get_model_folder, set_model_folder
 
 # ── Import Modular Components ────────────────────────────────────────────────
 from editor_utils import *
@@ -272,11 +275,30 @@ class EditorPage(ctk.CTkFrame):
         cap  = cv2.VideoCapture(path)
         fps  = cap.get(cv2.CAP_PROP_FPS) or 25
         cnt  = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        dur  = cnt / fps
+        dur  = cnt / fps if cnt > 0 else 5.0
         cap.release()
         asset = {"path":path,"name":os.path.basename(path),"type":"video"}
         self.assets.append(asset)
-        self.tracks["main"].append(self._clip(path,asset["name"],0,dur,fps=fps))
+
+        # Requirement C: Automatically separate video and audio into linked tracks
+        has_audio = self._has_audio_stream(path)
+        if has_audio:
+            link_id = f"link_{uuid.uuid4().hex[:8]}"
+            v_clip = self._clip(path, asset["name"], 0, dur, fps=fps)
+            v_clip["audio_muted"] = True
+            v_clip["link_id"] = link_id
+            self.tracks["main"].append(v_clip)
+
+            if "audio_0" not in self.tracks:
+                self.tracks["audio_0"] = []
+            a_clip = self._clip(path, f"[Audio] {asset['name']}", 0, dur, fps=fps)
+            a_clip["source_dur"] = dur
+            a_clip["link_id"] = link_id
+            self.tracks["audio_0"].append(a_clip)
+        else:
+            v_clip = self._clip(path, asset["name"], 0, dur, fps=fps)
+            self.tracks["main"].append(v_clip)
+
         self._push_undo()
         # ── Kick off proxy + waveform after UI is fully shown (defer 500ms) ──
         self.after(500, lambda p=path: self._start_proxy_build(p))
@@ -665,85 +687,88 @@ class EditorPage(ctk.CTkFrame):
         return False
 
     def _bind_keys(self):
-        # 1. Control Key Combinations (Ctrl+Z, Ctrl+Y, Ctrl+S, Ctrl+O, Ctrl+I, Ctrl+B)
-        def _on_ctrl_key(event):
+        from shortcut_manager import shortcut_mgr
+
+        def _on_key_press(event):
             if self._is_typing():
-                return  # let the widget handle it normally (copy/paste in entries)
-            key = event.keysym.lower()
-            code = event.keycode
-            # US keycodes: Z=90, Y=89, S=83, O=79, I=73, B=66
-            if key == 'z' or code == 90:
-                self._undo_do()
-                return "break"
-            elif key == 'y' or code == 89:
-                self._redo_do()
-                return "break"
-            elif key == 'b' or code == 66:
-                self._split()
-                return "break"
-            elif key == 's' or code == 83:
-                if event.state & 1:  # Ctrl+Shift+S = Save As
+                return  # Don't trigger shortcuts when editing text entries
+
+            action = shortcut_mgr.match_event(event)
+            if not action:
+                # Fallback for Ctrl+Shift+S (Save As)
+                if (event.state & 4) and (event.state & 1) and event.keysym.lower() == 's':
                     self._save_as()
-                else:
-                    self._save()
-                return "break"
-            elif key == 'o' or code == 79:
-                self._load_project()
-                return "break"
-            elif key == 'i' or code == 73:
-                self._import()
-                return "break"
-            # All other Ctrl combos (C, V, X, A, etc.) → fall through so OS/widgets handle them
-
-        # 2. General Keyboard Shortcuts (S, G, M, J, K, L, Space, Delete, Backspace, Arrows)
-        def _on_general_key(event):
-            if self._is_typing():
-                return
-            # If Control modifier is active, ignore (let _on_ctrl_key or OS handle it)
-            if event.state & 4:
+                    return "break"
                 return
 
-            key = event.keysym.lower()
-            code = event.keycode
-
-            # Arrow keys & Space & Delete
-            if key == "space" or code == 32:
+            if action == "play_pause":
                 self._toggle_play()
                 return "break"
-            elif key in ("delete", "backspace") or code in (46, 8):
+            elif action in ("split", "split_tool"):
+                self._split()
+                return "break"
+            elif action == "delete":
                 self._del_sel()
                 return "break"
-            elif key == "left" or code == 37:
-                shift = (event.state & 1)  # Shift key active
+            elif action == "ripple_delete":
+                self._ripple_delete()
+                return "break"
+            elif action == "undo":
+                self._undo_do()
+                return "break"
+            elif action == "redo":
+                self._redo_do()
+                return "break"
+            elif action == "save":
+                self._save()
+                return "break"
+            elif action == "save_as":
+                self._save_as()
+                return "break"
+            elif action == "open_project":
+                self._load_project()
+                return "break"
+            elif action == "import_media":
+                self._import()
+                return "break"
+            elif action == "export":
+                self._export()
+                return "break"
+            elif action == "mute":
+                self._toggle_mute_sel()
+                return "break"
+            elif action == "step_back":
+                shift = (event.state & 1)
                 self._step(-TARGET_FPS if shift else -1)
                 return "break"
-            elif key == "right" or code == 39:
+            elif action == "step_fwd":
                 shift = (event.state & 1)
                 self._step(TARGET_FPS if shift else 1)
                 return "break"
-            # US layout single keys: S=83, G=71, M=77, J=74, K=75, L=76
-            elif key == 's' or code == 83:
-                self._split()
-                return "break"
-            elif key == 'g' or code == 71:
-                self._ripple_delete()
-                return "break"
-            elif key == 'm' or code == 77:
-                self._toggle_mute_sel()
-                return "break"
-            elif key == 'j' or code == 74:
+            elif action == "jkl_rev":
                 self._jkl("J")
                 return "break"
-            elif key == 'k' or code == 75:
+            elif action == "jkl_pause":
                 self._jkl("K")
                 return "break"
-            elif key == 'l' or code == 76:
+            elif action == "jkl_fwd":
                 self._jkl("L")
                 return "break"
+            elif action == "select_all":
+                all_sel = []
+                for k, items in self.tracks.items():
+                    for i in range(len(items)):
+                        all_sel.append((k, i))
+                self._multi_sel = all_sel
+                if all_sel:
+                    self.sel_track, self.sel_idx = all_sel[0]
+                self._draw_tl()
+                return "break"
+            elif action == "open_settings":
+                self._open_settings()
+                return "break"
 
-        # Bind globally to the root window master
-        self.master.bind("<Control-KeyPress>", _on_ctrl_key)
-        self.master.bind("<KeyPress>", _on_general_key)
+        self.master.bind("<KeyPress>", _on_key_press)
 
     # ── J/K/L playback ────────────────────────────────────────────────────────
     def _jkl(self, key):
@@ -825,6 +850,8 @@ class EditorPage(ctk.CTkFrame):
                     self.tracks[new] = self.tracks.pop(old)
             if data.get("assets"): self.assets = data["assets"]
             self.segments = data.get("segments", [])
+            if "style" in data and hasattr(self, "style"):
+                self.style = SubtitleStyle.from_dict(data["style"])
             
             # Fallback to recreate segments if project had subtitle clips but no segments
             if not self.segments and self.tracks.get("subtitle"):
@@ -928,13 +955,7 @@ class EditorPage(ctk.CTkFrame):
                 self.v_ratio.set(data["ratio"])
 
             if "style" in data and hasattr(self, "style"):
-                st = data["style"]
-                if "font_name" in st: self.style.font_name = st["font_name"]
-                if "font_size" in st: self.style.font_size = st["font_size"]
-                if "font_color" in st: self.style.font_color = st["font_color"]
-                if "decoration" in st: self.style.decoration = st["decoration"]
-                if "animation" in st: self.style.animation = st["animation"]
-                if "position" in st: self.style.position = st["position"]
+                self.style = SubtitleStyle.from_dict(data["style"])
             
             if not self.segments and self.tracks.get("subtitle"):
                 self.segments = []
@@ -1247,6 +1268,12 @@ class EditorPage(ctk.CTkFrame):
         right = ctk.CTkFrame(h, fg_color="transparent")
         right.pack(side="right", padx=12)
 
+        # Settings button in upper-right
+        ctk.CTkButton(right, text="⚙ Settings", height=32, width=82, corner_radius=8,
+                      fg_color=PANEL_MID, hover_color=PANEL_HOV,
+                      font=ctk.CTkFont(size=10, weight="bold"), command=self._open_settings
+                      ).pack(side="right", padx=(6, 0))
+
         # Prominent rounded blue Export button
         ctk.CTkButton(right, text="Export", height=36, width=100, corner_radius=10,
                       fg_color="#3b82f6", hover_color="#2563eb",
@@ -1265,6 +1292,10 @@ class EditorPage(ctk.CTkFrame):
                       fg_color=PANEL_LIGHT, hover_color=PANEL_HOV,
                       font=ctk.CTkFont(size=10, weight="bold"), command=self._save
                       ).pack(side="right", padx=3)
+
+    def _open_settings(self):
+        from shortcut_manager import ShortcutSettingsDialog
+        ShortcutSettingsDialog(self.master)
 
     # ── Bridge Component Methods ──────────────────────────────────────────────
     def _rebuild_label_column(self):
@@ -1530,9 +1561,11 @@ class EditorPage(ctk.CTkFrame):
             scale = self._scale()
             px    = (self.fi / float(TARGET_FPS)) * scale
             H     = self.timeline_panel._tlc.winfo_height()
-            self.timeline_panel._tlc.coords(self.timeline_panel._tl_ph_line, px, 0, px, H)
-            self.timeline_panel._tlc.coords(self.timeline_panel._tl_ph_cap,
-                                            px-6, 0, px+6, 0, px+2, 10, px-2, 10)
+            c     = self.timeline_panel._tlc
+            c.coords(self.timeline_panel._tl_ph_line, px, 0, px, H)
+            if hasattr(self.timeline_panel, '_tl_ph_cap') and self.timeline_panel._tl_ph_cap:
+                c.coords(self.timeline_panel._tl_ph_cap, px - 6, 0, px + 6, 0, px + 6, 8, px, 14, px - 6, 8)
+            c.tag_raise("playhead")
 
             # Auto-scroll: throttle to 300ms — use cached scrollregion to avoid Tk IPC on every call
             now = time.perf_counter()
@@ -1648,26 +1681,57 @@ class EditorPage(ctk.CTkFrame):
 
     # ── Editing operations ────────────────────────────────────────────────────
     def _split(self):
-        t=self.fi/float(TARGET_FPS)
-        clip=self._at(self.sel_track,t)
+        t = self.fi / float(TARGET_FPS)
+        clip = self._at(self.sel_track, t)
         if not clip:
-            clip=self._at("main",t)
+            clip = self._at("main", t)
         if not clip: self._status("No clip at playhead"); return
 
-        track_key=self.sel_track if self._at(self.sel_track,t) else "main"
-        items=self.tracks[track_key]; idx=items.index(clip)
-        src_t=(t-clip["tl"])*clip["speed"]+clip["start"]
-        if src_t<=clip["start"]+0.04 or src_t>=clip["end"]-0.04:
+        track_key = self.sel_track if self._at(self.sel_track, t) else "main"
+        items = self.tracks[track_key]
+        idx = items.index(clip)
+        src_t = (t - clip["tl"]) * clip["speed"] + clip["start"]
+        if src_t <= clip["start"] + 0.04 or src_t >= clip["end"] - 0.04:
             self._status("Too close to edge"); return
-        new=copy.deepcopy(clip)
-        clip["end"]=src_t; new["start"]=src_t; new["tl"]=t
-        items.insert(idx+1,new)
-        self._push_undo(); self._status(f"Split at {_ft(t)}"); self._draw_tl()
+
+        link_id = clip.get("link_id")
+        new = copy.deepcopy(clip)
+        clip["end"] = src_t
+        new["start"] = src_t
+        new["tl"] = t
+        items.insert(idx + 1, new)
+
+        # Requirement C: Synchronize linked partner clip split
+        if link_id:
+            new_lid_left = f"link_{uuid.uuid4().hex[:8]}"
+            new_lid_right = f"link_{uuid.uuid4().hex[:8]}"
+            clip["link_id"] = new_lid_left
+            new["link_id"] = new_lid_right
+
+            for otk, oclips in self.tracks.items():
+                if otk == track_key:
+                    continue
+                for oidx, oclip in enumerate(list(oclips)):
+                    if oclip.get("link_id") == link_id:
+                        osrc_t = (t - oclip["tl"]) * oclip.get("speed", 1.0) + oclip["start"]
+                        if oclip["start"] + 0.04 < osrc_t < oclip["end"] - 0.04:
+                            onew = copy.deepcopy(oclip)
+                            oclip["end"] = osrc_t
+                            oclip["link_id"] = new_lid_left
+                            onew["start"] = osrc_t
+                            onew["tl"] = t
+                            onew["link_id"] = new_lid_right
+                            oclips.insert(oidx + 1, onew)
+
+        self._push_undo()
+        self._status(f"Split at {_ft(t)}")
+        self._draw_tl()
 
     def _del_sel(self):
         """
         Delete all selected items across single selection AND box multi-selection (_multi_sel).
         Safely removes items per track in descending order to avoid index shifting.
+        Automatically removes linked partner clips.
         """
         targets = set()
         if getattr(self, "_multi_sel", None):
@@ -1679,6 +1743,18 @@ class EditorPage(ctk.CTkFrame):
         if not targets:
             return
 
+        # Expand targets with any linked partner clips
+        expanded_targets = set(targets)
+        for k, idx in targets:
+            clip = self.tracks.get(k, [])[idx] if idx < len(self.tracks.get(k, [])) else None
+            if clip and clip.get("link_id"):
+                lid = clip["link_id"]
+                for other_k, other_clips in self.tracks.items():
+                    for other_idx, other_c in enumerate(other_clips):
+                        if other_c.get("link_id") == lid:
+                            expanded_targets.add((other_k, other_idx))
+        targets = expanded_targets
+
         # Group targets by track
         by_track = {}
         for k, idx in targets:
@@ -1688,7 +1764,6 @@ class EditorPage(ctk.CTkFrame):
 
         for k, idx_list in by_track.items():
             items = self.tracks.get(k, [])
-            # Sort indices in descending order to prevent index corruption during pop
             for idx in sorted(idx_list, reverse=True):
                 if 0 <= idx < len(items):
                     items.pop(idx)
@@ -1708,8 +1783,74 @@ class EditorPage(ctk.CTkFrame):
 
         self._push_undo()
         self._draw_tl()
+        self._reload_audio()
         self._refresh_preview()
         self._status("Deleted selected items")
+
+    def _ripple_delete(self):
+        """Ripple delete selected clip(s) and any linked partners, shifting following clips left."""
+        if not self.sel_track or not (0 <= self.sel_idx < len(self.tracks.get(self.sel_track, []))):
+            self._status("No clip selected for ripple delete")
+            return
+        target_clip = self.tracks[self.sel_track][self.sel_idx]
+        del_tl = target_clip.get("tl", 0.0)
+        del_dur = (target_clip["end"] - target_clip["start"]) / max(target_clip.get("speed", 1.0), 0.01)
+        del_end = del_tl + del_dur
+        self._cut_timeline_range(del_tl, del_end)
+        self.sel_track = ""
+        self.sel_idx = -1
+        self._multi_sel = []
+        self._draw_tl()
+        self._refresh_preview()
+        self._status("Ripple delete complete")
+
+    def _unlink_clip(self, track_key, idx):
+        """Unlink audio and video clips so they can be edited independently."""
+        items = self.tracks.get(track_key, [])
+        if not (0 <= idx < len(items)):
+            return
+        clip = items[idx]
+        link_id = clip.get("link_id")
+        if not link_id:
+            return
+        for tk, clips in self.tracks.items():
+            for c in clips:
+                if c.get("link_id") == link_id:
+                    c.pop("link_id", None)
+        self._push_undo()
+        self._draw_tl()
+        self._status("Unlinked Audio and Video")
+
+    def _link_selected_clips(self):
+        """Link compatible video and audio clips so they move, trim, split and delete together."""
+        selected = []
+        if getattr(self, "_multi_sel", None):
+            for k, idx in self._multi_sel:
+                if 0 <= idx < len(self.tracks.get(k, [])):
+                    selected.append((k, self.tracks[k][idx]))
+        elif self.sel_track and 0 <= self.sel_idx < len(self.tracks.get(self.sel_track, [])):
+            primary = self.tracks[self.sel_track][self.sel_idx]
+            selected.append((self.sel_track, primary))
+            p_tl = primary.get("tl", 0.0)
+            is_audio = self.sel_track.startswith("audio_")
+            targets = ["main", "layer_0"] if is_audio else ["audio_0", "audio_1"]
+            for otk in targets:
+                for c in self.tracks.get(otk, []):
+                    if abs(c.get("tl", 0.0) - p_tl) < 0.2:
+                        selected.append((otk, c))
+                        break
+                if len(selected) > 1:
+                    break
+
+        if len(selected) >= 2:
+            new_lid = f"link_{uuid.uuid4().hex[:8]}"
+            for _, c in selected:
+                c["link_id"] = new_lid
+            self._push_undo()
+            self._draw_tl()
+            self._status("Linked Audio and Video")
+        else:
+            self._status("Please select both a video and an audio clip to link")
 
     def _del_subtitle(self, idx):
         """Unified subtitle delete: removes clip from timeline AND segment from transcript panel."""
@@ -2191,34 +2332,48 @@ class EditorPage(ctk.CTkFrame):
                     break
             if tk is None:
                 existing = self._audio_keys()
-                if existing:
-                    n = int(existing[-1].split("_")[1]) + 1
-                else:
-                    n = 0
+                n = int(existing[-1].split("_")[1]) + 1 if existing else 0
                 tk = f"audio_{n}"
                 self.tracks[tk] = []
-        elif not self.tracks.get("main"):
-            tk = "main"
-            tl_start = 0.0  # first video clip always at position 0
-            tl_end = tl_start + dur
+            clip_obj = self._clip(asset["path"], asset["name"], 0, dur, tl=tl_start, fps=fps)
+            clip_obj["source_dur"] = dur
+            self.tracks[tk].append(clip_obj)
+            self.sel_track = tk
+            self.sel_idx = len(self.tracks[tk]) - 1
         elif is_image:
             tk = self._find_free_layer(tl_start, tl_end)
-        else:
-            # Additional video: append after existing main clips
-            tk = "main"
-            # tl_start already = self._dur() from above
-
-        clip_obj = self._clip(asset["path"], asset["name"], 0, dur,
-                              tl=tl_start, fps=fps)
-        if is_image:
+            clip_obj = self._clip(asset["path"], asset["name"], 0, dur, tl=tl_start, fps=fps)
             clip_obj["source_dur"] = 999999.0
             clip_obj["end"] = 999999.0
-        if is_audio:
-            clip_obj["source_dur"] = dur
+            self.tracks[tk].append(clip_obj)
+            self.sel_track = tk
+            self.sel_idx = len(self.tracks[tk]) - 1
+        else:
+            # Video: auto-separate into linked video (main) and audio (audio_0) tracks
+            tk = "main"
+            has_audio = self._has_audio_stream(asset["path"])
+            if has_audio:
+                link_id = f"link_{uuid.uuid4().hex[:8]}"
+                v_clip = self._clip(asset["path"], asset["name"], 0, dur, tl=tl_start, fps=fps)
+                v_clip["audio_muted"] = True
+                v_clip["link_id"] = link_id
+                self.tracks[tk].append(v_clip)
 
-        self.tracks[tk].append(clip_obj)
-        self.sel_track = tk
-        self.sel_idx = len(self.tracks[tk]) - 1
+                atk = "audio_0"
+                if atk not in self.tracks:
+                    self.tracks[atk] = []
+                a_clip = self._clip(asset["path"], f"[Audio] {asset['name']}", 0, dur, tl=tl_start, fps=fps)
+                a_clip["source_dur"] = dur
+                a_clip["link_id"] = link_id
+                self.tracks[atk].append(a_clip)
+
+                self.sel_track = tk
+                self.sel_idx = len(self.tracks[tk]) - 1
+            else:
+                v_clip = self._clip(asset["path"], asset["name"], 0, dur, tl=tl_start, fps=fps)
+                self.tracks[tk].append(v_clip)
+                self.sel_track = tk
+                self.sel_idx = len(self.tracks[tk]) - 1
 
         if is_audio or ext in (".mp4", ".mov", ".avi", ".mkv", ".webm"):
             self._extract_waveforms_bg(asset["path"])
@@ -2230,7 +2385,7 @@ class EditorPage(ctk.CTkFrame):
             self._schedule_reload_audio(250)
         self._push_undo(); self._rebuild_label_column(); self._draw_tl()
         self._refresh_props()
-        self._status(f"Added to [{tk}]: {asset['name']}")
+        self._status(f"Added to timeline: {asset['name']}")
 
 
     # ── Helpers ───────────────────────────────────────────────────────────────
@@ -2343,31 +2498,41 @@ class EditorPage(ctk.CTkFrame):
         clip_dur   = (clip["end"] - clip["start"]) / max(clip.get("speed", 1.0), 0.01)
         clip_tl    = clip.get("tl", 0.0)               # position on timeline
 
+        # Store in user-selected directory or project directory
+        saved_dir = _ld.get(_ld.DETACH_AUDIO, fallback="")
+        if not saved_dir or not os.path.isdir(saved_dir):
+            if hasattr(self, "_current_project_path") and self._current_project_path:
+                saved_dir = os.path.dirname(os.path.abspath(self._current_project_path))
+            else:
+                saved_dir = os.path.dirname(os.path.abspath(path))
+
         self._status("Detaching audio…")
 
         def _run_detach():
             try:
                 ff = imageio_ffmpeg.get_ffmpeg_exe()
                 base = os.path.splitext(os.path.basename(path))[0]
-                out_dir = os.path.dirname(path)
-                out_path = os.path.join(out_dir, f"{base}_audio.wav")
+                out_path = os.path.join(saved_dir, f"{base}_audio.wav")
                 counter = 1
                 while os.path.exists(out_path):
-                    out_path = os.path.join(out_dir, f"{base}_audio_{counter}.wav")
+                    out_path = os.path.join(saved_dir, f"{base}_audio_{counter}.wav")
                     counter += 1
-                # Extract ONLY the clip's portion from the source video
+
+                # Extract the clip's portion from source video as uncompressed WAV
                 cmd = [
                     ff, "-y",
-                    "-ss", str(clip_start),      # seek to clip start in source
-                    "-t",  str(clip_dur),         # extract only clip duration
+                    "-ss", str(clip_start),
+                    "-t",  str(clip_dur),
                     "-i",  path,
                     "-vn", "-ar", "44100", "-ac", "2", out_path
                 ]
                 res = subprocess.run(cmd, capture_output=True, timeout=120)
-                if res.returncode != 0:
+                if res.returncode != 0 or not os.path.exists(out_path):
                     raise RuntimeError("FFmpeg audio extraction failed")
 
-                # Find free audio track
+                _ld.remember(_ld.DETACH_AUDIO, os.path.dirname(out_path))
+
+                # Find or create free audio track
                 tk = None
                 for ak in self._audio_keys():
                     if not self.tracks.get(ak):
@@ -2378,7 +2543,6 @@ class EditorPage(ctk.CTkFrame):
                     tk = f"audio_{n}"
                     self.tracks[tk] = []
 
-                # Audio clip starts at tl=clip_tl, source start=0 (already trimmed)
                 audio_clip = self._clip(
                     out_path,
                     os.path.basename(out_path),
@@ -2391,19 +2555,25 @@ class EditorPage(ctk.CTkFrame):
 
                 def _ui_update():
                     self.tracks[tk].append(audio_clip)
-                    # Mute the source video clip so it no longer plays audio
+                    # Mute the source video clip
+                    clip["audio_muted"] = True
                     clip["muted"] = True
+                    # Detached audio is independent — remove any link_id
+                    clip.pop("link_id", None)
+                    audio_clip.pop("link_id", None)
                     asset = {"path": out_path, "name": os.path.basename(out_path), "type": "audio"}
                     self.assets.append(asset)
                     self._extract_waveforms_bg(out_path)
                     self._push_undo()
                     self._rebuild_label_column()
                     self._draw_tl()
-                    self._status(f"Audio detached → {os.path.basename(out_path)} (video muted)")
+                    self._reload_audio()
+                    self._status(f"Audio detached: {os.path.basename(out_path)}")
+                    DetachResultDialog(self, out_path, os.path.getsize(out_path))
 
                 self.after(0, _ui_update)
             except Exception as ex:
-                self.after(0, lambda e=ex: self._status(f"Detach error: {e}"))
+                self.after(0, lambda e=ex: messagebox.showerror("Audio Extraction Failed", str(e)))
 
         threading.Thread(target=_run_detach, daemon=True).start()
 
@@ -2640,9 +2810,14 @@ class EditorPage(ctk.CTkFrame):
                 try:
                     from video_exporter import generate_ass_file
                     tmp_ass = out + "_tmp_subs.ass"
-                    generate_ass_file(all_export_subs, self.style, tmp_ass)
+                    generate_ass_file(all_export_subs, self.style, tmp_ass, target_w=target_w, target_h=target_h)
                     ass_path_escaped = tmp_ass.replace("\\", "/").replace(":", "\\:")
-                    fc.append(f"{out_v}ass='{ass_path_escaped}'[vsub]")
+                    fonts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "fonts"))
+                    fonts_dir_escaped = fonts_dir.replace("\\", "/").replace(":", "\\:")
+                    if os.path.exists(fonts_dir):
+                        fc.append(f"{out_v}ass='{ass_path_escaped}':fontsdir='{fonts_dir_escaped}'[vsub]")
+                    else:
+                        fc.append(f"{out_v}ass='{ass_path_escaped}'[vsub]")
                     out_v = "[vsub]"
                 except Exception as ass_err:
                     print(f"[ASS Subtitle Burn Direct Warning] {ass_err}")
@@ -2919,14 +3094,7 @@ class EditorPage(ctk.CTkFrame):
                 "muted":   self._muted,
                 "segments": self.segments,
                 "ratio":   self.v_ratio.get() if hasattr(self, "v_ratio") else "16:9",
-                "style":   {
-                    "font_name": self.style.font_name,
-                    "font_size": self.style.font_size,
-                    "font_color": self.style.font_color,
-                    "decoration": self.style.decoration,
-                    "animation": self.style.animation,
-                    "position": self.style.position,
-                } if hasattr(self, "style") else {},
+                "style":   self.style.to_dict() if hasattr(self, "style") and hasattr(self.style, "to_dict") else {},
                 "version": 5,
             }
             with open(path, "w") as f:
@@ -3079,7 +3247,7 @@ class EditorPage(ctk.CTkFrame):
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-class _ExportDialog(ctk.CTkToplevel):
+class _ExportDialog(BaseModal):
     """Export settings dialog – resolution, quality, subtitle burn."""
 
     _CRF_MAP = {
@@ -3089,10 +3257,14 @@ class _ExportDialog(ctk.CTkToplevel):
     }
 
     def __init__(self, master, on_done, has_subs=False, proj_name=""):
-        super().__init__(master)
-        self.title("Export Settings")
-        self.geometry("430x550"); self.resizable(False, False)
-        self.configure(fg_color=PANEL_DARK)
+        super().__init__(
+            parent=master,
+            title="🎬  Export Settings",
+            subtitle="H.264 · AAC · MP4",
+            width=460,
+            height=580
+        )
+        self.master = master
         self._on_done  = on_done
         self._has_subs = has_subs
 
@@ -3110,20 +3282,12 @@ class _ExportDialog(ctk.CTkToplevel):
             self._default_path = ""  # Clean / blank by default
 
         self._build()
-        self.after(100, self._raise)
 
-    def _raise(self):
-        self.lift(); self.focus_force(); self.grab_set()
+    def destroy(self):
+        self.close()
 
     def _build(self):
-        ctk.CTkLabel(self, text="🎬  Export Settings",
-                     font=ctk.CTkFont(size=15, weight="bold"),
-                     text_color=TXT_W).pack(pady=(18, 2))
-        ctk.CTkLabel(self, text="H.264 · AAC · MP4",
-                     font=ctk.CTkFont(size=9), text_color=TXT_G).pack()
-
-        sc = ctk.CTkFrame(self, fg_color="transparent")
-        sc.pack(fill="both", expand=True, padx=22, pady=10)
+        sc = self.content
 
         def sec(t):
             ctk.CTkLabel(sc, text=t,
@@ -3178,17 +3342,9 @@ class _ExportDialog(ctk.CTkToplevel):
                       hover_color=PANEL_HOV, font=ctk.CTkFont(size=9),
                       command=self._browse).pack(side="left")
 
-        # Action buttons
-        br = ctk.CTkFrame(self, fg_color="transparent")
-        br.pack(fill="x", padx=22, pady=(0, 18))
-        ctk.CTkButton(br, text="Cancel", width=90, height=36,
-                      corner_radius=8, fg_color=PANEL_MID,
-                      hover_color=PANEL_LIGHT,
-                      command=self.destroy).pack(side="left")
-        ctk.CTkButton(br, text="🎬  Export", height=36, corner_radius=8,
-                      fg_color=C_BLUE, hover_color=_dark(C_BLUE),
-                      font=ctk.CTkFont(size=12, weight="bold"),
-                      command=self._submit).pack(side="right")
+        # Action buttons in footer
+        self.add_footer_button("🎬  Export", command=self._submit, style="primary", width=110)
+        self.add_footer_button("Cancel", command=self.close, style="secondary", width=90)
 
     def _browse(self):
         import last_dirs as _ld
@@ -3218,7 +3374,7 @@ class _ExportDialog(ctk.CTkToplevel):
                 return
         import last_dirs as _ld
         _ld.remember(_ld.EXPORT_VIDEO, os.path.dirname(out))
-        self.destroy()
+        self.close()
         self._on_done(
             out,
             self._CRF_MAP.get(self._q_v.get(), 20),
@@ -3228,48 +3384,46 @@ class _ExportDialog(ctk.CTkToplevel):
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-class _SubtitleDialog(ctk.CTkToplevel):
-    _LOCAL_MODEL = os.path.join(os.path.dirname(os.path.abspath(__file__)), "whisper-small-final")
-
+class _SubtitleDialog(BaseModal):
     def __init__(self, master, style, on_done):
-        super().__init__(master)
-        self.title("Subtitle Settings")
-        self.geometry("500x700"); self.resizable(False, False)
-        self.configure(fg_color=PANEL_DARK)
+        super().__init__(
+            parent=master,
+            title="Auto-Subtitle Settings",
+            subtitle="Whisper (Local Model) + PyThaiNLP",
+            width=540,
+            height=680
+        )
+        self.master = master
         self._on_done  = on_done
         self._style    = copy.deepcopy(style)
         self._srt_path = ""
         self._build()
-        self.after(100, self._raise)
+
+    def destroy(self):
+        self.close()
 
     def _build(self):
-        ctk.CTkLabel(self, text="Auto-Subtitle Settings",
-                     font=ctk.CTkFont(size=15, weight="bold"),
-                     text_color=TXT_W).pack(pady=(18, 2))
-        ctk.CTkLabel(self, text="Whisper (Local Model) + PyThaiNLP",
-                     font=ctk.CTkFont(size=10), text_color=TXT_G).pack()
-
-        sc = ctk.CTkScrollableFrame(self, fg_color="transparent")
-        sc.pack(fill="both", expand=True, padx=14, pady=10)
+        sc = self.content
 
         def sec(t):
             ctk.CTkLabel(sc, text=t, font=ctk.CTkFont(size=9, weight="bold"),
                          text_color=TXT_G).pack(anchor="w", pady=(10, 3))
 
         sec("โมเดล (Model Path)")
-        _default_model = self._LOCAL_MODEL if os.path.isdir(self._LOCAL_MODEL) else "base"
+        active_model_dir = get_model_folder()
         # Row: entry + browse button
         _mrow = ctk.CTkFrame(sc, fg_color="transparent")
         _mrow.pack(fill="x", pady=(0, 2))
         self._cm = ctk.CTkEntry(_mrow, placeholder_text="Path to model folder…",
                                 height=28, corner_radius=6, fg_color=PANEL_MID)
         self._cm.pack(side="left", fill="x", expand=True)
-        self._cm.insert(0, _default_model)
+        self._cm.insert(0, active_model_dir)
 
         def _browse_model():
             from tkinter import filedialog as _fd
-            folder = _fd.askdirectory(title="Select Whisper Model Folder")
+            folder = _fd.askdirectory(title="Select Whisper Model Folder", initialdir=get_model_folder() or None)
             if folder:
+                set_model_folder(folder)
                 self._cm.delete(0, "end")
                 self._cm.insert(0, folder)
 
@@ -3392,20 +3546,9 @@ class _SubtitleDialog(ctk.CTkToplevel):
                                           command=self._browse_srt)
         self._srt_browse.pack(side="left")
 
-        br=ctk.CTkFrame(self,fg_color="transparent")
-        br.pack(fill="x",padx=14,pady=(0,14))
-        ctk.CTkButton(br,text="Cancel",width=100,height=34,corner_radius=8,
-                      fg_color=PANEL_MID,hover_color=PANEL_LIGHT,
-                      command=self.destroy).pack(side="left")
-        ctk.CTkButton(br,text="Generate Subtitles",height=34,corner_radius=8,
-                      fg_color=C_BLUE,hover_color=_dark(C_BLUE),
-                      font=ctk.CTkFont(size=11,weight="bold"),
-                      command=self._submit).pack(side="right")
-
-    def _raise(self):
-        self.lift()
-        self.focus_force()
-        self.grab_set()
+        # Footer Buttons
+        self.add_footer_button("Generate Subtitles", command=self._submit, style="primary", width=140)
+        self.add_footer_button("Cancel", command=self.close, style="secondary", width=90)
 
     def _toggle_srt_path(self):
         state = "normal" if self._srt_var.get() else "disabled"
@@ -3442,14 +3585,14 @@ class _SubtitleDialog(ctk.CTkToplevel):
         s.position   = self._pv.get()
         mp    = self._cm.get().strip()
         model = mp if mp else self._mv.get()
+        if mp and os.path.isdir(mp):
+            set_model_folder(mp)
         words_per_line = int(self._wpl_v.get())
         srt_path = ""
         if self._srt_var.get():
             srt_path = self._srt_path or self._srt_entry.get().strip()
 
         # ── Validate model path before submitting ────────────────────────────
-        # If user typed a directory path, verify it actually exists and looks
-        # like a HuggingFace model folder (has config.json or pytorch_model.bin)
         if mp and not self._mv.get() == mp:
             if not os.path.isdir(mp):
                 from tkinter import messagebox as _mb
@@ -3457,11 +3600,10 @@ class _SubtitleDialog(ctk.CTkToplevel):
                     "Model Path Error",
                     f"ไม่พบ folder:\n{mp}\n\n"
                     "กรุณาเลือก folder ของ Whisper model ที่ถูกต้อง\n"
-                    "(ควรมีไฟล์ config.json หรือ pytorch_model.bin)\n\n"
+                    "(ควรมีไฟล์ config.json หรือ pytorch_model.bin หรือ best.pt)\n\n"
                     "หรือเลือก fallback model (tiny/base/small/medium) แทน"
                 )
-                return  # ไม่ปิด dialog ให้ user แก้ไขก่อน
-            # Warn if folder looks incomplete
+                return
             has_model = any(
                 os.path.exists(os.path.join(mp, f))
                 for f in ["config.json", "pytorch_model.bin",
@@ -3489,5 +3631,5 @@ class _SubtitleDialog(ctk.CTkToplevel):
                 t_start = 0.0
                 t_end = 0.0
 
-        self.destroy()
+        self.close()
         self._on_done(s, model, words_per_line, srt_path, rmode, t_start, t_end)

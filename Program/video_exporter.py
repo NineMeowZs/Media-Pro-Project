@@ -96,30 +96,33 @@ def _secs_to_ass_time(t: float) -> str:
     return f"{h}:{m:02d}:{s:02d}.{cs:02d}"
 
 
-def generate_ass_file(segments: list[dict], style: SubtitleStyle, out_path: str) -> None:
+def generate_ass_file(segments: list[dict], style: SubtitleStyle, out_path: str, target_w: int = 1920, target_h: int = 1080) -> None:
     """Write an ASS subtitle file from segments and SubtitleStyle with exact positioning, letter spacing, and font styling."""
+    target_w = max(320, int(target_w))
+    target_h = max(240, int(target_h))
+
     header = f"""[Script Info]
 ScriptType: v4.00+
-PlayResX: 1920
-PlayResY: 1080
+PlayResX: {target_w}
+PlayResY: {target_h}
 ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{style.font_name},{int(style.font_size)},{_hex_to_ass_colour(style.font_color)},&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,5,40,40,40,1
+Style: Default,{style.font_name},{int(style.font_size)},{_hex_to_ass_colour(style.font_color)},&H00FFFFFF,&H00000000,&H00000000,{1 if style.bold else 0},{1 if style.italic else 0},0,0,100,100,0,0,1,2,0,5,40,40,40,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
     pos_map = {
-        "bottom_center": (960, 950),
-        "bottom_left":   (360, 950),
-        "bottom_right":  (1560, 950),
-        "top_center":    (960, 130),
-        "top_left":      (360, 130),
-        "top_right":     (1560, 130),
-        "center":        (960, 540),
-        "custom":        (int(getattr(style, "custom_x", 0.5) * 1920), int(getattr(style, "custom_y", 0.85) * 1080)),
+        "bottom_center": (target_w // 2, int(target_h * 0.88)),
+        "bottom_left":   (int(target_w * 0.18), int(target_h * 0.88)),
+        "bottom_right":  (int(target_w * 0.82), int(target_h * 0.88)),
+        "top_center":    (target_w // 2, int(target_h * 0.12)),
+        "top_left":      (int(target_w * 0.18), int(target_h * 0.12)),
+        "top_right":     (int(target_w * 0.82), int(target_h * 0.12)),
+        "center":        (target_w // 2, target_h // 2),
+        "custom":        (int(getattr(style, "custom_x", 0.5) * target_w), int(getattr(style, "custom_y", 0.85) * target_h)),
     }
 
     lines = [header]
@@ -143,13 +146,13 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
         # Determine exact position coordinates
         if "custom_x" in seg and "custom_y" in seg:
-            px = int(seg["custom_x"] * 1920)
-            py = int(seg["custom_y"] * 1080)
+            px = int(seg["custom_x"] * target_w)
+            py = int(seg["custom_y"] * target_h)
         elif style.position == "custom":
-            px = int(getattr(style, "custom_x", 0.5) * 1920)
-            py = int(getattr(style, "custom_y", 0.85) * 1080)
+            px = int(getattr(style, "custom_x", 0.5) * target_w)
+            py = int(getattr(style, "custom_y", 0.85) * target_h)
         else:
-            px, py = pos_map.get(style.position, (960, 950))
+            px, py = pos_map.get(style.position, (target_w // 2, int(target_h * 0.88)))
 
         # Alignment tag (\an4=left, \an5=center, \an6=right)
         align_mode = str(seg.get("align", getattr(style, "align", "center"))).lower()
@@ -264,6 +267,8 @@ def export_video_with_subtitles(
     segments: list[dict],
     style: SubtitleStyle,
     progress_cb=None,
+    target_w: int = 0,
+    target_h: int = 0,
 ):
     """
     Burn subtitles using ffmpeg's ASS subtitle filter.
@@ -278,10 +283,23 @@ def export_video_with_subtitles(
 
     ff = imageio_ffmpeg.get_ffmpeg_exe()
 
-    # Write temp .ass file
+    # Determine resolution if not specified
+    tw = target_w
+    th = target_h
+    if tw <= 0 or th <= 0:
+        try:
+            import cv2
+            cap = cv2.VideoCapture(input_path)
+            tw = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) or 1920)
+            th = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) or 1080)
+            cap.release()
+        except Exception:
+            tw, th = 1920, 1080
+
+    # Write temp .ass file with matching PlayResX / PlayResY
     tmp_ass = output_path + "_tmp_subs.ass"
     try:
-        generate_ass_file(segments, style, tmp_ass)
+        generate_ass_file(segments, style, tmp_ass, target_w=tw, target_h=th)
     except Exception as e:
         if progress_cb:
             progress_cb(f"สร้าง ASS ล้มเหลว: {e} – ใช้ frame-by-frame แทน")
@@ -291,6 +309,13 @@ def export_video_with_subtitles(
     # Escape path for ffmpeg on Windows (backslash → forward-slash, escape colons)
     ass_path_escaped = tmp_ass.replace("\\", "/").replace(":", "\\:")
 
+    # Local fonts directory support
+    fonts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
+    fontsdir_opt = ""
+    if os.path.isdir(fonts_dir):
+        fontsdir_esc = fonts_dir.replace("\\", "/").replace(":", "\\:")
+        fontsdir_opt = f":fontsdir='{fontsdir_esc}'"
+
     # Build command line with optional GPU hardware decoding
     hw_args = ["-hwaccel", "auto"] if enc_name != "libx264" else []
 
@@ -298,7 +323,7 @@ def export_video_with_subtitles(
         ff, "-y",
         *hw_args,
         "-i", input_path,
-        "-vf", f"ass='{ass_path_escaped}'",
+        "-vf", f"ass='{ass_path_escaped}'{fontsdir_opt}",
         *enc_args,
         "-c:a", "copy",
         output_path,

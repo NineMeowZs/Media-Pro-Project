@@ -11,6 +11,7 @@ from editor_utils import (
     C_BLUE, C_TEAL, C_GREEN, C_AMBER, C_PINK, C_RED,
     _ft, _dark, _bright, HAS_SUBTITLES
 )
+from modal_system import BaseModal
 try:
     from subtitle_config import (
         FONT_CHOICES, get_all_fonts, add_custom_font,
@@ -29,15 +30,11 @@ except ImportError:
 # ═══════════════════════════════════════════════════════════════════
 #  Color Wheel Dialog
 # ═══════════════════════════════════════════════════════════════════
-class ColorWheelDialog(ctk.CTkToplevel):
+class ColorWheelDialog(BaseModal):
     """HSV Color Wheel + Value slider + Hex entry picker."""
 
     def __init__(self, parent, initial_color="#ffffff", on_pick=None):
-        super().__init__(parent)
-        self.title("Pick Color")
-        self.geometry("340x420")
-        self.resizable(False, False)
-        self.configure(fg_color=PANEL_DARK)
+        super().__init__(parent, title="🎨  Choose Color", width=360, height=440)
         self._on_pick = on_pick
         self._result = initial_color
 
@@ -58,26 +55,24 @@ class ColorWheelDialog(ctk.CTkToplevel):
         self._dragging_wheel = False
 
         self._build()
-        self.after(100, lambda: (self.lift(), self.focus_force(), self.grab_set()))
         self._redraw_all()
 
-    def _build(self):
-        ctk.CTkLabel(self, text="🎨  Choose Color",
-                     font=ctk.CTkFont(size=13, weight="bold"),
-                     text_color=TXT_W).pack(pady=(12, 4))
+    def destroy(self):
+        self.close()
 
+    def _build(self):
         # Color wheel canvas
         ws = self._wheel_size
-        self._wheel_canvas = tk.Canvas(self, width=ws, height=ws,
+        self._wheel_canvas = tk.Canvas(self.content, width=ws, height=ws,
                                         bg="#0f172a", highlightthickness=0)
-        self._wheel_canvas.pack(pady=(0, 6))
+        self._wheel_canvas.pack(pady=(4, 6))
         self._wheel_canvas.bind("<Button-1>", self._wheel_press)
         self._wheel_canvas.bind("<B1-Motion>", self._wheel_drag)
         self._wheel_canvas.bind("<ButtonRelease-1>", self._wheel_release)
 
         # Value (brightness) slider
-        val_row = ctk.CTkFrame(self, fg_color="transparent")
-        val_row.pack(fill="x", padx=20, pady=(0, 6))
+        val_row = ctk.CTkFrame(self.content, fg_color="transparent")
+        val_row.pack(fill="x", padx=10, pady=(0, 6))
         ctk.CTkLabel(val_row, text="Brightness", font=ctk.CTkFont(size=9),
                      text_color=TXT_G, width=62).pack(side="left")
         self._val_slider = ctk.CTkSlider(
@@ -89,8 +84,8 @@ class ColorWheelDialog(ctk.CTkToplevel):
         self._val_slider.pack(side="left", padx=4)
 
         # Hex entry + preview swatch
-        hex_row = ctk.CTkFrame(self, fg_color="transparent")
-        hex_row.pack(fill="x", padx=20, pady=(0, 8))
+        hex_row = ctk.CTkFrame(self.content, fg_color="transparent")
+        hex_row.pack(fill="x", padx=10, pady=(0, 8))
         ctk.CTkLabel(hex_row, text="#Hex", font=ctk.CTkFont(size=9),
                      text_color=TXT_G, width=36).pack(side="left")
         self._hex_var = tk.StringVar(value=self._result)
@@ -106,16 +101,9 @@ class ColorWheelDialog(ctk.CTkToplevel):
                                   highlightbackground="#334155")
         self._swatch.pack(side="left", padx=4)
 
-        # Buttons
-        btn_row = ctk.CTkFrame(self, fg_color="transparent")
-        btn_row.pack(fill="x", padx=20, pady=(0, 14))
-        ctk.CTkButton(btn_row, text="Cancel", width=100, height=32,
-                      corner_radius=8, fg_color=PANEL_MID, hover_color=PANEL_LIGHT,
-                      command=self.destroy).pack(side="left")
-        ctk.CTkButton(btn_row, text="✓ Select", height=32, corner_radius=8,
-                      fg_color=C_BLUE, hover_color=_dark(C_BLUE),
-                      font=ctk.CTkFont(size=11, weight="bold"),
-                      command=self._submit).pack(side="right")
+        # Buttons in footer
+        self.add_footer_button("✓ Select", command=self._submit, style="primary", width=100)
+        self.add_footer_button("Cancel", command=self.close, style="secondary", width=90)
 
     # ── Drawing ───────────────────────────────────────────────────────────────
     def _redraw_all(self):
@@ -238,39 +226,33 @@ class ColorWheelDialog(ctk.CTkToplevel):
 # ═══════════════════════════════════════════════════════════════════
 #  Global Text Style Dialog (opened from ⚙ gear in Text tab)
 # ═══════════════════════════════════════════════════════════════════
-class GlobalTextStyleDialog(ctk.CTkToplevel):
+class GlobalTextStyleDialog(BaseModal):
     """Global default text / subtitle style settings opened from ⚙ gear button in Text tab."""
 
     def __init__(self, parent, controller):
-        super().__init__(parent)
-        self.title("⚙  Global Text Style Settings")
-        self.geometry("400x640")
-        self.resizable(False, False)
-        self.configure(fg_color=PANEL_DARK)
+        super().__init__(
+            parent=parent,
+            title="⚙  Global Text Style Settings",
+            subtitle="ตั้งค่า default ของสไตล์ข้อความในโปรเจกต์",
+            width=440,
+            height=660
+        )
         self._ctrl = controller
         import copy
         self._style = copy.deepcopy(getattr(controller, "style", None))
         self._build()
-        self.after(100, lambda: (self.lift(), self.focus_force(), self.grab_set()))
+
+    def destroy(self):
+        self.close()
 
     def _build(self):
         style = self._style
         if style is None:
-            ctk.CTkLabel(self, text="No subtitle style available.",
+            ctk.CTkLabel(self.content, text="No subtitle style available.",
                          text_color=TXT_G).pack(pady=40)
             return
 
-        # Header title
-        ctk.CTkLabel(self, text="🌐  Global Subtitle Style",
-                     font=ctk.CTkFont(size=14, weight="bold"),
-                     text_color="#60a5fa").pack(pady=(16, 2))
-        ctk.CTkLabel(self, text="ตั้งค่า default ของสไตล์ข้อความในโปรเจกต์",
-                     font=ctk.CTkFont(size=9), text_color=TXT_G).pack(pady=(0, 6))
-        ctk.CTkFrame(self, height=1, fg_color=BORD).pack(fill="x", padx=14)
-
-        sc = ctk.CTkScrollableFrame(self, fg_color="transparent",
-                                     scrollbar_button_color=PANEL_LIGHT)
-        sc.pack(fill="both", expand=True, padx=14, pady=(8, 6))
+        sc = self.content
 
         def _sec(t):
             ctk.CTkLabel(sc, text=t, font=ctk.CTkFont(size=9, weight="bold"),
@@ -407,16 +389,9 @@ class GlobalTextStyleDialog(ctk.CTkToplevel):
             command=self._apply_to_all
         ).pack(fill="x", pady=(8, 0))
 
-        # ── Bottom action buttons ─────────────────────────────────────────────
-        br = ctk.CTkFrame(self, fg_color="transparent")
-        br.pack(fill="x", padx=14, pady=(6, 14))
-        ctk.CTkButton(br, text="Cancel", width=90, height=32, corner_radius=8,
-                      fg_color=PANEL_MID, hover_color=PANEL_LIGHT,
-                      command=self.destroy).pack(side="left")
-        ctk.CTkButton(br, text="✓ Apply", height=32, corner_radius=8,
-                      fg_color=C_BLUE, hover_color=_dark(C_BLUE),
-                      font=ctk.CTkFont(size=11, weight="bold"),
-                      command=self._apply).pack(side="right")
+        # Action buttons in footer
+        self.add_footer_button("✓ Apply", command=self._apply, style="primary", width=100)
+        self.add_footer_button("Cancel", command=self.close, style="secondary", width=90)
 
     # ── Callbacks ─────────────────────────────────────────────────────────────
     def _preview_font(self, val):
@@ -466,10 +441,11 @@ class GlobalTextStyleDialog(ctk.CTkToplevel):
             self._update_swatch()
         ColorWheelDialog(self, initial_color=current, on_pick=_pk)
 
-    def _apply(self):
+    def _apply(self, close=True):
         style = self._style
         if style is None:
-            self.destroy()
+            if close:
+                self.close()
             return
         style.font_name  = self._fv.get()
         try:
@@ -492,10 +468,11 @@ class GlobalTextStyleDialog(ctk.CTkToplevel):
                           "decoration", "animation", "position", "align"):
                 setattr(ctrl_style, attr, getattr(style, attr))
         self._ctrl._refresh_preview()
-        self.destroy()
+        if close:
+            self.close()
 
     def _apply_to_all(self):
-        self._apply()
+        self._apply(close=False)
         fn = getattr(self._ctrl.style, "font_name",  "Tahoma")
         fs = getattr(self._ctrl.style, "font_size",  36)
         fc = getattr(self._ctrl.style, "font_color", "#ffffff")
@@ -510,6 +487,7 @@ class GlobalTextStyleDialog(ctk.CTkToplevel):
         self._ctrl._refresh_preview()
         n = len(self._ctrl.tracks.get("subtitle", []))
         self._ctrl._status(f"✓ Applied to all {n} subtitle clips")
+        self.close()
 
 
 # ═══════════════════════════════════════════════════════════════════

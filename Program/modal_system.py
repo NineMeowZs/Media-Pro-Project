@@ -65,6 +65,10 @@ class BaseModal:
         self.card.place(relx=0.5, rely=0.5, anchor="center")
         self.card.pack_propagate(False)
 
+        # Dynamic size clamping to parent container
+        self._adjust_size()
+        self._cfg_bind_id = self.top_container.bind("<Configure>", lambda e: self._adjust_size(), add="+")
+
         # 3. Header
         self._header = ctk.CTkFrame(self.card, height=54, fg_color="transparent", corner_radius=0)
         self._header.pack(fill="x", padx=16, pady=(12, 0))
@@ -119,6 +123,19 @@ class BaseModal:
 
         # Escape key closes modal
         self.top_container.bind("<Escape>", self._on_escape, add="+")
+
+    def _adjust_size(self):
+        try:
+            if not hasattr(self, "card") or not self.card.winfo_exists():
+                return
+            cw = self.top_container.winfo_width()
+            ch = self.top_container.winfo_height()
+            if cw > 50 and ch > 50:
+                target_w = min(self.width, max(280, cw - 40))
+                target_h = min(self.height, max(180, ch - 40))
+                self.card.configure(width=target_w, height=target_h)
+        except Exception:
+            pass
 
     def _on_escape(self, event=None):
         self.close()
@@ -466,3 +483,44 @@ class ProgressModal(BaseModal):
         self.close()
         if self.on_cancel:
             self.on_cancel()
+
+
+class InputDialog(BaseModal):
+    """Prompt modal with text input and Confirm/Cancel action buttons."""
+
+    def __init__(self, parent, title: str, message: str, initial_value: str = "",
+                 on_confirm=None, on_cancel=None, confirm_text: str = "Confirm", cancel_text: str = "Cancel"):
+        super().__init__(parent, title=title, width=440, height=250, on_close=on_cancel)
+        self._on_confirm = on_confirm
+        self._on_cancel = on_cancel
+
+        body = ctk.CTkFrame(self.content, fg_color="transparent")
+        body.pack(fill="both", expand=True, pady=10)
+
+        ctk.CTkLabel(
+            body, text=message,
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color=TXT_W, justify="left", anchor="w"
+        ).pack(fill="x", pady=(0, 8))
+
+        self._entry = ctk.CTkEntry(
+            body, height=32, corner_radius=8,
+            fg_color=BG_MODAL_INNER, border_color=BORDER_CLR,
+            text_color=TXT_W, font=ctk.CTkFont(family="Segoe UI", size=11)
+        )
+        self._entry.pack(fill="x", pady=(0, 4))
+        if initial_value:
+            self._entry.insert(0, initial_value)
+        self._entry.focus_set()
+
+        def _do_confirm():
+            val = self._entry.get()
+            self.close()
+            if self._on_confirm:
+                self._on_confirm(val)
+
+        self._entry.bind("<Return>", lambda e: _do_confirm())
+
+        self.add_footer_button(confirm_text, command=_do_confirm, style="primary", width=100)
+        self.add_footer_button(cancel_text, command=self.close, style="secondary", width=90)
+

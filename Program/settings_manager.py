@@ -28,9 +28,13 @@ def _load_settings():
     _loaded = True
     _cache = dict(_DEFAULT_SETTINGS)
 
-    # If default whisper directory exists locally, set it as initial fallback
+    # Check existing verified model folders: D:/Folder_For_Work/Year4_1/best
+    best_model = "D:/Folder_For_Work/Year4_1/best"
+    if os.path.isdir(best_model):
+        _cache["model_folder"] = best_model
+
     local_model = os.path.join(os.path.dirname(os.path.abspath(__file__)), "whisper-small-final")
-    if os.path.isdir(local_model):
+    if os.path.isdir(local_model) and not _cache.get("model_folder"):
         _cache["model_folder"] = local_model
 
     if os.path.exists(_SETTINGS_FILE):
@@ -114,6 +118,7 @@ def format_clean_path(path: str, max_chars: int = 24) -> str:
 
     # Clean name mapping
     clean_names = {
+        "best": "Whisper Model (best)",
         "whisper-small-final": "Whisper Small (Local)",
         "whisper-base": "Whisper Base",
         "models": "Model Directory",
