@@ -21,6 +21,8 @@ class MediaPanel(ctk.CTkFrame):
 
         # Tabs references
         self._tbtn = {}
+        self._active_tab_name = "Media"
+        self._deadair_cards = {}
 
         self._build_ui()
 
@@ -83,6 +85,7 @@ class MediaPanel(ctk.CTkFrame):
 
     def _tab(self, name):
         """Switch active tab and rebuild inner components list."""
+        self._active_tab_name = name
         self._ptitle.configure(text=name)
         
         # Hide transcript panel first
@@ -382,17 +385,10 @@ class MediaPanel(ctk.CTkFrame):
         ctk.CTkFrame(self._pscroll, height=1, fg_color=BORD).pack(fill="x", pady=4)
 
         current_selected_id = getattr(self.controller, "_selected_deadair_id", None)
-        card_widgets = {}
+        self._deadair_cards = {}
 
         def _highlight_card(active_id):
-            self.controller._selected_deadair_id = active_id
-            for d_id, (c_row, b_lbl) in card_widgets.items():
-                if d_id == active_id:
-                    c_row.configure(border_color="#38bdf8", fg_color="#1e293b", border_width=2)
-                    b_lbl.configure(text_color="#38bdf8")
-                else:
-                    c_row.configure(border_color=BORD, fg_color=PANEL_MID, border_width=1)
-                    b_lbl.configure(text_color=C_AMBER)
+            self.highlight_deadair_card(active_id, scroll=False)
 
         # ── Progressive Non-Blocking List Population ──
         def _populate_chunk(start_i=0, chunk_size=15):
@@ -407,8 +403,8 @@ class MediaPanel(ctk.CTkFrame):
                 did = item["id"]
                 is_active = (did == current_selected_id)
 
-                card_border = "#38bdf8" if is_active else BORD
-                card_bg = "#1e293b" if is_active else PANEL_MID
+                card_border = "#facc15" if is_active else BORD
+                card_bg = "#292518" if is_active else PANEL_MID
                 card_bw = 2 if is_active else 1
 
                 row = ctk.CTkFrame(
@@ -432,7 +428,7 @@ class MediaPanel(ctk.CTkFrame):
                 title_row = ctk.CTkFrame(info_col, fg_color="transparent", cursor="hand2")
                 title_row.pack(fill="x")
 
-                badge_col = "#38bdf8" if is_active else C_AMBER
+                badge_col = "#facc15" if is_active else C_AMBER
                 badge_lbl = ctk.CTkLabel(
                     title_row, text=f"#{idx+1}",
                     font=ctk.CTkFont(family="Consolas", size=9, weight="bold"),
@@ -456,15 +452,19 @@ class MediaPanel(ctk.CTkFrame):
                 btn_col = ctk.CTkFrame(row, fg_color="transparent")
                 btn_col.pack(side="right", padx=6, pady=4)
 
-                card_widgets[did] = (row, badge_lbl)
+                self._deadair_cards[did] = (row, badge_lbl)
 
                 def _select_card(event=None, s=st, d_id=did):
-                    self.controller._stop()
-                    self.controller.fi = max(0, int(s * TARGET_FPS))
-                    self.controller._render(self.controller.fi)
-                    self.controller._scroll_tl_to_time(s)
-                    self.controller._draw_tl()
-                    _highlight_card(d_id)
+                    if hasattr(self.controller, "_select_deadair"):
+                        self.controller._select_deadair(d_id, seek=True)
+                    else:
+                        self.controller._stop()
+                        self.controller.fi = max(0, int(s * TARGET_FPS))
+                        self.controller._render(self.controller.fi)
+                        self.controller._scroll_tl_to_time(s)
+                        self.controller._selected_deadair_id = d_id
+                        self.controller._draw_tl()
+                        self.highlight_deadair_card(d_id, scroll=False)
 
                 for w in (row, info_col, title_row, badge_lbl, time_lbl, dur_lbl):
                     w.bind("<Button-1>", _select_card)
@@ -504,6 +504,68 @@ class MediaPanel(ctk.CTkFrame):
                 _update_summary()
 
         _populate_chunk(0, 15)
+
+    def focus_deadair(self, did):
+        """Switch to DeadAir tab if not active, highlight card, and scroll to it."""
+        if getattr(self, "_active_tab_name", "") != "DeadAir":
+            self._tab("DeadAir")
+        self.highlight_deadair_card(did, scroll=True)
+
+    def highlight_deadair_card(self, active_id, scroll=True):
+        """Highlight specified deadair card in yellow and optionally scroll to it."""
+        cards = getattr(self, "_deadair_cards", {})
+        for d_id, (c_row, b_lbl) in cards.items():
+            if d_id == active_id:
+                c_row.configure(border_color="#facc15", fg_color="#292518", border_width=2)
+                b_lbl.configure(text_color="#facc15")
+            else:
+                c_row.configure(border_color=BORD, fg_color=PANEL_MID, border_width=1)
+                b_lbl.configure(text_color=C_AMBER)
+        if scroll:
+            self.scroll_to_deadair_card(active_id)
+
+    def scroll_to_deadair_card(self, active_id, retries=5):
+        """Scroll the DeadAir scrollable frame to ensure the active card is visible."""
+        cards = getattr(self, "_deadair_cards", {})
+        if active_id not in cards:
+            if retries > 0:
+                self.after(40, lambda: self.scroll_to_deadair_card(active_id, retries - 1))
+            return
+        self._do_scroll_deadair(active_id)
+
+    def _do_scroll_deadair(self, active_id):
+        cards = getattr(self, "_deadair_cards", {})
+        if active_id not in cards:
+            return
+        c_row, _ = cards[active_id]
+        try:
+            self.update_idletasks()
+            y = c_row.winfo_y()
+            h = c_row.winfo_height()
+            canvas = getattr(self._pscroll, "_parent_canvas", None)
+            if not canvas:
+                return
+            canvas_h = canvas.winfo_height()
+            bbox = canvas.bbox("all")
+            total_h = (bbox[3] - bbox[1]) if bbox else self._pscroll.winfo_height()
+            if total_h <= canvas_h or canvas_h <= 0:
+                return
+            top, bottom = canvas.yview()
+            view_top = top * total_h
+            view_bottom = bottom * total_h
+            if y < view_top:
+                canvas.yview_moveto(max(0.0, (y - 8) / total_h))
+            elif (y + h) > view_bottom:
+                canvas.yview_moveto(min(1.0, (y + h - canvas_h + 12) / total_h))
+        except Exception:
+            pass
+
+    def unhighlight_deadair_cards(self):
+        """Reset all dead air cards to unhighlighted state."""
+        cards = getattr(self, "_deadair_cards", {})
+        for d_id, (c_row, b_lbl) in cards.items():
+            c_row.configure(border_color=BORD, fg_color=PANEL_MID, border_width=1)
+            b_lbl.configure(text_color=C_AMBER)
 
     def _pt_adjustment(self):
         """Tab Panel: Color & Adjustment Presets."""

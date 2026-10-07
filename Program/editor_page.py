@@ -213,6 +213,8 @@ class EditorPage(ctk.CTkFrame):
         self._solo_key:  str  = ""   # "" = none soloed
         self._multi_sel: list = []   # [(track_key, idx), ...]
         self._jkl_speed: float = 1.0 # J=rev/K=pause/L=fwd speed multiplier
+        self._deadair_segments: list = []
+        self._selected_deadair_id = None
 
         # ── Audio reload debouncing and process cancellation ──────────────────
         self._audio_reload_timer = None
@@ -2031,8 +2033,8 @@ class EditorPage(ctk.CTkFrame):
         self._refresh_preview()
         self._status(f"✂ ลบ Dead Air ทั้งหมด {len(deadair_list)} ช่วงเรียบร้อย")
 
-    def _scroll_tl_to_time(self, t: float):
-        """Scroll timeline canvas so that timestamp t is centered in view."""
+    def _scroll_tl_to_time(self, t: float, only_if_hidden: bool = False):
+        """Scroll timeline canvas so that timestamp t is visible (or centered in view)."""
         if hasattr(self, "timeline_panel") and hasattr(self.timeline_panel, "_tlc"):
             try:
                 scale = self._scale()
@@ -2041,10 +2043,37 @@ class EditorPage(ctk.CTkFrame):
                 W = c.winfo_width()
                 cw = getattr(self, "_cached_tl_cw", 0)
                 if cw > W:
+                    left_ratio, right_ratio = c.xview()
+                    vis_left = left_ratio * cw
+                    vis_right = right_ratio * cw
+                    if only_if_hidden and (vis_left + 40 <= px <= vis_right - 40):
+                        return
                     target_left = max(0.0, px - W / 2)
                     c.xview_moveto(target_left / cw)
             except Exception:
                 pass
+
+    def _select_deadair(self, did: int, seek: bool = True):
+        """
+        Select a dead air segment by ID:
+        1. Set _selected_deadair_id
+        2. Move playhead to start of that dead air interval and render preview
+        3. Scroll timeline to the interval
+        4. Redraw timeline (highlighting selected dead air in yellow)
+        5. Navigate and highlight in MediaPanel DeadAir tab
+        """
+        self._selected_deadair_id = did
+        deadair_list = getattr(self, "_deadair_segments", [])
+        seg = next((d for d in deadair_list if d.get("id") == did), None)
+        if seg and seek:
+            self._stop()
+            st = seg.get("start", 0.0)
+            self.fi = max(0, int(st * TARGET_FPS))
+            self._render(self.fi)
+            self._scroll_tl_to_time(st, only_if_hidden=True)
+        self._draw_tl()
+        if hasattr(self, "media_panel"):
+            self.media_panel.focus_deadair(did)
 
     def _render_main_track_audio(self) -> str:
         """

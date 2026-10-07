@@ -505,14 +505,19 @@ class TimelinePanel(ctk.CTkFrame):
             rect_w = max(end_x - start_x, 4)
             is_selected = (seg.get("id") == selected_deadair_id)
 
-            fill_color = "#f43f5e" if is_selected else "#ef4444"
-            outline_color = "#ffffff" if is_selected else "#fda4af"
+            fill_color = "#facc15" if is_selected else "#ef4444"
+            outline_color = "#fef08a" if is_selected else "#fda4af"
             border_width = 2 if is_selected else 1
+            badge_text_col = "#0f172a" if is_selected else "#ffffff"
 
             # Soft background fill for Dead Air range
+            bg_fill = "#713f12" if is_selected else "#881337"
+            bg_outline = "#facc15" if is_selected else ""
+            bg_width = 2 if is_selected else 0
+
             c.create_rectangle(
                 start_x, RULER_H, start_x + rect_w, overlay_h,
-                fill="#881337", outline="", tags="deadair_overlay"
+                fill=bg_fill, outline=bg_outline, width=bg_width, tags="deadair_overlay"
             )
 
             # Top label badge on the ruler
@@ -522,11 +527,17 @@ class TimelinePanel(ctk.CTkFrame):
                 tags="deadair_overlay"
             )
 
-            if rect_w > 30:
+            if rect_w > 28:
+                txt = f"🔇 {seg['duration']:.1f}s"
+            elif rect_w > 14:
+                txt = "🔇"
+            else:
+                txt = ""
+            if txt:
                 c.create_text(
                     start_x + rect_w / 2, RULER_H / 2,
-                    text=f"🔇 {seg['duration']:.1f}s",
-                    fill="#ffffff",
+                    text=txt,
+                    fill=badge_text_col,
                     font=("Segoe UI", 7, "bold"),
                     anchor="center",
                     tags="deadair_overlay"
@@ -583,6 +594,50 @@ class TimelinePanel(ctk.CTkFrame):
         cx = self._tlc.canvasx(e.x)
         cy = self._tlc.canvasy(e.y)
         t_click = cx / sc
+
+        # ── Step 0: Check if clicked on a Dead Air segment ───────────────────
+        deadair_list = getattr(self.controller, "_deadair_segments", [])
+        if deadair_list and not (e.state & 1):
+            hit_deadair = None
+            for seg in deadair_list:
+                sx = seg["start"] * sc
+                ex = seg["end"] * sc
+                rw = max(ex - sx, 4)
+                if cy <= RULER_H:
+                    if sx - 3 <= cx <= sx + rw + 3:
+                        hit_deadair = seg
+                        break
+                else:
+                    if sx - 2 <= cx <= sx + rw + 2:
+                        hit_deadair = seg
+                        break
+
+            if hit_deadair is not None:
+                # If clicked in tracks, check if aiming directly at clip trim handle
+                is_trimming = False
+                if cy > RULER_H:
+                    for key, lbl, col, th, kind in self.controller._all_track_rows():
+                        if key == "__empty_layer__":
+                            continue
+                        for item in self.controller.tracks.get(key, []):
+                            dur = (item["end"] - item["start"]) / max(item.get("speed", 1.0), 0.01)
+                            cl_x1 = item.get("tl", 0.0) * sc
+                            cl_x2 = (item.get("tl", 0.0) + dur) * sc
+                            if abs(cx - cl_x1) <= 6 or abs(cx - cl_x2) <= 6:
+                                is_trimming = True
+                                break
+                        if is_trimming:
+                            break
+
+                if not is_trimming:
+                    self._dm = None
+                    self._dtk = None
+                    self._di = -1
+                    self.controller.sel_track = ""
+                    self.controller.sel_idx = -1
+                    if hasattr(self.controller, "_select_deadair"):
+                        self.controller._select_deadair(hit_deadair["id"], seek=True)
+                    return
 
         # ── Step 1: Try to hit a CLIP first (highest priority) ─────────────────
         # A clip is "hit" when cy is WITHIN its clip-body area (ty1..ty2) AND cx overlaps [x1, x2].
@@ -653,6 +708,12 @@ class TimelinePanel(ctk.CTkFrame):
             self.controller.sel_track = hit_k
             self.controller.sel_idx = hit_i
 
+            # Clear selected dead air if user selects a clip
+            if getattr(self.controller, "_selected_deadair_id", None) is not None:
+                self.controller._selected_deadair_id = None
+                if hasattr(self.controller, "media_panel") and hasattr(self.controller.media_panel, "unhighlight_deadair_cards"):
+                    self.controller.media_panel.unhighlight_deadair_cards()
+
             # If track is locked, block editing and drag mode (Section 9)
             if getattr(self.controller, "_is_locked", lambda k: False)(hit_k):
                 self.controller._status(f"Track [{hit_k}] is locked 🔒 — editing disabled")
@@ -718,6 +779,11 @@ class TimelinePanel(ctk.CTkFrame):
                 self.controller.sel_idx = -1
                 if hasattr(self.controller, "properties_panel"):
                     self.controller.properties_panel._refresh_props()
+                # Clear dead air selection on empty space click
+                if getattr(self.controller, "_selected_deadair_id", None) is not None:
+                    self.controller._selected_deadair_id = None
+                    if hasattr(self.controller, "media_panel") and hasattr(self.controller.media_panel, "unhighlight_deadair_cards"):
+                        self.controller.media_panel.unhighlight_deadair_cards()
             # Rubber-band or scrub on empty space
             self._dm = "rubber"
             self._rb_x0 = cx
@@ -949,6 +1015,23 @@ class TimelinePanel(ctk.CTkFrame):
         cx = self._tlc.canvasx(e.x)
         cy = self._tlc.canvasy(e.y)  # use canvas coords, not raw widget coords
         sc = self._scale()
+
+        # Check Dead Air hover
+        deadair_list = getattr(self.controller, "_deadair_segments", [])
+        if deadair_list:
+            for seg in deadair_list:
+                sx = seg["start"] * sc
+                ex = seg["end"] * sc
+                rw = max(ex - sx, 4)
+                if cy <= RULER_H:
+                    if sx - 3 <= cx <= sx + rw + 3:
+                        self._tlc.configure(cursor="hand2")
+                        return
+                else:
+                    if sx - 2 <= cx <= sx + rw + 2:
+                        self._tlc.configure(cursor="hand2")
+                        return
+
         y = RULER_H + 2
         for key, lbl, col, th, kind in self.controller._all_track_rows():
             if key == "__empty_layer__":
