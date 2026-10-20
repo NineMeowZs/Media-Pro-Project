@@ -221,6 +221,10 @@ class EditorPage(ctk.CTkFrame):
         self._jkl_speed: float = 1.0 # J=rev/K=pause/L=fwd speed multiplier
         self._deadair_segments: list = []
         self._selected_deadair_id = None
+        self._repeat_zones: list = []        # [{id, start, end, text, count}, ...]  ← Repeat-word marker zones
+        self._selected_repeat_id = None      # currently highlighted repeat zone id
+        self._repeat_window_sec: float = 8.0 # sliding window for repeat detection (seconds)
+        self._repeat_min_count: int = 2      # min occurrences to flag as repeat
 
         # ── Audio reload debouncing and process cancellation ──────────────────
         self._audio_reload_timer = None
@@ -2023,6 +2027,210 @@ class EditorPage(ctk.CTkFrame):
         self._refresh_preview()
         self._status(f"✂ ลบ Dead Air ทั้งหมด {len(deadair_list)} ช่วงเรียบร้อย")
 
+    # ── Repeat-Word Zone Detection ─────────────────────────────────────────────
+    def _detect_repeat_zones(self, window_sec: float = 8.0, min_count: int = 2) -> list[dict]:
+        """
+        Scan transcript segments for repeated words/phrases spoken within a short
+        time window.  Returns a list of zone dicts:
+          {id, start, end, text, count}
+        where `start`/`end` are timeline seconds covering all occurrences.
+
+        Algorithm:
+          1. Tokenise every segment text → (word, seg_start, seg_end) triples.
+          2. Group consecutive occurrences of the same normalised word that fall
+             within `window_sec` of each other.
+          3. Groups with ≥ min_count occurrences become zone markers.
+        """
+        import re, unicodedata
+
+        if not self.segments:
+            return []
+
+        def _normalise(w: str) -> str:
+            w = w.lower().strip()
+            w = unicodedata.normalize("NFC", w)
+            # Strip leading/trailing punctuation (keep Thai/Latin alphanumeric)
+            w = re.sub(r"^[^\w\u0E00-\u0E7F]+|[^\w\u0E00-\u0E7F]+$", "", w, flags=re.UNICODE)
+            return w
+
+        # Build token list: [(norm_word, seg_start, seg_end), ...]
+        tokens: list[tuple[str, float, float]] = []
+        for seg in self.segments:
+            text = seg.get("text", "")
+            t0 = float(seg.get("start", 0.0))
+            t1 = float(seg.get("end", t0 + 1.0))
+            # Tokenise Thai + Latin (split on whitespace and common punctuation)
+            words = re.split(r"[\s\u200b,.\!?\"'()\[\]{}]+", text, flags=re.UNICODE)
+            for w in words:
+                nw = _normalise(w)
+                if len(nw) >= 2:  # skip single-char / empty tokens
+                    tokens.append((nw, t0, t1))
+
+        if not tokens:
+            return []
+
+        # Scan with a sliding window per word
+        from collections import defaultdict
+        word_times: dict[str, list[tuple[float, float]]] = defaultdict(list)
+        for nw, t0, t1 in tokens:
+            word_times[nw].append((t0, t1))
+
+        zones: list[dict] = []
+        zone_id = 1
+
+        # Skip common stop-words that aren't meaningful repetition markers
+        STOP_THAI = {"ที่", "และ", "ใน", "ของ", "ว่า", "ก็", "ด้วย", "จะ", "ให้",
+                     "กัน", "แต่", "มา", "ไป", "ได้", "คือ", "เป็น", "นะ", "ครับ",
+                     "ค่ะ", "นั้น", "นี้", "แล้ว", "อยู่", "มี", "เรา", "กับ", "ตาม"}
+        STOP_EN = {"the", "a", "an", "and", "or", "but", "in", "on", "at",
+                   "to", "of", "is", "it", "i", "you", "we", "he", "she", "they"}
+        STOP = STOP_THAI | STOP_EN
+
+        for nw, occurrences in word_times.items():
+            if nw in STOP or len(occurrences) < min_count:
+                continue
+
+            # Group occurrences within window_sec using a sliding window
+            occurrences.sort(key=lambda x: x[0])
+            i = 0
+            while i < len(occurrences):
+                group_start_t = occurrences[i][0]
+                group = [occurrences[i]]
+                j = i + 1
+                while j < len(occurrences):
+                    if occurrences[j][0] - group_start_t <= window_sec:
+                        group.append(occurrences[j])
+                        j += 1
+                    else:
+                        break
+                if len(group) >= min_count:
+                    zone_t0 = min(g[0] for g in group)
+                    zone_t1 = max(g[1] for g in group)
+                    # Merge with previous zone if overlapping and same word
+                    merged = False
+                    for z in zones:
+                        if z["text"] == nw and z["start"] <= zone_t1 and z["end"] >= zone_t0:
+                            z["start"] = min(z["start"], zone_t0)
+                            z["end"] = max(z["end"], zone_t1)
+                            z["count"] = max(z["count"], len(group))
+                            merged = True
+                            break
+                    if not merged:
+                        zones.append({
+                            "id": zone_id,
+                            "start": round(zone_t0, 3),
+                            "end": round(zone_t1, 3),
+                            "text": nw,
+                            "count": len(group),
+                        })
+                        zone_id += 1
+                i = j if j > i else i + 1
+
+        # Sort by start time
+        zones.sort(key=lambda z: z["start"])
+        # Re-number ids in order
+        for idx, z in enumerate(zones, 1):
+            z["id"] = idx
+
+        return zones
+
+    def _run_repeat_detection(self, window_sec: float = 8.0, min_count: int = 2):
+        """Run repeat-word detection and refresh relevant UI."""
+        zones = self._detect_repeat_zones(window_sec=window_sec, min_count=min_count)
+        self._repeat_zones = zones
+        self._selected_repeat_id = None
+        self._draw_tl()
+        self._status(f"🔁 พบ {len(zones)} กลุ่มคำ/วลีซ้ำ")
+        if hasattr(self, "media_panel") and getattr(self.media_panel, "_active_tab_name", "") == "Captions":
+            self.media_panel._tab("Captions")
+
+    def _select_repeat_zone(self, zone_id: int, seek: bool = True):
+        """Highlight and seek to the selected repeat-word zone."""
+        self._selected_repeat_id = zone_id
+        zone = next((z for z in self._repeat_zones if z["id"] == zone_id), None)
+        if zone and seek:
+            self._stop()
+            st = zone["start"]
+            self.fi = max(0, int(st * TARGET_FPS))
+            self._render(self.fi)
+            self._scroll_tl_to_time(st, only_if_hidden=True)
+        self._draw_tl()
+        if hasattr(self, "media_panel"):
+            self.media_panel.focus_repeat(zone_id)
+
+    def _delete_single_repeat_zone(self, zone_id: int):
+        """Ripple-delete a single repeat zone from all tracks and update remaining zones."""
+        zone = next((z for z in self._repeat_zones if z["id"] == zone_id), None)
+        if not zone:
+            return
+
+        z_start = zone["start"]
+        z_end = zone["end"]
+        dt = z_end - z_start
+
+        pseudo_items = [{
+            "id": zone["id"],
+            "start": z_start,
+            "end": z_end,
+            "duration": dt
+        }]
+
+        self._cut_all_deadair(pseudo_items)
+
+        # Shift timestamps of subsequent repeat zones by dt
+        new_zones = []
+        for z in self._repeat_zones:
+            if z["id"] == zone_id:
+                continue
+            z_copy = dict(z)
+            if z_copy["start"] > z_start:
+                z_copy["start"] = max(0.0, z_copy["start"] - dt)
+                z_copy["end"] = max(z_copy["start"], z_copy["end"] - dt)
+            new_zones.append(z_copy)
+
+        self._repeat_zones = new_zones
+        self._selected_repeat_id = None
+        self._draw_tl()
+        self._status(f"✂ ลบช่วงคำซ้ำ #{zone_id} เรียบร้อย")
+
+        if hasattr(self, "media_panel") and getattr(self.media_panel, "_active_tab_name", "") == "Captions":
+            self.media_panel._tab("Captions")
+        self.after(50, lambda: self.focus_force() if hasattr(self, "focus_force") else None)
+
+    def _delete_all_repeat_zones(self):
+        """Delete all detected repeat zones with ripple-delete across all tracks."""
+        repeat_zones = getattr(self, "_repeat_zones", [])
+        if not repeat_zones:
+            self._status("ไม่มีคำซ้ำที่ต้องลบ")
+            return
+
+        from tkinter import messagebox
+        ans = messagebox.askyesno(
+            "ลบคำซ้ำทั้งหมด",
+            f"ต้องการลบช่วงคำซ้ำทั้งหมด {len(repeat_zones)} ช่วงออกจากไทม์ไลน์ใช่หรือไม่?\n(สามารถกด Ctrl+Z เพื่อเลิกทำได้)"
+        )
+        if not ans:
+            return
+
+        pseudo_items = [{
+            "id": z["id"],
+            "start": z["start"],
+            "end": z["end"],
+            "duration": z["end"] - z["start"]
+        } for z in repeat_zones]
+
+        self._cut_all_deadair(pseudo_items)
+        self._repeat_zones = []
+        self._selected_repeat_id = None
+        self._draw_tl()
+        self._status(f"✂ ลบช่วงคำซ้ำทั้งหมด {len(pseudo_items)} ช่วงเรียบร้อย")
+
+        if hasattr(self, "media_panel") and getattr(self.media_panel, "_active_tab_name", "") == "Captions":
+            self.media_panel._tab("Captions")
+        self.after(50, lambda: self.focus_force() if hasattr(self, "focus_force") else None)
+
+
+
     def _scroll_tl_to_time(self, t: float, only_if_hidden: bool = False):
         """Scroll timeline canvas so that timestamp t is visible (or centered in view)."""
         if hasattr(self, "timeline_panel") and hasattr(self.timeline_panel, "_tlc"):
@@ -2454,7 +2662,11 @@ class EditorPage(ctk.CTkFrame):
         self.sel_idx = -1
         self._multi_sel = []
         self._rebuild_label_column()
-        self._draw_tl(); self._render(self.fi); self._status("Undo")
+        self._draw_tl(); self._render(self.fi)
+        self._reload_audio()  # ✅ Restore audio after undo
+        self._status("Undo")
+        # ✅ Restore keyboard focus to main window so shortcuts keep working
+        self.after(50, lambda: self.master.focus_force())
 
     def _redo_do(self):
         if not self._redo: self._status("Nothing to redo"); return
@@ -2470,7 +2682,11 @@ class EditorPage(ctk.CTkFrame):
         self.sel_idx = -1
         self._multi_sel = []
         self._rebuild_label_column()
-        self._draw_tl(); self._render(self.fi); self._status("Redo")
+        self._draw_tl(); self._render(self.fi)
+        self._reload_audio()  # ✅ Restore audio after redo
+        self._status("Redo")
+        # ✅ Restore keyboard focus to main window so shortcuts keep working
+        self.after(50, lambda: self.master.focus_force())
 
     # ── Export ────────────────────────────────────────────────────────────────
     def get_export_segments(self):

@@ -1,0 +1,71 @@
+{
+  "tracks": {
+    "main": [
+      {
+        "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e15\u0e31\u0e14\u0e40\u0e2a\u0e23\u0e47\u0e08\u0e41\u0e25\u0e49\u0e27/\u0e40\u0e25\u0e48\u0e19\u0e40\u0e01\u0e21\u0e1c\u0e35\u0e01\u0e31\u0e1a\u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e19\u0e04\u0e23\u0e31\u0e1a \u0e2d\u0e22\u0e48\u0e32\u0e43\u0e2a\u0e48\u0e43\u0e08.mp4",
+        "name": "\u0e40\u0e25\u0e48\u0e19\u0e40\u0e01\u0e21\u0e1c\u0e35\u0e01\u0e31\u0e1a\u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e19\u0e04\u0e23\u0e31\u0e1a \u0e2d\u0e22\u0e48\u0e32\u0e43\u0e2a\u0e48\u0e43\u0e08.mp4",
+        "start": 0,
+        "end": 483.4,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 0.0,
+        "fps": 30.0,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 483.4,
+        "audio_muted": true,
+        "link_id": "link_4673814f"
+      }
+    ],
+    "subtitle": [],
+    "audio_0": [
+      {
+        "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e15\u0e31\u0e14\u0e40\u0e2a\u0e23\u0e47\u0e08\u0e41\u0e25\u0e49\u0e27/\u0e40\u0e25\u0e48\u0e19\u0e40\u0e01\u0e21\u0e1c\u0e35\u0e01\u0e31\u0e1a\u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e19\u0e04\u0e23\u0e31\u0e1a \u0e2d\u0e22\u0e48\u0e32\u0e43\u0e2a\u0e48\u0e43\u0e08.mp4",
+        "name": "[Audio] \u0e40\u0e25\u0e48\u0e19\u0e40\u0e01\u0e21\u0e1c\u0e35\u0e01\u0e31\u0e1a\u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e19\u0e04\u0e23\u0e31\u0e1a \u0e2d\u0e22\u0e48\u0e32\u0e43\u0e2a\u0e48\u0e43\u0e08.mp4",
+        "start": 0,
+        "end": 483.4,
+        "speed": 1.0,
+        "volume": 1.0,
+        "tl": 0.0,
+        "fps": 30.0,
+        "fade_in": 0.0,
+        "fade_out": 0.0,
+        "source_dur": 483.4,
+        "link_id": "link_4673814f"
+      }
+    ],
+    "audio_1": []
+  },
+  "assets": [
+    {
+      "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e15\u0e31\u0e14\u0e40\u0e2a\u0e23\u0e47\u0e08\u0e41\u0e25\u0e49\u0e27/\u0e40\u0e25\u0e48\u0e19\u0e40\u0e01\u0e21\u0e1c\u0e35\u0e01\u0e31\u0e1a\u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e19\u0e04\u0e23\u0e31\u0e1a \u0e2d\u0e22\u0e48\u0e32\u0e43\u0e2a\u0e48\u0e43\u0e08.mp4",
+      "name": "\u0e40\u0e25\u0e48\u0e19\u0e40\u0e01\u0e21\u0e1c\u0e35\u0e01\u0e31\u0e1a\u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e19\u0e04\u0e23\u0e31\u0e1a \u0e2d\u0e22\u0e48\u0e32\u0e43\u0e2a\u0e48\u0e43\u0e08.mp4",
+      "type": "video"
+    }
+  ],
+  "muted": {},
+  "segments": [],
+  "ratio": "16:9",
+  "style": {
+    "font_name": "Tahoma",
+    "font_size": 44,
+    "font_color": "#FFFFFF",
+    "bold": false,
+    "italic": false,
+    "decoration": "outline",
+    "decoration_color": "#000000",
+    "animation": "fade_in",
+    "position": "bottom_center",
+    "align": "center",
+    "max_chars_per_line": 40,
+    "max_lines": 2,
+    "margin_x": 40,
+    "margin_y": 40,
+    "custom_x": 0.5,
+    "custom_y": 0.85,
+    "line_spacing": 8,
+    "letter_spacing": 0,
+    "bg_opacity": 0.5
+  },
+  "version": 5
+}

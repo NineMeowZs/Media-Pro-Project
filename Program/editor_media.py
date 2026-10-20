@@ -23,6 +23,8 @@ class MediaPanel(ctk.CTkFrame):
         self._tbtn = {}
         self._active_tab_name = "Media"
         self._deadair_cards = {}
+        self._repeat_cards = {}
+        self._repeat_settings_open = False
 
         self._build_ui()
 
@@ -39,10 +41,10 @@ class MediaPanel(ctk.CTkFrame):
         tab_bar.grid_rowconfigure(0, weight=1)
 
         tabs = [
-            ("🎬", "Media", "Media"),
-            ("🔤", "Text", "Text"),
+            ("🎬", "Media",   "Media"),
+            ("🔤", "Text",    "Text"),
             ("⚡", "DeadAir", "DeadAir"),
-            ("💬", "Captions", "Captions"),
+            ("💬", "Captions","Captions"),
         ]
 
         for idx, (icon, label, name) in enumerate(tabs):
@@ -101,17 +103,7 @@ class MediaPanel(ctk.CTkFrame):
         self._pscroll.pack(fill="both", expand=True, padx=4, pady=4)
 
         if name in ("Captions", "Transcript", "Subtitle"):
-            # Auto Sub button inside Captions tab
-            ctk.CTkButton(
-                self._pscroll, text="🎙 Auto Generate Subtitles", height=34, corner_radius=10,
-                fg_color="#3b82f6", hover_color="#2563eb",
-                font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
-                command=self.controller._sub_dialog
-            ).pack(fill="x", pady=(2, 8))
-
-            if hasattr(self.controller, "transcript_panel"):
-                self.controller.transcript_panel.pack(fill="both", expand=True, padx=2, pady=2)
-                self.controller.transcript_panel.refresh()
+            self._build_captions_tab()
         else:
             tab_func = getattr(self, f"_pt_{name.lower()}", None)
             if tab_func:
@@ -366,9 +358,12 @@ class MediaPanel(ctk.CTkFrame):
                         self.controller._deadair_segments = remaining
                         self.controller._selected_deadair_id = None
                         self.controller.after(0, lambda: self._tab("DeadAir"))
+                        # ✅ Restore keyboard focus after dialog so shortcuts keep working
+                        self.controller.after(100, lambda: self.controller.master.focus_force())
                     except Exception as ex:
                         err_text = str(ex)
                         self.controller.after(0, lambda: messagebox.showerror("Error", err_text))
+                        self.controller.after(150, lambda: self.controller.master.focus_force())
 
                 threading.Thread(target=_do_cut_async, daemon=True).start()
 
@@ -566,6 +561,63 @@ class MediaPanel(ctk.CTkFrame):
         for d_id, (c_row, b_lbl) in cards.items():
             c_row.configure(border_color=BORD, fg_color=PANEL_MID, border_width=1)
             b_lbl.configure(text_color=C_AMBER)
+
+    def focus_repeat(self, zid):
+        """Switch to Captions tab if not active, highlight repeat card in yellow, and scroll to it."""
+        if getattr(self, "_active_tab_name", "") != "Captions":
+            self._tab("Captions")
+        self.highlight_repeat_card(zid, scroll=True)
+
+    def highlight_repeat_card(self, active_id, scroll=True):
+        """Highlight specified repeat card in yellow and reset others."""
+        cards = getattr(self, "_repeat_cards", {})
+        for r_id, (c_row, b_lbl, t_lbl) in cards.items():
+            if r_id == active_id:
+                c_row.configure(border_color="#facc15", fg_color="#292518", border_width=2)
+                if b_lbl: b_lbl.configure(text_color="#facc15")
+                if t_lbl: t_lbl.configure(text_color="#fef08a")
+            else:
+                c_row.configure(border_color=BORD, fg_color=PANEL_MID, border_width=1)
+                if b_lbl: b_lbl.configure(text_color="#a855f7")
+                if t_lbl: t_lbl.configure(text_color=TXT_W)
+        if scroll:
+            self.scroll_to_repeat_card(active_id)
+
+    def scroll_to_repeat_card(self, active_id, retries=5):
+        """Scroll the scrollable frame to ensure the active repeat card is visible."""
+        cards = getattr(self, "_repeat_cards", {})
+        if active_id not in cards:
+            if retries > 0:
+                self.after(40, lambda: self.scroll_to_repeat_card(active_id, retries - 1))
+            return
+        self._do_scroll_repeat(active_id)
+
+    def _do_scroll_repeat(self, active_id):
+        cards = getattr(self, "_repeat_cards", {})
+        if active_id not in cards:
+            return
+        c_row, _, _ = cards[active_id]
+        try:
+            self.update_idletasks()
+            y = c_row.winfo_y()
+            h = c_row.winfo_height()
+            canvas = getattr(self._pscroll, "_parent_canvas", None)
+            if not canvas:
+                return
+            canvas_h = canvas.winfo_height()
+            bbox = canvas.bbox("all")
+            total_h = (bbox[3] - bbox[1]) if bbox else self._pscroll.winfo_height()
+            if total_h <= canvas_h or canvas_h <= 0:
+                return
+            top, bottom = canvas.yview()
+            view_top = top * total_h
+            view_bottom = bottom * total_h
+            if y < view_top:
+                canvas.yview_moveto(max(0.0, (y - 8) / total_h))
+            elif (y + h) > view_bottom:
+                canvas.yview_moveto(min(1.0, (y + h - canvas_h + 12) / total_h))
+        except Exception:
+            pass
 
     def _pt_adjustment(self):
         """Tab Panel: Color & Adjustment Presets."""
@@ -792,3 +844,226 @@ class MediaPanel(ctk.CTkFrame):
             return ph
         except Exception:
             return None
+
+    # ── Captions Tab & Repeat-Word Section ──────────────────────────────────
+    def _build_captions_tab(self):
+        """Captions Tab: Auto Generate Subtitle, Repeat-Word Detection & Cleaner, Subtitle Transcript."""
+        # 1. Auto Sub button inside Captions tab
+        ctk.CTkButton(
+            self._pscroll, text="🎙 Auto Generate Subtitles", height=34, corner_radius=10,
+            fg_color="#3b82f6", hover_color="#2563eb",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            command=self.controller._sub_dialog
+        ).pack(fill="x", pady=(2, 6))
+
+        # 2. Repeat Detection Section (located right below Auto Subtitle button)
+        self._build_repeat_section()
+
+        # 3. Separator
+        ctk.CTkFrame(self._pscroll, height=1, fg_color=BORD).pack(fill="x", pady=(6, 4))
+
+        # 4. Subtitle Transcript List
+        if hasattr(self.controller, "transcript_panel"):
+            self.controller.transcript_panel.pack(fill="both", expand=True, padx=2, pady=2)
+            self.controller.transcript_panel.refresh()
+
+    def _build_repeat_section(self):
+        """Repeat-Word detection UI integrated directly inside Captions tab."""
+        import tkinter as tk
+        from editor_utils import C_RED, C_AMBER, C_BLUE, C_GREEN, PANEL_MID, PANEL_LIGHT, BORD, TXT_G, TXT_W, _ft_ms
+
+        C_VIOLET = "#7c3aed"
+        C_VIOLET_H = "#6d28d9"
+
+        self._repeat_cards = {}
+
+        rep_box = ctk.CTkFrame(self._pscroll, fg_color=PANEL_MID, corner_radius=10, border_color=BORD, border_width=1)
+        rep_box.pack(fill="x", padx=2, pady=(0, 4))
+
+        # ── Header ──
+        hrow = ctk.CTkFrame(rep_box, fg_color="transparent")
+        hrow.pack(fill="x", padx=8, pady=(6, 4))
+
+        ctk.CTkLabel(
+            hrow, text="🔁 ตรวจจับคำซ้ำ (Repeat Words)",
+            font=ctk.CTkFont(size=11, weight="bold"), text_color=TXT_W
+        ).pack(side="left")
+
+        # Settings gear toggle
+        def _toggle_settings():
+            self._repeat_settings_open = not getattr(self, "_repeat_settings_open", False)
+            self._tab("Captions")
+
+        gear_btn = ctk.CTkButton(
+            hrow, text="⚙ ตั้งค่า" if not getattr(self, "_repeat_settings_open", False) else "▲ ซ่อน",
+            width=54, height=22, corner_radius=6,
+            fg_color=PANEL_LIGHT, hover_color=PANEL_MID,
+            font=ctk.CTkFont(size=9), text_color=TXT_G,
+            command=_toggle_settings
+        )
+        gear_btn.pack(side="right")
+
+        # ── Optional Collapsible Settings Frame ──
+        if getattr(self, "_repeat_settings_open", False):
+            cfg = ctk.CTkFrame(rep_box, fg_color=PANEL_LIGHT, corner_radius=6)
+            cfg.pack(fill="x", padx=6, pady=(0, 6))
+
+            # Window size
+            w_row = ctk.CTkFrame(cfg, fg_color="transparent")
+            w_row.pack(fill="x", padx=6, pady=(4, 2))
+            ctk.CTkLabel(w_row, text="ขอบเขตเวลา (วิ)", font=ctk.CTkFont(size=8, weight="bold"), text_color=TXT_G).pack(side="left")
+            cur_win = getattr(self.controller, "_repeat_window_sec", 8.0)
+            win_var = tk.DoubleVar(value=cur_win)
+            win_lbl = ctk.CTkLabel(w_row, text=f"{int(cur_win)}s", font=ctk.CTkFont(size=8, weight="bold"), text_color=C_AMBER, width=28)
+            win_lbl.pack(side="right")
+            def _sync_win(v):
+                w = float(v)
+                self.controller._repeat_window_sec = w
+                win_lbl.configure(text=f"{int(w)}s")
+            win_slider = ctk.CTkSlider(w_row, from_=2.0, to=30.0, number_of_steps=28, variable=win_var, progress_color=C_VIOLET, button_color=C_VIOLET, height=14, command=_sync_win)
+            win_slider.pack(side="left", fill="x", expand=True, padx=4)
+
+            # Min count
+            c_row = ctk.CTkFrame(cfg, fg_color="transparent")
+            c_row.pack(fill="x", padx=6, pady=(2, 4))
+            ctk.CTkLabel(c_row, text="ซ้ำขั้นต่ำ (ครั้ง)", font=ctk.CTkFont(size=8, weight="bold"), text_color=TXT_G).pack(side="left")
+            cur_cnt = getattr(self.controller, "_repeat_min_count", 2)
+            cnt_var = tk.IntVar(value=cur_cnt)
+            cnt_lbl = ctk.CTkLabel(c_row, text=f"{cur_cnt}×", font=ctk.CTkFont(size=8, weight="bold"), text_color=C_AMBER, width=28)
+            cnt_lbl.pack(side="right")
+            def _sync_cnt(v):
+                n = max(2, int(round(float(v))))
+                self.controller._repeat_min_count = n
+                cnt_lbl.configure(text=f"{n}×")
+            cnt_slider = ctk.CTkSlider(c_row, from_=2, to=8, number_of_steps=6, variable=cnt_var, progress_color=C_AMBER, button_color=C_AMBER, height=14, command=_sync_cnt)
+            cnt_slider.pack(side="left", fill="x", expand=True, padx=4)
+
+        # ── Detect Button Action ──
+        status_lbl = ctk.CTkLabel(rep_box, text="", font=ctk.CTkFont(size=8), text_color=TXT_G)
+
+        def _run():
+            if not getattr(self.controller, "segments", None):
+                from tkinter import messagebox
+                messagebox.showwarning("Repeat Detect", "ยังไม่มี Transcript — กรุณา Generate Subtitles ก่อนใช้งานฟีเจอร์นี้")
+                return
+            win_sec = getattr(self.controller, "_repeat_window_sec", 8.0)
+            min_cnt = getattr(self.controller, "_repeat_min_count", 2)
+            detect_btn.configure(state="disabled", text="⏳ กำลังวิเคราะห์...")
+            status_lbl.configure(text="🔍 กำลังสแกนคำซ้ำ...", text_color=TXT_G)
+            status_lbl.pack(anchor="w", padx=8, pady=(1, 3))
+
+            def _work():
+                self.controller._run_repeat_detection(window_sec=win_sec, min_count=min_cnt)
+                self.controller.after(0, _done)
+
+            import threading
+            threading.Thread(target=_work, daemon=True).start()
+
+        def _done():
+            detect_btn.configure(state="normal", text="🔍 ตรวจหาคำซ้ำ")
+            self._tab("Captions")
+
+        detect_btn = ctk.CTkButton(
+            rep_box, text="🔍 ตรวจหาคำซ้ำ",
+            height=30, corner_radius=8,
+            fg_color=C_VIOLET, hover_color=C_VIOLET_H,
+            font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+            command=_run
+        )
+        detect_btn.pack(fill="x", padx=6, pady=(2, 6))
+
+        # ── Results & Action Controls ──
+        repeat_zones = getattr(self.controller, "_repeat_zones", [])
+        if not repeat_zones:
+            ctk.CTkLabel(
+                rep_box, text="คลิก 'ตรวจหาคำซ้ำ' เพื่อค้นหาช่วงที่พูดซ้ำติดๆ กัน",
+                font=ctk.CTkFont(size=8), text_color=TXT_G
+            ).pack(pady=(0, 6))
+            return
+
+        # Summary and Delete All Button Row
+        s_row = ctk.CTkFrame(rep_box, fg_color="transparent")
+        s_row.pack(fill="x", padx=6, pady=(0, 6))
+
+        ctk.CTkLabel(
+            s_row, text=f"📊 พบ {len(repeat_zones)} จุดคำซ้ำ",
+            font=ctk.CTkFont(size=10, weight="bold"), text_color=TXT_W
+        ).pack(side="left", padx=(2, 0))
+
+        # Delete All Repeat Zones Button (Requested by User)
+        del_all_btn = ctk.CTkButton(
+            s_row, text="🗑 ลบคำซ้ำทั้งหมด",
+            height=26, corner_radius=6,
+            fg_color=C_RED, hover_color="#dc2626",
+            font=ctk.CTkFont(size=9, weight="bold"),
+            command=self.controller._delete_all_repeat_zones
+        )
+        del_all_btn.pack(side="right")
+
+        # ── Zone Cards ──
+        selected_id = getattr(self.controller, "_selected_repeat_id", None)
+
+        for zone in repeat_zones:
+            zid = zone["id"]
+            is_sel = (zid == selected_id)
+
+            card_bg     = "#292518" if is_sel else PANEL_LIGHT
+            card_border = "#facc15" if is_sel else BORD
+            card_bw     = 2 if is_sel else 1
+            badge_col   = "#facc15" if is_sel else "#a855f7"
+            text_col    = "#fef08a" if is_sel else TXT_W
+
+            card = ctk.CTkFrame(
+                rep_box, fg_color=card_bg, corner_radius=8,
+                border_color=card_border, border_width=card_bw,
+                cursor="hand2"
+            )
+            card.pack(fill="x", pady=2, padx=4)
+
+            # Card Header Row
+            ch_row = ctk.CTkFrame(card, fg_color="transparent", cursor="hand2")
+            ch_row.pack(fill="x", padx=6, pady=(4, 1))
+
+            b_lbl = ctk.CTkLabel(
+                ch_row, text=f"#{zid}",
+                font=ctk.CTkFont(family="Consolas", size=9, weight="bold"),
+                text_color=badge_col, width=22
+            )
+            b_lbl.pack(side="left")
+
+            t_lbl = ctk.CTkLabel(
+                ch_row, text=f"🔁 \"{zone['text']}\"  ×{zone['count']}",
+                font=ctk.CTkFont(size=9, weight="bold"),
+                text_color=text_col
+            )
+            t_lbl.pack(side="left", padx=(2, 0))
+
+            # Delete single zone button
+            del_single_btn = ctk.CTkButton(
+                ch_row, text="🗑 ลบ",
+                width=46, height=20, corner_radius=5,
+                fg_color=C_RED, hover_color="#dc2626",
+                font=ctk.CTkFont(size=8, weight="bold"),
+                command=lambda z_id=zid: self.controller._delete_single_repeat_zone(z_id)
+            )
+            del_single_btn.pack(side="right")
+
+            # Time range row
+            tm_row = ctk.CTkFrame(card, fg_color="transparent", cursor="hand2")
+            tm_row.pack(fill="x", padx=6, pady=(0, 4))
+
+            ctk.CTkLabel(
+                tm_row,
+                text=f"{_ft_ms(zone['start'])}  ➜  {_ft_ms(zone['end'])}  ({zone['end']-zone['start']:.2f}s)",
+                font=ctk.CTkFont(family="Consolas", size=8),
+                text_color=C_AMBER
+            ).pack(side="left")
+
+            # Bind click to select repeat zone
+            def _seek(e, z_id=zid):
+                self.controller._select_repeat_zone(z_id, seek=True)
+
+            for w in (card, ch_row, tm_row, b_lbl, t_lbl):
+                w.bind("<Button-1>", _seek)
+
+            self._repeat_cards[zid] = (card, b_lbl, t_lbl)

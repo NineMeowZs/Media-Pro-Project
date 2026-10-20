@@ -543,6 +543,62 @@ class TimelinePanel(ctk.CTkFrame):
                     tags="deadair_overlay"
                 )
 
+        # ── Repeat-Word Zone Highlights on Timeline ───────────────────────────
+        repeat_zones = getattr(self.controller, "_repeat_zones", [])
+        selected_repeat_id = getattr(self.controller, "_selected_repeat_id", None)
+
+        for zone in repeat_zones:
+            start_x = zone["start"] * scale
+            end_x   = zone["end"] * scale
+            if end_x < vis_left or start_x > vis_right:
+                continue
+
+            rect_w = max(end_x - start_x, 6)
+            is_sel = (zone.get("id") == selected_repeat_id)
+
+            if is_sel:
+                bg_fill    = "#facc15"  # bright yellow highlight
+                border_col = "#eab308"  # yellow/amber border
+                badge_fill = "#facc15"  # yellow badge
+                badge_txt  = "#000000"  # black bold text for readability
+                bw         = 2
+                stip       = "gray50"
+            else:
+                bg_fill    = "#2d1b69"  # violet/purple background
+                border_col = "#a855f7"  # purple border
+                badge_fill = "#7c3aed"  # purple badge
+                badge_txt  = "#ffffff"  # white text
+                bw         = 1
+                stip       = "gray25"
+
+            # Thin vertical stripe on the body (drawn across tracks)
+            c.create_rectangle(
+                start_x, RULER_H, start_x + rect_w, overlay_h,
+                fill=bg_fill, outline=border_col, width=bw,
+                stipple=stip, tags="repeat_overlay"
+            )
+            # Badge in ruler row
+            badge_y0 = 2
+            badge_y1 = RULER_H - 2
+            c.create_rectangle(
+                start_x, badge_y0, start_x + rect_w, badge_y1,
+                fill=badge_fill, outline=border_col, width=bw,
+                tags="repeat_overlay"
+            )
+            if rect_w > 30:
+                label = f"🔁 \"{zone['text'][:8]}\" ×{zone['count']}"
+            elif rect_w > 16:
+                label = f"🔁×{zone['count']}"
+            else:
+                label = ""
+            if label:
+                c.create_text(
+                    start_x + rect_w / 2, (badge_y0 + badge_y1) / 2,
+                    text=label, fill=badge_txt,
+                    font=("Segoe UI", 7, "bold"),
+                    anchor="center", tags="repeat_overlay"
+                )
+
         # Draw Playhead Red Line and Cap Handle on main canvas
         px = (self.controller.fi / float(TARGET_FPS)) * scale
         self._tl_ph_line = c.create_line(px, 0, px, max(H, y), fill=C_RED, width=2, tags="playhead")
@@ -637,6 +693,50 @@ class TimelinePanel(ctk.CTkFrame):
                     self.controller.sel_idx = -1
                     if hasattr(self.controller, "_select_deadair"):
                         self.controller._select_deadair(hit_deadair["id"], seek=True)
+                    return
+
+        # ── Step 0b: Check if clicked on a Repeat-Word Zone ───────────────────
+        repeat_zones = getattr(self.controller, "_repeat_zones", [])
+        if repeat_zones and not (e.state & 1):
+            hit_repeat = None
+            for zone in repeat_zones:
+                sx = zone["start"] * sc
+                ex = zone["end"] * sc
+                rw = max(ex - sx, 6)
+                if cy <= RULER_H:
+                    if sx - 3 <= cx <= sx + rw + 3:
+                        hit_repeat = zone
+                        break
+                else:
+                    if sx - 2 <= cx <= sx + rw + 2:
+                        hit_repeat = zone
+                        break
+
+            if hit_repeat is not None:
+                # If clicked in tracks, check if aiming directly at clip trim handle
+                is_trimming = False
+                if cy > RULER_H:
+                    for key, lbl, col, th, kind in self.controller._all_track_rows():
+                        if key == "__empty_layer__":
+                            continue
+                        for item in self.controller.tracks.get(key, []):
+                            dur = (item["end"] - item["start"]) / max(item.get("speed", 1.0), 0.01)
+                            cl_x1 = item.get("tl", 0.0) * sc
+                            cl_x2 = (item.get("tl", 0.0) + dur) * sc
+                            if abs(cx - cl_x1) <= 6 or abs(cx - cl_x2) <= 6:
+                                is_trimming = True
+                                break
+                        if is_trimming:
+                            break
+
+                if not is_trimming:
+                    self._dm = None
+                    self._dtk = None
+                    self._di = -1
+                    self.controller.sel_track = ""
+                    self.controller.sel_idx = -1
+                    if hasattr(self.controller, "_select_repeat_zone"):
+                        self.controller._select_repeat_zone(hit_repeat["id"], seek=True)
                     return
 
         # ── Step 1: Try to hit a CLIP first (highest priority) ─────────────────
@@ -1023,6 +1123,22 @@ class TimelinePanel(ctk.CTkFrame):
                 sx = seg["start"] * sc
                 ex = seg["end"] * sc
                 rw = max(ex - sx, 4)
+                if cy <= RULER_H:
+                    if sx - 3 <= cx <= sx + rw + 3:
+                        self._tlc.configure(cursor="hand2")
+                        return
+                else:
+                    if sx - 2 <= cx <= sx + rw + 2:
+                        self._tlc.configure(cursor="hand2")
+                        return
+
+        # Check Repeat Zones hover
+        repeat_zones = getattr(self.controller, "_repeat_zones", [])
+        if repeat_zones:
+            for zone in repeat_zones:
+                sx = zone["start"] * sc
+                ex = zone["end"] * sc
+                rw = max(ex - sx, 6)
                 if cy <= RULER_H:
                     if sx - 3 <= cx <= sx + rw + 3:
                         self._tlc.configure(cursor="hand2")
