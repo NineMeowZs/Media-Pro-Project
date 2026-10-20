@@ -265,7 +265,6 @@ class PreviewPanel(ctk.CTkFrame):
         self._ov_drag_clip = None
         self._tf_mode = None
 
-    # ── Frame display ─────────────────────────────────────────────────────────
     def _show(self, frame):
         """Render frame with clean, crisp, pixel-perfect aspect ratio on Canvas."""
         if self.controller.playing:
@@ -280,51 +279,59 @@ class PreviewPanel(ctk.CTkFrame):
                 frame = cv2.resize(frame, (ow, oh), interpolation=cv2.INTER_LINEAR)
                 h, w = oh, ow
 
-            # ── Draw text and subtitles with the same PIL renderer used by
-            # paused preview and export BEFORE sending frame to Canvas!
             self.canvas.delete("text_overlay")
             self.canvas.delete("sub_overlay")
-            if HAS_SUBTITLES:
+
+            # ตรวจสอบก่อนว่ามี Subtitle หรือ Text Clip ที่ต้องแสดงผลหรือไม่ เพื่อหลีกเลี่ยงการแปลงสีโดยไม่จำเป็น
+            t = self.controller.fi / float(TARGET_FPS)
+            active_texts = []
+            for lk in self.controller._layer_keys():
+                for tc in self.controller.tracks.get(lk, []):
+                    if tc.get("path", "") != "":
+                        continue
+                    dur = max(tc.get("end", 0) - tc.get("start", 0), 0.05) / max(tc.get("speed", 1.0), 0.01)
+                    tl = tc.get("tl", 0.0)
+                    if tl <= t <= tl + dur and tc.get("name", "").strip():
+                        active_texts.append(tc)
+
+            sub_text, prog, sub_clip = ("", 0.5, None)
+            if getattr(self.controller, "_sub_visible", True):
+                sub_text, prog, sub_clip = self._find_sub(t)
+
+            # แปลง BGR -> Draw -> RGB เฉพาะกรณีที่มี Text หรือ Subtitle จริง ๆ เท่านั้น
+            if HAS_SUBTITLES and (active_texts or sub_text):
                 import copy
-                t = self.controller.fi / float(TARGET_FPS)
                 bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-                for lk in self.controller._layer_keys():
-                    for tc in self.controller.tracks.get(lk, []):
-                        if tc.get("path", "") != "":
-                            continue
-                        dur = max(tc["end"] - tc["start"], 0.05) / max(tc.get("speed", 1.0), 0.01)
-                        tl = tc.get("tl", 0.0)
-                        if tl <= t <= tl + dur and tc.get("name", "").strip():
-                            ts = SubtitleStyle()
-                            ts.font_name = tc.get("font_name", "Tahoma")
-                            ts.font_size = tc.get("font_size", 44)
-                            ts.font_color = tc.get("font_color", "#ffffff")
-                            ts.decoration = tc.get("decoration", "shadow")
-                            ts.decoration_color = tc.get("decoration_color", "#000000")
-                            ts.bold = bool(tc.get("bold", False))
-                            ts.italic = bool(tc.get("italic", False))
-                            ts.letter_spacing = tc.get("letter_spacing", 0)
-                            ts.align = tc.get("align", "center")
-                            ts.animation = "none"
-                            ts.position = "custom"
-                            ts.custom_x = tc.get("custom_x", 0.5)
-                            ts.custom_y = tc.get("custom_y", 0.2)
-                            bgr = draw_subtitles_on_frame(bgr, tc["name"], ts, 0.5)
+                for tc in active_texts:
+                    ts = SubtitleStyle()
+                    ts.font_name = tc.get("font_name", "Tahoma")
+                    ts.font_size = tc.get("font_size", 44)
+                    ts.font_color = tc.get("font_color", "#ffffff")
+                    ts.decoration = tc.get("decoration", "shadow")
+                    ts.decoration_color = tc.get("decoration_color", "#000000")
+                    ts.bold = bool(tc.get("bold", False))
+                    ts.italic = bool(tc.get("italic", False))
+                    ts.letter_spacing = tc.get("letter_spacing", 0)
+                    ts.align = tc.get("align", "center")
+                    ts.animation = "none"
+                    ts.position = "custom"
+                    ts.custom_x = tc.get("custom_x", 0.5)
+                    ts.custom_y = tc.get("custom_y", 0.2)
+                    bgr = draw_subtitles_on_frame(bgr, tc["name"], ts, 0.5)
 
-                if getattr(self.controller, "_sub_visible", True):
-                    sub, prog, sub_clip = self._find_sub(t)
-                    if sub:
-                        render_style = copy.copy(self.controller.style)
-                        if sub_clip is not None:
-                            for attr in ("font_name", "font_size", "font_color", "bold", "italic",
-                                         "decoration", "decoration_color", "letter_spacing", "align"):
-                                if attr in sub_clip:
-                                    setattr(render_style, attr, sub_clip[attr])
-                            render_style.position = "custom"
-                            render_style.custom_x = sub_clip.get("custom_x", render_style.custom_x)
-                            render_style.custom_y = sub_clip.get("custom_y", render_style.custom_y)
-                        bgr = draw_subtitles_on_frame(bgr, sub, render_style, prog)
+                if sub_text:
+                    render_style = copy.copy(self.controller.style)
+                    if sub_clip is not None:
+                        for attr in ("font_name", "font_size", "font_color", "bold", "italic",
+                                     "decoration", "decoration_color", "letter_spacing", "align"):
+                            if attr in sub_clip:
+                                setattr(render_style, attr, sub_clip[attr])
+                        render_style.position = "custom"
+                        render_style.custom_x = sub_clip.get("custom_x", render_style.custom_x)
+                        render_style.custom_y = sub_clip.get("custom_y", render_style.custom_y)
+                    bgr = draw_subtitles_on_frame(bgr, sub_text, render_style, prog)
+
                 frame = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
 
             try:
@@ -347,7 +354,7 @@ class PreviewPanel(ctk.CTkFrame):
             self._draw_transform_overlay()
             return
 
-        # --- Pause / Scrub Path (High quality + Subtitles) ---
+        # ── Pause / Scrub Path (High quality + Subtitles) ───────────────────
         bgr = self._crop_ratio(frame)
         self._last_raw_bgr = bgr.copy()
 
@@ -358,7 +365,7 @@ class PreviewPanel(ctk.CTkFrame):
                 for tc in self.controller.tracks.get(lk, []):
                     if tc.get("path", "") != "":
                         continue
-                    dur = max(tc["end"] - tc["start"], 0.05) / max(tc.get("speed", 1.0), 0.01)
+                    dur = max(tc.get("end", 0) - tc.get("start", 0), 0.05) / max(tc.get("speed", 1.0), 0.01)
                     tl = tc.get("tl", 0.0)
                     if tl <= t <= tl + dur and tc.get("name", "").strip():
                         try:

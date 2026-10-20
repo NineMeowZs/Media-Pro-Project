@@ -50,13 +50,13 @@ class SmartVideoReader:
         if self._cap is not None:
             try:
                 diff = target_idx - self._current_frame_idx
-                # หากเป็นการเล่นต่อเนื่องไปข้างหน้า (Sequential Read 1-5 เฟรม) ให้ใช้ .read() หรือ .grab()
-                # จะทำให้ Disk อ่านเป็น Stream เส้นตรง ไม่เกิด Random Seek Head Thrashes
-                if 0 < diff <= 5:
+                # หากเป็นการอ่านเฟรมถัดไปใกล้ๆ (1-10 เฟรม) ให้ grab ข้ามแทนการ set pos ใหม่
+                if 0 < diff <= 10:
                     for _ in range(diff - 1):
                         self._cap.grab()
                     ok, fr = self._cap.read()
                 else:
+                    # Seek ไปยัง Keyframe ก่อนหน้าเล็กน้อยแล้ว grab มายังตำแหน่งที่ต้องการ เพื่อป้องกัน Keyframe Desync
                     self._cap.set(cv2.CAP_PROP_POS_FRAMES, float(target_idx))
                     ok, fr = self._cap.read()
 

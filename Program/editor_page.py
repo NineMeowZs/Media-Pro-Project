@@ -180,6 +180,12 @@ class EditorPage(ctk.CTkFrame):
         self._pfi0      = 0      # fi at play start
         self._audio_tmp = None
         self._play_speed = 1.0   # effective playback speed (from active clip)
+        # ── เพิ่มสำหรับ Audio Channel Playback ──
+        self._audio_sound = None
+        self._audio_channel = None
+        self._audio_raw_data = None
+        self._audio_sample_rate = 44100
+        self._audio_channels_count = 2
 
         # Frame buffer
         self._fbuf      = queue.Queue(maxsize=FRAME_BUF)
@@ -635,47 +641,49 @@ class EditorPage(ctk.CTkFrame):
         self._setup_audio()
 
     def _finish_load(self):
-        """Called when audio is ready – update status and resync playback if currently playing."""
+        """Called when audio is ready – load sound buffer and resync if playing."""
         self._status("Ready")
-        if getattr(self, "playing", False):
+        if self._audio_tmp and os.path.exists(self._audio_tmp):
             try:
-                has_active = False
-                if self._is_active("main"):
-                    for c in self.tracks.get("main", []):
-                        if c.get("path") and not c.get("audio_muted") and not c.get("video_only") and not c.get("muted"):
-                            has_active = True
-                            break
-                if not has_active:
-                    for ak in self._audio_keys():
-                        if self._is_active(ak):
-                            for c in self.tracks.get(ak, []):
-                                if c.get("path") and not c.get("audio_muted") and not c.get("muted"):
-                                    has_active = True
-                                    break
-                            if has_active:
-                                break
-                if not has_active:
-                    for lk in self._layer_keys():
-                        if self._is_active(lk):
-                            for c in self.tracks.get(lk, []):
-                                if c.get("path") and not c.get("audio_muted") and not c.get("video_only") and not c.get("muted"):
-                                    has_active = True
-                                    break
-                            if has_active:
-                                break
-
-                cur_sec = self.fi / float(TARGET_FPS)
-                if has_active:
-                    pygame.mixer.music.play(start=cur_sec)
-                    self._pt0 = time.perf_counter()
-                    self._pfi0 = self.fi
-                else:
-                    try:
-                        pygame.mixer.music.pause()
-                    except Exception:
-                        pass
+                import wave
+                with wave.open(self._audio_tmp, "rb") as wf:
+                    self._audio_sample_rate = wf.getframerate()
+                    self._audio_channels_count = wf.getnchannels()
+                    self._audio_sample_width = wf.getsampwidth()
+                    self._audio_raw_data = wf.readframes(wf.getnframes())
             except Exception as e:
-                print(f"[Audio Resync Error] {e}")
+                print(f"[Audio Load Error] {e}")
+
+        if getattr(self, "playing", False):
+            self._play_audio_at(self.fi / float(TARGET_FPS))
+
+    def _play_audio_at(self, start_sec: float):
+        """เล่นเสียงจากตำแหน่งวินาทีที่กำหนดอย่างแม่นยำระดับ Byte Offset"""
+        if not self._audio_raw_data:
+            return
+
+        try:
+            bytes_per_sample = self._audio_sample_width * self._audio_channels_count
+            bytes_per_sec = self._audio_sample_rate * bytes_per_sample
+            start_byte = int(start_sec * bytes_per_sec)
+            start_byte = (start_byte // bytes_per_sample) * bytes_per_sample  # align frame
+
+            if start_byte < len(self._audio_raw_data):
+                chunk = self._audio_raw_data[start_byte:]
+                # สร้าง Sound object เฉพาะช่วงที่ต้องการเล่น
+                snd = pygame.mixer.Sound(buffer=chunk)
+                
+                # หยุดเสียงเดิมก่อน
+                if self._audio_channel is not None:
+                    self._audio_channel.stop()
+                    
+                self._audio_channel = snd.play()
+                self._audio_sound = snd
+            else:
+                if self._audio_channel is not None:
+                    self._audio_channel.stop()
+        except Exception as e:
+            print(f"[Audio Seek Error] {e}")
 
 
     # ── keys ──────────────────────────────────────────────────────────────────
@@ -1370,70 +1378,60 @@ class EditorPage(ctk.CTkFrame):
         self.playing = True
         self._dec_gen = getattr(self, "_dec_gen", 0) + 1
         gen = self._dec_gen
-        self._dec_stop.set()  # signal any existing worker to exit immediately
+        self._dec_stop.set()
         time.sleep(0.01)
         self._dec_stop.clear()
 
         if hasattr(self, "preview_panel"):
             self.preview_panel._pbtn.configure(text="⏸")
 
-        # Determine effective play speed from the active clip at current time
         t = self.fi / float(TARGET_FPS)
         active_clip = self._at("main", t)
         self._play_speed = float(active_clip.get("speed", 1.0)) if active_clip else 1.0
         if self._play_speed <= 0:
             self._play_speed = 1.0
 
-        # flush old buffer
+        # เคลียร์ buffer เฟรมภาพเก่า
         while not self._fbuf.empty():
             try: self._fbuf.get_nowait()
             except queue.Empty: break
 
+        # เริ่ม Decode Worker
         self._dec_th = threading.Thread(target=lambda g=gen: self._dec_worker(g), daemon=True)
         self._dec_th.start()
 
         start_sec = self.fi / float(TARGET_FPS)
-        play_speed = self._play_speed
-        def _start_audio_and_clock(g=gen):
-            min_frames = min(12, FRAME_BUF - 1)
-            deadline   = time.perf_counter() + 0.35
-            while self._fbuf.qsize() < min_frames and time.perf_counter() < deadline:
-                if not self.playing or g != getattr(self, "_dec_gen", 0):
-                    return
-                time.sleep(0.003)
-            if not self.playing or g != getattr(self, "_dec_gen", 0):
-                return
-            try:
-                # Set pygame volume from active clip
-                _vol = 1.0
-                if active_clip:
-                    _vol = float(active_clip.get("volume", 1.0))
-                pygame.mixer.music.set_volume(min(2.0, max(0.0, _vol)))
-                pygame.mixer.music.play(start=start_sec)
-            except Exception:
-                pass
-            self._pt0  = time.perf_counter()
-            self._pfi0 = self.fi
-        threading.Thread(target=_start_audio_and_clock, daemon=True).start()
+        
+        # เล่นเสียงตามวินาทีปัจจุบัน
+        self._play_audio_at(start_sec)
+
+        # ล็อกเวลาเริ่มต้นทันที
+        self._pt0  = time.perf_counter()
+        self._pfi0 = self.fi
+
         self.after(16, self._tick)
 
     def _stop(self):
         self.playing = False
         self._dec_gen = getattr(self, "_dec_gen", 0) + 1
         self._dec_stop.set()
-        self._pt0 = -1.0  # reset clock sentinel
+        self._pt0 = -1.0
         if hasattr(self, "preview_panel"):
             self.preview_panel._pbtn.configure(text="▶")
-            # Reset cached PhotoImage so pause path renders fresh high-quality frame
             self.preview_panel._disp_img = None
             self.preview_panel._canvas_img_id = None
-        try: pygame.mixer.music.pause()
-        except: pass
-        # Flush queue on stop
+
+        # หยุดเสียงที่เล่นอยู่
+        try:
+            if self._audio_channel is not None:
+                self._audio_channel.stop()
+        except Exception:
+            pass
+
         while not self._fbuf.empty():
             try: self._fbuf.get_nowait()
             except queue.Empty: break
-        # Re-render the current frame so preview shows the paused image
+
         self.after(60, lambda: self._render(self.fi))
         self.after(80, self._draw_tl)
 
@@ -1453,7 +1451,6 @@ class EditorPage(ctk.CTkFrame):
                 t    = fi / float(TARGET_FPS)
                 clip = self._at("main", t)
                 if not clip:
-                    # ถ้าไม่มีคลิปหลัก ให้ขยับเฟรมไปข้างหน้าเรื่อยๆ
                     fi += 1
                     time.sleep(0.01)
                     continue
@@ -1469,7 +1466,6 @@ class EditorPage(ctk.CTkFrame):
                     cap         = SmartVideoReader(play_path)
                     cap_path    = play_path
 
-                # ดึงด้วย Exact Frame Index แทน Time Float
                 ok, fr = cap.get_frame_at_index(src_fi)
                 if not ok:
                     fi += 1
@@ -1485,34 +1481,28 @@ class EditorPage(ctk.CTkFrame):
 
                 fr = self._apply_overlay(fr, t)
 
-                if self.playing:
-                    if hasattr(self, "preview_panel"):
-                        fr_ready = self.preview_panel._crop_ratio(fr)
-                        cw = max(getattr(self.preview_panel, "_cv_w", 640), 640)
-                        ch = max(getattr(self.preview_panel, "_cv_h", 360), 360)
-                    else:
-                        fr_ready = fr
-                        cw, ch = 640, 360
-                    fh, fw = fr_ready.shape[:2]
-                    sc_disp = min(cw / fw, ch / fh)
-                    nw = max(1, int(fw * sc_disp))
-                    nh = max(1, int(fh * sc_disp))
-                    fr_ready = _gpu_resize_bgr(fr_ready, nw, nh)
-                    fr_ready = _gpu_bgr2rgb(fr_ready)
+                if hasattr(self, "preview_panel"):
+                    fr_ready = self.preview_panel._crop_ratio(fr)
+                    cw = max(getattr(self.preview_panel, "_cv_w", 640), 640)
+                    ch = max(getattr(self.preview_panel, "_cv_h", 360), 360)
                 else:
                     fr_ready = fr
+                    cw, ch = 640, 360
+                fh, fw = fr_ready.shape[:2]
+                sc_disp = min(cw / fw, ch / fh)
+                nw = max(1, int(fw * sc_disp))
+                nh = max(1, int(fh * sc_disp))
+                fr_ready = _gpu_resize_bgr(fr_ready, nw, nh)
+                fr_ready = _gpu_bgr2rgb(fr_ready)
 
                 try:
                     self._fbuf.put((fi, fr_ready), timeout=0.05)
-                    fi += 1  # ขยับไปเฟรมถัดไปอย่างเคร่งครัด
+                    fi += 1
                 except queue.Full:
                     continue
         finally:
-            if cap is None or cap_path != play_path:
-                if hasattr(cap, "release"): 
-                    cap.release()
-                cap = SmartVideoReader(play_path)
-                cap_path = play_path
+            if hasattr(cap, "release"):
+                cap.release()
 
     def _tick(self):
         if not self.playing: return
@@ -3662,3 +3652,4 @@ class _SubtitleDialog(BaseModal):
 
         self.close()
         self._on_done(s, model, words_per_line, srt_path, rmode, t_start, t_end)
+
