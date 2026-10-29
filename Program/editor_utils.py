@@ -15,44 +15,47 @@ except ImportError:
         margin_x=40; margin_y=40; custom_x=0.5; custom_y=0.85
         line_spacing=8; bg_opacity=0.5; max_chars_per_line=40; max_lines=2
 
-# ── Design tokens (CapCut-inspired dark palette) ────────────────────────────
-BG_DEEP     = "#0a0a0d"
-BG_DARK     = "#0f0f14"
-PANEL_DARK  = "#141418"
-PANEL_MID   = "#1a1a20"
-PANEL_LIGHT = "#22222a"
-PANEL_HOV   = "#2c2c38"
+# ── Design tokens (60-30-10 Rule & WCAG AA Accessible Palette) ───────────────
+# 60% Dominant (Canvas / Panels)
+BG_DEEP     = "#0d1117"     # Deep canvas background
+BG_DARK     = "#12161f"     # Editor frame background
+PANEL_DARK  = "#161b22"     # Base panels & header
+PANEL_MID   = "#1c2128"     # Cards, list rows, inactive tabs
+PANEL_LIGHT = "#252d38"     # Elevated cards, secondary buttons
+PANEL_HOV   = "#303a48"     # Interactive hover states
 
-C_BLUE      = "#2d7cf6"    # main video / primary accent
-C_PURPLE    = "#9b5de5"    # overlay
-C_PINK      = "#f72585"    # text clips
-C_TEAL      = "#00b4d8"    # audio 1
-C_GREEN     = "#06d6a0"    # audio 2
-C_RED       = "#ef233c"    # playhead / delete
-C_AMBER     = "#f9a826"    # warning / speed
+# 30% Structural (Borders & Readability Text)
+TXT_W  = "#f8fafc"          # Primary text (high contrast, crisp readability)
+TXT_L  = "#94a3b8"          # Secondary body text
+TXT_G  = "#64748b"          # Muted helper labels, shortcuts
+BORD   = "#30363d"          # Clean structural border
 
-TXT_W  = "#f0f0f5"
-TXT_G  = "#5a5a6e"
-TXT_L  = "#9090aa"
-BORD   = "#20202a"
+TL_BG      = "#0a0e14"      # Timeline canvas deep
+TL_ROW_BG  = "#111620"      # Track lanes background
+TL_RULER   = "#0d1117"      # Ruler background
 
-TL_BG      = "#0b0b0f"
-TL_ROW_BG  = "#101014"
-TL_RULER   = "#080810"
+# 10% High-Contrast Semantic Accents
+C_BLUE      = "#3b82f6"     # Main video clip & primary action
+C_PURPLE    = "#8b5cf6"     # AI Auto-edit & overlay layers
+C_PINK      = "#f43f5e"     # Text & graphic clips
+C_TEAL      = "#06b6d4"     # Audio 1 track
+C_GREEN     = "#10b981"     # Audio 2 track & import
+C_RED       = "#ef4444"     # Delete & playhead
+C_AMBER     = "#f59e0b"     # Subtitles & ripple cut
 
-# ── Toolbar button groups (label, icon, command-name, color) ─────────────────
+# ── Toolbar button groups with Recognition-over-Recall Hotkey Badges ──────────
 _TOOL_GROUPS = [
     [
-        ("Split",     "✂",  "_split",          C_BLUE),
-        ("Delete",    "🗑",  "_del_sel",         C_RED),
-        ("Ripple",    "⊖",  "_ripple_delete",   C_AMBER),
+        ("Split (S)",     "✂",  "_split",          C_BLUE),
+        ("Delete (Del)",  "🗑",  "_del_sel",         C_RED),
+        ("Ripple (G)",    "⊖",  "_ripple_delete",   C_AMBER),
     ],
     [
-        ("Undo",      "↩",  "_undo_do",         TXT_L),
-        ("Redo",      "↪",  "_redo_do",         TXT_L),
+        ("Undo (Ctrl+Z)", "↩",  "_undo_do",         TXT_L),
+        ("Redo (Ctrl+Y)", "↪",  "_redo_do",         TXT_L),
     ],
     [
-        ("Import",    "+",  "_import",          C_GREEN),
+        ("Import (+)",    "+",  "_import",          C_GREEN),
     ],
 ]
 

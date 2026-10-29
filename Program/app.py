@@ -25,11 +25,18 @@ except Exception:
 import customtkinter as ctk
 from tkinter import filedialog, simpledialog
 import tkinter as tk
+try:
+    from tkinterdnd2 import TkinterDnD, DND_FILES
+    _HAS_DND = True
+except ImportError:
+    _HAS_DND = False
 import json, time, threading
 from PIL import Image, ImageTk, ImageDraw
 import last_dirs as _ld
+import settings_manager as _sm
 
-ctk.set_appearance_mode("Dark")
+_saved_theme = _sm.get_setting("theme", "Dark")
+ctk.set_appearance_mode(_saved_theme)
 ctk.set_default_color_theme("blue")
 
 # ── Design Tokens — matches editor_utils.py palette ───────────────────────────
@@ -466,6 +473,12 @@ class HomePage(ctk.CTkFrame):
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
+        # Patch DnD onto this CTk window (must run before any drop_target_register calls)
+        if _HAS_DND:
+            try:
+                TkinterDnD._require(self)
+            except Exception as e:
+                print(f"[DnD] Could not enable drag-and-drop: {e}")
         self.title("MediaPro")
         self.geometry("1100x720")
         self.minsize(900, 600)
@@ -474,6 +487,7 @@ class App(ctk.CTk):
         self._show_home()
         self.protocol("WM_DELETE_WINDOW", self._on_close_window)
         self.after(2000, lambda: threading.Thread(target=self._prewarm, daemon=True).start())
+
 
     def _prewarm(self):
         try:

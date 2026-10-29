@@ -1050,114 +1050,137 @@ def detect_deadair_segments(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 2. ถอดเสียงด้วย AI (Local Whisper Model)
-# ─────────────────────────────────────────────────────────────────────────────
+# ── Global Model Cache for fast repeated inference ─────────────────────────────
+_WHISPER_MODEL_CACHE = {}
+
 def _run_local_whisper(
     model_path: str,
     audio: np.ndarray,
     speech_ts: list[dict],
     progress_cb=None,
 ) -> list[dict]:
-    """ถอดเสียงด้วยโมเดล Whisper ภายในเครื่องผ่าน model.generate โดยตรง (ไม่ผ่าน pipeline)"""
+    """ถอดเสียงด้วยโมเดล Whisper ภายในเครื่องผ่าน model.generate โดยตรง (มี In-Memory Cache)"""
     import torch
     from transformers import WhisperProcessor, WhisperForConditionalGeneration
 
-    if progress_cb:
-        progress_cb(f"โหลดโมเดล: {os.path.basename(model_path)} …")
-
-    # 1. Resolve paths
-    pt_file = None
-    if os.path.isfile(model_path):
-        pt_file = model_path
-        model_dir = os.path.dirname(model_path)
+    # Check cache first for instant reuse
+    if model_path in _WHISPER_MODEL_CACHE:
+        cached = _WHISPER_MODEL_CACHE[model_path]
+        processor = cached["processor"]
+        model = cached["model"]
+        device_str = cached["device_str"]
+        torch_dtype = cached["torch_dtype"]
+        forced_decoder_ids = cached["forced_decoder_ids"]
+        prompt_ids = cached["prompt_ids"]
+        if progress_cb:
+            progress_cb("โมเดลพร้อมใช้งานทันที (Cached in Memory)")
     else:
-        model_dir = model_path
-        for fname in ["best.pt", "model.pt", "pytorch_model.pt", "pytorch_model.bin"]:
-            fpath = os.path.join(model_dir, fname)
-            if os.path.exists(fpath):
-                pt_file = fpath
-                break
+        if progress_cb:
+            progress_cb(f"โหลดโมเดล: {os.path.basename(model_path)} …")
 
-    # 2. Load Processor
-    processor = None
-    try:
-        processor = WhisperProcessor.from_pretrained(model_dir, local_files_only=True)
-    except Exception:
+        # 1. Resolve paths
+        pt_file = None
+        if os.path.isfile(model_path):
+            pt_file = model_path
+            model_dir = os.path.dirname(model_path)
+        else:
+            model_dir = model_path
+            for fname in ["best.pt", "model.pt", "pytorch_model.pt", "pytorch_model.bin"]:
+                fpath = os.path.join(model_dir, fname)
+                if os.path.exists(fpath):
+                    pt_file = fpath
+                    break
+
+        # 2. Load Processor
+        processor = None
         try:
-            processor = WhisperProcessor.from_pretrained(model_dir, local_files_only=False)
+            processor = WhisperProcessor.from_pretrained(model_dir, local_files_only=True)
+        except Exception:
+            try:
+                processor = WhisperProcessor.from_pretrained(model_dir, local_files_only=False)
+            except Exception:
+                pass
+
+        if processor is None:
+            for fallback_model in ["openai/whisper-small", "openai/whisper-base", "openai/whisper-tiny"]:
+                try:
+                    processor = WhisperProcessor.from_pretrained(fallback_model, local_files_only=True)
+                    break
+                except Exception:
+                    pass
+            if processor is None:
+                raise RuntimeError("ไม่สามารถโหลด Whisper processor ได้ กรุณาตรวจสอบอินเทอร์เน็ตหรือโมเดล")
+
+        # 3. Load Model
+        device_str = "cuda" if torch.cuda.is_available() else "cpu"
+        torch_dtype = torch.float16 if device_str == "cuda" else torch.float32
+
+        if device_str == "cuda":
+            torch.backends.cudnn.benchmark = True
+            torch.backends.cuda.matmul.allow_tf32 = True
+            torch.backends.cudnn.allow_tf32 = True
+            _report_progress(progress_cb, 15, f"Using GPU: {torch.cuda.get_device_name(0)}")
+        else:
+            _report_progress(progress_cb, 15, "Using CPU for transcription")
+
+        model = None
+        if pt_file and os.path.exists(pt_file):
+            try:
+                state = torch.load(pt_file, map_location="cpu")
+                if isinstance(state, dict) and "state_dict" in state:
+                    state = state["state_dict"]
+
+                base_model_name = "openai/whisper-small"
+                if isinstance(state, dict) and "model.encoder.conv1.weight" in state:
+                    h_dim = state["model.encoder.conv1.weight"].shape[0]
+                    if h_dim == 384: base_model_name = "openai/whisper-tiny"
+                    elif h_dim == 512: base_model_name = "openai/whisper-base"
+                    elif h_dim == 768: base_model_name = "openai/whisper-small"
+                    elif h_dim == 1024: base_model_name = "openai/whisper-medium"
+
+                model = WhisperForConditionalGeneration.from_pretrained(base_model_name, torch_dtype=torch_dtype)
+                model.load_state_dict(state, strict=False)
+                model = model.to(device_str)
+                model.eval()
+            except Exception as e:
+                print(f"[LocalWhisper] Loading state_dict weights failed: {e}")
+
+        if model is None:
+            try:
+                model = WhisperForConditionalGeneration.from_pretrained(model_dir, local_files_only=True, torch_dtype=torch_dtype)
+                model = model.to(device_str)
+                model.eval()
+            except Exception:
+                try:
+                    model = WhisperForConditionalGeneration.from_pretrained(model_dir, local_files_only=False, torch_dtype=torch_dtype)
+                    model = model.to(device_str)
+                    model.eval()
+                except Exception as e2:
+                    raise RuntimeError(f"โหลดโมเดลจาก '{model_path}' ไม่สำเร็จ: {e2}")
+
+        # 4. Decoder Prompt Setup (Forced Thai + English terms support)
+        forced_decoder_ids = None
+        try:
+            forced_decoder_ids = processor.get_decoder_prompt_ids(language="thai", task="transcribe")
         except Exception:
             pass
 
-    if processor is None:
-        for fallback_model in ["openai/whisper-small", "openai/whisper-base", "openai/whisper-tiny"]:
-            try:
-                processor = WhisperProcessor.from_pretrained(fallback_model, local_files_only=True)
-                break
-            except Exception:
-                pass
-        if processor is None:
-            raise RuntimeError("ไม่สามารถโหลด Whisper processor ได้ กรุณาตรวจสอบอินเทอร์เน็ตหรือโมเดล")
-
-    # 3. Load Model
-    device_str = "cuda" if torch.cuda.is_available() else "cpu"
-    torch_dtype = torch.float16 if device_str == "cuda" else torch.float32
-
-    if device_str == "cuda":
-        torch.backends.cudnn.benchmark = True
-        torch.backends.cuda.matmul.allow_tf32 = True
-        torch.backends.cudnn.allow_tf32 = True
-        _report_progress(progress_cb, 15, f"Using GPU: {torch.cuda.get_device_name(0)}")
-    else:
-        _report_progress(progress_cb, 15, "Using CPU for transcription")
-
-    model = None
-    if pt_file and os.path.exists(pt_file):
+        prompt_ids = None
         try:
-            state = torch.load(pt_file, map_location="cpu")
-            if isinstance(state, dict) and "state_dict" in state:
-                state = state["state_dict"]
-
-            base_model_name = "openai/whisper-small"
-            if isinstance(state, dict) and "model.encoder.conv1.weight" in state:
-                h_dim = state["model.encoder.conv1.weight"].shape[0]
-                if h_dim == 384: base_model_name = "openai/whisper-tiny"
-                elif h_dim == 512: base_model_name = "openai/whisper-base"
-                elif h_dim == 768: base_model_name = "openai/whisper-small"
-                elif h_dim == 1024: base_model_name = "openai/whisper-medium"
-
-            model = WhisperForConditionalGeneration.from_pretrained(base_model_name, torch_dtype=torch_dtype)
-            model.load_state_dict(state, strict=False)
-            model = model.to(device_str)
-            model.eval()
-        except Exception as e:
-            print(f"[LocalWhisper] Loading state_dict weights failed: {e}")
-
-    if model is None:
-        try:
-            model = WhisperForConditionalGeneration.from_pretrained(model_dir, local_files_only=True, torch_dtype=torch_dtype)
-            model = model.to(device_str)
-            model.eval()
+            prompt_text = "บทสนทนาภาษาไทย มีคำทับศัพท์และภาษาอังกฤษ เช่น Video, Audio, Track, Cut, Edit, Clip, Timeline, AI, Python, Export"
+            prompt_ids = processor.get_prompt_ids(prompt_text, return_tensors="pt").to(device_str)
         except Exception:
-            try:
-                model = WhisperForConditionalGeneration.from_pretrained(model_dir, local_files_only=False, torch_dtype=torch_dtype)
-                model = model.to(device_str)
-                model.eval()
-            except Exception as e2:
-                raise RuntimeError(f"โหลดโมเดลจาก '{model_path}' ไม่สำเร็จ: {e2}")
+            pass
 
-    # 4. Decoder Prompt Setup (Forced Thai + English terms support)
-    forced_decoder_ids = None
-    try:
-        forced_decoder_ids = processor.get_decoder_prompt_ids(language="thai", task="transcribe")
-    except Exception:
-        pass
-
-    prompt_ids = None
-    try:
-        prompt_text = "บทสนทนาภาษาไทย มีคำทับศัพท์และภาษาอังกฤษ เช่น Video, Audio, Track, Cut, Edit, Clip, Timeline, AI, Python, Export"
-        prompt_ids = processor.get_prompt_ids(prompt_text, return_tensors="pt").to(device_str)
-    except Exception:
-        pass
+        # Save to cache
+        _WHISPER_MODEL_CACHE[model_path] = {
+            "processor": processor,
+            "model": model,
+            "device_str": device_str,
+            "torch_dtype": torch_dtype,
+            "forced_decoder_ids": forced_decoder_ids,
+            "prompt_ids": prompt_ids,
+        }
 
     raw: list[dict] = []
     total = len(speech_ts)

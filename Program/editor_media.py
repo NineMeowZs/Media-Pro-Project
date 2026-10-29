@@ -61,21 +61,8 @@ class MediaPanel(ctk.CTkFrame):
         self._mpanel = ctk.CTkFrame(self, width=270, fg_color="transparent", corner_radius=0)
         self._mpanel.pack(fill="both", expand=True, padx=4, pady=4)
 
-        # Header title
-        hdr = ctk.CTkFrame(self._mpanel, fg_color="transparent", height=28)
-        hdr.pack(fill="x", padx=8, pady=(2, 2))
-        hdr.pack_propagate(False)
-
-        self._ptitle = ctk.CTkLabel(
-            hdr, text="Media",
-            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
-            text_color=TXT_W
-        )
-        self._ptitle.pack(side="left")
-
-        ctk.CTkFrame(self._mpanel, height=1, fg_color=BORD).pack(fill="x", padx=4)
-
-        # Scrollable inner content frame
+        # Scrollable inner content frame (starts directly under tab bar)
+        self._ptitle = None
         self._pscroll = ctk.CTkScrollableFrame(
             self._mpanel, fg_color="transparent",
             scrollbar_button_color=PANEL_LIGHT
@@ -88,7 +75,8 @@ class MediaPanel(ctk.CTkFrame):
     def _tab(self, name):
         """Switch active tab and rebuild inner components list."""
         self._active_tab_name = name
-        self._ptitle.configure(text=name)
+        if self._ptitle is not None:
+            self._ptitle.configure(text=name)
         
         # Hide transcript panel first
         if hasattr(self.controller, "transcript_panel"):
@@ -147,7 +135,8 @@ class MediaPanel(ctk.CTkFrame):
 
         ms_ent = ctk.CTkEntry(
             ms_row, width=54, height=26, corner_radius=6,
-            font=ctk.CTkFont(size=10, weight="bold"), fg_color=PANEL_LIGHT
+            font=ctk.CTkFont(size=10, weight="bold"),
+            fg_color="#ffffff", text_color="#000000"
         )
         ms_ent.insert(0, str(cur_ms))
         ms_ent.pack(side="right", padx=(4, 0))
@@ -637,44 +626,82 @@ class MediaPanel(ctk.CTkFrame):
 
     def _pt_media(self):
         """Tab Panel: Media files loader and catalog."""
+        # 1. Main '+ Import Media' Button
         ctk.CTkButton(
             self._pscroll, text="+ Import Media", height=32, corner_radius=6,
             fg_color=C_BLUE, hover_color=_dark(C_BLUE),
             font=ctk.CTkFont(size=10, weight="bold"),
             command=self.controller._import
-        ).pack(fill="x", pady=(0, 8))
+        ).pack(fill="x", pady=(0, 6))
 
+        self._drop_zone = None
+
+        # 2. Drag to Import Guide Zone (shown ONLY when no media assets have been imported yet)
+        if not self.controller.assets:
+            self._drop_zone = ctk.CTkFrame(
+                self._pscroll, fg_color="#182234", corner_radius=10,
+                border_width=1, border_color="#334155"
+            )
+            self._drop_zone.pack(fill="x", pady=(0, 8))
+
+            if hasattr(self.controller, "_register_dnd_target"):
+                self.controller._register_dnd_target(self._drop_zone)
+
+            def _on_click_dropzone(e=None):
+                self.controller._import()
+
+            self._drop_zone.bind("<Button-1>", _on_click_dropzone)
+
+            inner = ctk.CTkFrame(self._drop_zone, fg_color="transparent")
+            inner.pack(fill="both", expand=True, padx=10, pady=10)
+            inner.bind("<Button-1>", _on_click_dropzone)
+
+            icon_lbl = ctk.CTkLabel(inner, text="📥", font=ctk.CTkFont(size=20), text_color="#60a5fa")
+            icon_lbl.pack(pady=(0, 2))
+            icon_lbl.bind("<Button-1>", _on_click_dropzone)
+
+            t_lbl = ctk.CTkLabel(
+                inner, text="Drag & drop media files here",
+                font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"),
+                text_color="#e2e8f0"
+            )
+            t_lbl.pack(pady=(0, 1))
+            t_lbl.bind("<Button-1>", _on_click_dropzone)
+
+            s_lbl = ctk.CTkLabel(
+                inner, text="ลากไฟล์วิดีโอ/เสียง/ภาพมาวาง หรือคลิกเพื่อนำเข้า",
+                font=ctk.CTkFont(family="Segoe UI", size=8),
+                text_color="#94a3b8"
+            )
+            s_lbl.pack()
+            s_lbl.bind("<Button-1>", _on_click_dropzone)
+
+        # 3. List of imported assets
         for a in self.controller.assets:
             self._acard(a)
 
     def _pt_text(self):
-        """Tab Panel: Text clip builder + ⚙ gear opens Global Text Style settings."""
-        from editor_utils import C_PINK, PANEL_MID, BORD, TXT_G
+        """Tab Panel: Text clip builder + compact ⚙ gear opens Global Text Style settings."""
+        from editor_utils import C_PINK, PANEL_MID, PANEL_HOV, BORD, TXT_G
 
-        # ── Header row with title + gear button ───────────────────────────────
-        hdr = ctk.CTkFrame(self._pscroll, fg_color="transparent")
-        hdr.pack(fill="x", pady=(0, 4))
+        # ── Text content header row with compact ⚙ gear button on the right ──
+        lbl_row = ctk.CTkFrame(self._pscroll, fg_color="transparent")
+        lbl_row.pack(fill="x", pady=(2, 4))
 
         ctk.CTkLabel(
-            hdr, text="Text",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            lbl_row, text="Text Content",
+            font=ctk.CTkFont(size=10, weight="bold"),
             text_color=TXT_G
         ).pack(side="left")
 
         ctk.CTkButton(
-            hdr, text="⚙", width=30, height=26, corner_radius=8,
-            fg_color=PANEL_MID, hover_color=PANEL_MID,
-            font=ctk.CTkFont(size=14),
+            lbl_row, text="⚙", width=24, height=22, corner_radius=6,
+            fg_color=PANEL_MID, hover_color=PANEL_HOV,
+            font=ctk.CTkFont(size=11),
             command=self._open_text_style_settings
         ).pack(side="right")
 
         # ── Text content entry ────────────────────────────────────────────────
-        ctk.CTkLabel(
-            self._pscroll, text="Text Content",
-            font=ctk.CTkFont(size=9, weight="bold"),
-            text_color=TXT_G
-        ).pack(anchor="w", pady=(4, 2))
-
         ctk.CTkEntry(
             self._pscroll, placeholder_text="Enter text…",
             height=32, corner_radius=6,
@@ -787,10 +814,11 @@ class MediaPanel(ctk.CTkFrame):
             ).pack(fill="x", pady=(0, 4))
 
     def _acard(self, asset):
-        """Render a single asset card representing an imported file."""
+        """Render a single asset card with 3-dots menu button and right-click support (Rename/Delete)."""
         f = ctk.CTkFrame(self._pscroll, fg_color=PANEL_MID, corner_radius=8)
         f.pack(fill="x", pady=3)
 
+        lbl = None
         thumb = self._get_thumb(asset)
         if thumb:
             lbl = tk.Label(f, image=thumb, bg=PANEL_MID)
@@ -798,30 +826,207 @@ class MediaPanel(ctk.CTkFrame):
             lbl.pack(side="left", padx=5, pady=5)
         else:
             col = {"video": C_BLUE, "audio": C_TEAL, "image": C_PURPLE}.get(asset.get("type"), TXT_G)
-            ctk.CTkLabel(
+            lbl = ctk.CTkLabel(
                 f, text=asset["type"][0].upper() if asset.get("type") else "?",
                 font=ctk.CTkFont(size=15, weight="bold"),
                 width=32, text_color=col
-            ).pack(side="left", padx=6, pady=6)
+            )
+            lbl.pack(side="left", padx=6, pady=6)
 
         info = ctk.CTkFrame(f, fg_color="transparent")
         info.pack(side="left", fill="both", expand=True)
 
-        nm = asset["name"]
+        nm = asset.get("name", "Media")
         sh = nm[:18] + "…" if len(nm) > 18 else nm
 
-        ctk.CTkLabel(info, text=sh, font=ctk.CTkFont(size=10), text_color=TXT_W).pack(anchor="w")
-        ctk.CTkLabel(
-            info, text=asset.get("type", "?"),
+        name_lbl = ctk.CTkLabel(info, text=sh, font=ctk.CTkFont(size=10, weight="bold"), text_color=TXT_W)
+        name_lbl.pack(anchor="w")
+        type_lbl = ctk.CTkLabel(
+            info, text=asset.get("type", "?").capitalize(),
             font=ctk.CTkFont(size=8), text_color=TXT_G
-        ).pack(anchor="w")
+        )
+        type_lbl.pack(anchor="w")
 
-        ctk.CTkButton(
-            f, text="+", width=26, height=26, corner_radius=5,
+        # Right-side button container
+        r_box = ctk.CTkFrame(f, fg_color="transparent")
+        r_box.pack(side="right", padx=4, pady=4)
+
+        # 3-dots button (⋮) at top-right for media options
+        dots_btn = ctk.CTkButton(
+            r_box, text="⋮", width=22, height=24, corner_radius=4,
+            fg_color="transparent", hover_color=PANEL_LIGHT,
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            text_color=TXT_G
+        )
+        dots_btn.pack(side="right", padx=(2, 0))
+
+        # Add to timeline '+' button
+        add_btn = ctk.CTkButton(
+            r_box, text="+", width=24, height=24, corner_radius=5,
             fg_color=C_BLUE, hover_color=_dark(C_BLUE),
-            font=ctk.CTkFont(size=12),
+            font=ctk.CTkFont(size=13, weight="bold"),
             command=lambda x=asset: self.controller._add_to_tl(x)
-        ).pack(side="right", padx=6, pady=6)
+        )
+        add_btn.pack(side="right", padx=(0, 2))
+
+        # ── Inline Rename Handler ──
+        def _start_inline_rename():
+            old_name = asset.get("name", "")
+
+            # Temporarily hide label and type
+            name_lbl.pack_forget()
+            type_lbl.pack_forget()
+
+            # Create an inline edit box right where the name was
+            entry = ctk.CTkEntry(
+                info, height=22, corner_radius=4,
+                font=ctk.CTkFont(size=10),
+                fg_color="#0f172a", border_color="#3b82f6", border_width=1,
+                text_color="#ffffff"
+            )
+            entry.pack(fill="x", pady=(1, 2))
+            type_lbl.pack(anchor="w")
+
+            entry.insert(0, old_name)
+            entry.focus_set()
+            entry.select_range(0, "end")
+
+            is_done = [False]
+            click_bind_id = [None]
+            root = self.winfo_toplevel()
+
+            def _clean_binding():
+                if click_bind_id[0] is not None:
+                    try:
+                        root.unbind("<Button-1>", click_bind_id[0])
+                    except Exception:
+                        pass
+                    click_bind_id[0] = None
+
+            def _commit_rename(event=None):
+                if is_done[0]:
+                    return
+                is_done[0] = True
+                _clean_binding()
+                new_name = entry.get().strip()
+                if new_name and new_name != old_name:
+                    asset["name"] = new_name
+                    p = asset.get("path")
+                    if p:
+                        for track_clips in self.controller.tracks.values():
+                            for clip in track_clips:
+                                if clip.get("path") == p and clip.get("name") == old_name:
+                                    clip["name"] = new_name
+                    self.controller._draw_tl()
+                    self.controller._status(f"เปลี่ยนชื่อเป็น: {new_name}")
+
+                cur_name = asset.get("name", "Media")
+                disp = cur_name[:18] + "…" if len(cur_name) > 18 else cur_name
+                name_lbl.configure(text=disp)
+                try:
+                    entry.destroy()
+                except Exception:
+                    pass
+                type_lbl.pack_forget()
+                name_lbl.pack(anchor="w")
+                type_lbl.pack(anchor="w")
+
+            def _cancel_rename(event=None):
+                if is_done[0]:
+                    return
+                is_done[0] = True
+                _clean_binding()
+                try:
+                    entry.destroy()
+                except Exception:
+                    pass
+                type_lbl.pack_forget()
+                name_lbl.pack(anchor="w")
+                type_lbl.pack(anchor="w")
+
+            def _on_global_click(event):
+                if is_done[0]:
+                    return
+                try:
+                    if entry.winfo_exists():
+                        x, y = event.x_root, event.y_root
+                        ex = entry.winfo_rootx()
+                        ey = entry.winfo_rooty()
+                        ew = entry.winfo_width()
+                        eh = entry.winfo_height()
+                        # If clicked outside the entry bounding box, commit and save!
+                        if not (ex <= x <= ex + ew and ey <= y <= ey + eh):
+                            _commit_rename()
+                except Exception:
+                    _commit_rename()
+
+            entry.bind("<Return>", _commit_rename)
+            entry.bind("<Escape>", _cancel_rename)
+            if hasattr(entry, "_entry"):
+                entry._entry.bind("<Return>", _commit_rename)
+                entry._entry.bind("<Escape>", _cancel_rename)
+                entry._entry.bind("<FocusOut>", _commit_rename)
+
+            def _setup_global_click():
+                if not is_done[0] and entry.winfo_exists():
+                    click_bind_id[0] = root.bind("<Button-1>", _on_global_click, add="+")
+
+            # Bind global click after initial click event finishes
+            self.after(120, _setup_global_click)
+
+        # Context Menu (Rename / Delete)
+        def _show_context_menu(x_root, y_root):
+            menu = tk.Menu(
+                self, tearoff=0, bg="#1e293b", fg="#f8fafc",
+                activebackground="#3b82f6", activeforeground="#ffffff",
+                relief="flat", bd=1
+            )
+            menu.add_command(label="✏️  Rename", command=_start_inline_rename)
+            menu.add_separator()
+            menu.add_command(label="🗑️  Delete", command=lambda: self._delete_asset(asset))
+            try:
+                menu.tk_popup(x_root, y_root)
+            finally:
+                menu.grab_release()
+
+        def _on_right_click(event):
+            _show_context_menu(event.x_root, event.y_root)
+
+        def _on_dots_click():
+            try:
+                x = dots_btn.winfo_rootx()
+                y = dots_btn.winfo_rooty() + dots_btn.winfo_height()
+                _show_context_menu(x, y)
+            except Exception:
+                pass
+
+        dots_btn.configure(command=_on_dots_click)
+
+        # Double-click name to inline rename
+        name_lbl.bind("<Double-Button-1>", lambda e: _start_inline_rename())
+
+        # Bind right-click on all interactive parts of this card
+        for w in (f, info, name_lbl, type_lbl, r_box):
+            w.bind("<Button-3>", _on_right_click)
+            w.bind("<Button-2>", _on_right_click)
+        if lbl:
+            lbl.bind("<Button-3>", _on_right_click)
+            lbl.bind("<Button-2>", _on_right_click)
+
+    def _delete_asset(self, asset):
+        """Confirm and delete a media asset from the library."""
+        from tkinter import messagebox
+        nm = asset.get("name", "มีเดียนี้")
+        if messagebox.askyesno("Delete Media", f"ต้องการลบ '{nm}' ออกจากรายการมีเดียหรือไม่?\n(ไฟล์ต้นฉบับในเครื่องจะไม่ถูกลบ)"):
+            if asset in self.controller.assets:
+                self.controller.assets.remove(asset)
+            p = asset.get("path", "")
+            if p in self.controller._thumbs:
+                del self.controller._thumbs[p]
+            self._tab(self._active_tab_name)
+            self.controller._status(f"ลบ '{nm}' ออกจากรายการเรียบร้อย")
+
+
 
     def _get_thumb(self, asset):
         """Retrieve or extract visual thumbnail for videos and images."""

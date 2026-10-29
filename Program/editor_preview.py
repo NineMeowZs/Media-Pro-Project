@@ -149,8 +149,25 @@ class PreviewPanel(ctk.CTkFrame):
             return cx, cy, hw, hh
 
         # Overlay media (images/videos on layer tracks)
-        hw = max(20, int(cw * 0.25 * scale))
-        hh = max(20, int(ch * 0.25 * scale))
+        p = clip.get("path", "")
+        ow, oh = 1920, 1080
+        if p and os.path.exists(p):
+            try:
+                if hasattr(self.controller, "_img_cache") and p in self.controller._img_cache:
+                    oh, ow = self.controller._img_cache[p].shape[:2]
+                else:
+                    cap_t = cv2.VideoCapture(p)
+                    w_t = int(cap_t.get(cv2.CAP_PROP_FRAME_WIDTH))
+                    h_t = int(cap_t.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                    cap_t.release()
+                    if w_t > 0 and h_t > 0:
+                        ow, oh = w_t, h_t
+            except Exception:
+                pass
+
+        base_s = min(cw / max(ow, 1), ch / max(oh, 1)) * 0.5
+        hw = max(15, int(round(ow * base_s * scale * 0.5)))
+        hh = max(15, int(round(oh * base_s * scale * 0.5)))
         return cx, cy, hw, hh
 
     def _hit_test_clip(self, mx, my, clip, track_key=""):
@@ -745,7 +762,7 @@ class PreviewPanel(ctk.CTkFrame):
                 continue
 
             ext = os.path.splitext(path)[1].lower()
-            is_image = ext in (".jpg", ".jpeg", ".png")
+            is_image = ext in (".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif")
 
             overlay_frame = None
             if is_image:
@@ -771,32 +788,53 @@ class PreviewPanel(ctk.CTkFrame):
             if overlay_frame is None:
                 continue
 
-            sc = overlay_clip.get("scale", 1.0)
-            rot = overlay_clip.get("rotate", 0.0)
-            if sc != 1.0 or rot != 0.0:
-                overlay_frame = self.controller._apply_clip_transform(overlay_frame, sc, rot)
+            sc = float(overlay_clip.get("scale", 1.0))
+            rot = float(overlay_clip.get("rotate", 0.0))
+            cx = float(overlay_clip.get("custom_x", 0.5))
+            cy = float(overlay_clip.get("custom_y", 0.5))
+
+            if rot != 0.0:
+                overlay_frame = self.controller._apply_clip_transform(overlay_frame, 1.0, rot)
 
             h, w = frame.shape[:2]
             oh, ow = overlay_frame.shape[:2]
-            scale = min(w / ow, h / oh) * 0.5
-            if scale > 0:
-                nw, nh = int(ow * scale), int(oh * scale)
-                if nw > 0 and nh > 0:
-                    overlay_resized = cv2.resize(overlay_frame, (nw, nh), interpolation=cv2.INTER_LINEAR)
-                    x_offset = (w - nw) // 2
-                    y_offset = (h - nh) // 2
-                    try:
-                        if overlay_resized.shape[2] == 4:
-                            alpha = overlay_resized[:, :, 3] / 255.0
-                            alpha = np.expand_dims(alpha, axis=2)
-                            overlay_color = overlay_resized[:, :, :3]
-                            target_roi = frame[y_offset:y_offset + nh, x_offset:x_offset + nw]
-                            blended = (overlay_color * alpha + target_roi * (1.0 - alpha)).astype(np.uint8)
-                            frame[y_offset:y_offset + nh, x_offset:x_offset + nw] = blended
-                        else:
-                            frame[y_offset:y_offset + nh, x_offset:x_offset + nw] = overlay_resized[:, :, :3]
-                    except Exception:
-                        pass
+            base_s = min(w / max(ow, 1), h / max(oh, 1)) * 0.5
+            total_scale = base_s * sc
+            nw = max(1, int(round(ow * total_scale)))
+            nh = max(1, int(round(oh * total_scale)))
+
+            overlay_resized = cv2.resize(overlay_frame, (nw, nh), interpolation=cv2.INTER_LINEAR)
+
+            # Center position based on normalized (cx, cy)
+            center_x = int(round(w * cx))
+            center_y = int(round(h * cy))
+            x_offset = center_x - nw // 2
+            y_offset = center_y - nh // 2
+
+            # Safe ROI clipping (allows dragging partially off-screen without crash)
+            x1 = max(0, x_offset)
+            y1 = max(0, y_offset)
+            x2 = min(w, x_offset + nw)
+            y2 = min(h, y_offset + nh)
+
+            if x2 > x1 and y2 > y1:
+                ox1 = x1 - x_offset
+                oy1 = y1 - y_offset
+                ox2 = ox1 + (x2 - x1)
+                oy2 = oy1 + (y2 - y1)
+
+                ov_roi = overlay_resized[oy1:oy2, ox1:ox2]
+                target_roi = frame[y1:y2, x1:x2]
+
+                try:
+                    if ov_roi.shape[2] == 4:
+                        alpha = ov_roi[:, :, 3:4] / 255.0
+                        blended = (ov_roi[:, :, :3] * alpha + target_roi * (1.0 - alpha)).astype(np.uint8)
+                        frame[y1:y2, x1:x2] = blended
+                    else:
+                        frame[y1:y2, x1:x2] = ov_roi[:, :, :3]
+                except Exception:
+                    pass
         return frame
 
     def _upd_time(self, t):

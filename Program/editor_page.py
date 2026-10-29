@@ -55,6 +55,12 @@ import uuid
 from modal_system import BaseModal, DetachResultDialog
 from settings_manager import get_model_folder, set_model_folder
 
+try:
+    from tkinterdnd2 import DND_FILES
+    _HAS_DND = True
+except ImportError:
+    _HAS_DND = False
+
 # ── Import Modular Components ────────────────────────────────────────────────
 from editor_utils import *
 from editor_utils import _ft, _bright, _dark, _nice_step, _TOOL_GROUPS
@@ -266,6 +272,141 @@ class EditorPage(ctk.CTkFrame):
 
         self._autosave_start()
         self._bind_keys()
+        self._setup_drop_target()
+
+
+    # ── Drag & Drop from OS (Media tab only) ──────────────────────────────────
+    def _setup_drop_target(self):
+        """Register ONLY the Media panel as a drag-and-drop target for media files."""
+        if not _HAS_DND:
+            return
+        try:
+            mp = getattr(self, "media_panel", None)
+            if not mp:
+                return
+
+            targets = [mp]
+            for sub in ("_mpanel", "_pscroll"):
+                w = getattr(mp, sub, None)
+                if w is not None:
+                    targets.append(w)
+
+            for w in targets:
+                self._register_dnd_target(w)
+        except Exception as e:
+            print(f"[DnD] setup error: {e}")
+
+    def _register_dnd_target(self, widget):
+        """Register an individual widget inside media panel as drop target."""
+        if not _HAS_DND or widget is None:
+            return
+        try:
+            widget.drop_target_register(DND_FILES)
+            widget.dnd_bind("<<DropEnter>>", self._on_dnd_enter)
+            widget.dnd_bind("<<DropLeave>>", self._on_dnd_leave)
+            widget.dnd_bind("<<Drop>>",      self._on_dnd_drop)
+        except Exception:
+            pass
+
+    def _on_dnd_enter(self, event):
+        """Show compact visual feedback inside the Media panel only when empty."""
+        try:
+            # If media already exists, do not show any overlay to avoid blocking existing media cards
+            if getattr(self, "assets", None):
+                return
+
+            mp = getattr(self, "media_panel", None)
+            if not mp:
+                return
+
+            # Highlight drop zone if present
+            if hasattr(mp, "_drop_zone") and mp._drop_zone is not None and mp._drop_zone.winfo_exists():
+                mp._drop_zone.configure(border_color="#38bdf8", fg_color="#1e293b")
+            elif not hasattr(self, "_dnd_overlay") or not self._dnd_overlay.winfo_exists():
+                self._dnd_overlay = tk.Frame(mp, bg="#0f2744",
+                                             highlightbackground="#38bdf8",
+                                             highlightthickness=2)
+                self._dnd_overlay.place(relx=0.5, y=95, anchor="n",
+                                        relwidth=0.90, height=60)
+                lbl = tk.Label(self._dnd_overlay,
+                               text="📥 วางไฟล์มีเดียที่นี่ (Drop to Import)",
+                               font=("Segoe UI", 10, "bold"),
+                               fg="#60a5fa", bg="#0f2744")
+                lbl.place(relx=0.5, rely=0.5, anchor="center")
+                self._dnd_overlay.lift()
+        except Exception:
+            pass
+
+    def _on_dnd_leave(self, event):
+        """Remove visual feedback when drag leaves the media panel."""
+        self._dnd_hide_overlay()
+
+    def _dnd_hide_overlay(self):
+        try:
+            mp = getattr(self, "media_panel", None)
+            if mp and hasattr(mp, "_drop_zone") and mp._drop_zone is not None and mp._drop_zone.winfo_exists():
+                mp._drop_zone.configure(border_color="#334155", fg_color="#182234")
+            if hasattr(self, "_dnd_overlay") and self._dnd_overlay.winfo_exists():
+                self._dnd_overlay.destroy()
+        except Exception:
+            pass
+
+    def _on_dnd_drop(self, event):
+        """Handle files dropped onto the editor."""
+        self._dnd_hide_overlay()
+        raw = event.data or ""
+        # tkinterdnd2 returns space-separated paths; curly-braces wrap paths with spaces
+        import re
+        paths = re.findall(r'\{([^}]+)\}|(\S+)', raw)
+        paths = [a or b for a, b in paths]
+        if not paths:
+            return
+        for path in paths:
+            path = path.strip()
+            if not os.path.isfile(path):
+                continue
+            ext = os.path.splitext(path)[1].lower()
+            if ext == ".srt":
+                self._import_srt_path(path)
+                continue
+            atype = ("video" if ext in (".mp4", ".mov", ".avi", ".mkv", ".webm")
+                     else "audio" if ext in (".wav", ".mp3", ".aac", ".ogg")
+                     else "image" if ext in (".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp")
+                     else None)
+            if atype is None:
+                continue
+            _ld.remember(_ld.IMPORT_MEDIA, path)
+            self.assets.append({"path": path, "name": os.path.basename(path), "type": atype})
+            self._status(f"นำเข้า: {os.path.basename(path)}")
+            if atype == "video":
+                self._start_proxy_build(path)
+        # Refresh Media tab
+        self._tab("Media")
+
+    def _import_srt_path(self, path: str):
+        """Import an SRT file dropped onto the editor."""
+        try:
+            import re
+            with open(path, encoding="utf-8-sig") as f:
+                raw = f.read()
+            pattern = re.compile(
+                r"\d+\s+(\d{2}:\d{2}:\d{2}[,\.]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[,\.]\d{3})\s+([\s\S]*?)(?=\n\n|\Z)",
+                re.MULTILINE)
+            segs = []
+            def _ts(s):
+                s = s.replace(",", ".")
+                h, m, rest = s.split(":")
+                sec, ms = rest.split(".")
+                return int(h)*3600 + int(m)*60 + int(sec) + int(ms)/1000
+            for m in pattern.finditer(raw):
+                segs.append({"start": _ts(m.group(1)), "end": _ts(m.group(2)),
+                             "text": m.group(3).replace("\n", " ").strip()})
+            if segs:
+                self.segments = segs
+                self._build_subtitle_clips()
+                self._status(f"นำเข้า SRT: {os.path.basename(path)} ({len(segs)} ประโยค)")
+        except Exception as e:
+            self._status(f"[SRT] ข้อผิดพลาด: {e}")
 
     def _has_audio_stream(self, path: str) -> bool:
         """Check if media file contains at least one audio stream using FFmpeg."""
@@ -1248,6 +1389,7 @@ class EditorPage(ctk.CTkFrame):
         h = ctk.CTkFrame(self, height=54, fg_color=PANEL_DARK, corner_radius=0)
         h.pack(side="top", fill="x")
         h.pack_propagate(False)
+        self._header_bar = h   # keep reference for theme repainting
 
         # Left: Home button (🏠 Home) + Logo + Project Name
         left = ctk.CTkFrame(h, fg_color="transparent")
@@ -1283,26 +1425,27 @@ class EditorPage(ctk.CTkFrame):
         right.pack(side="right", padx=12)
 
         # Settings button in upper-right
-        ctk.CTkButton(right, text="⚙ Settings", height=32, width=82, corner_radius=8,
+        ctk.CTkButton(right, text="⚙ Settings", height=32, width=76, corner_radius=8,
                       fg_color=PANEL_MID, hover_color=PANEL_HOV,
                       font=ctk.CTkFont(size=10, weight="bold"), command=self._open_settings
-                      ).pack(side="right", padx=(6, 0))
+                      ).pack(side="right", padx=(4, 0))
+
 
         # Prominent rounded blue Export button
-        ctk.CTkButton(right, text="Export", height=36, width=100, corner_radius=10,
+        ctk.CTkButton(right, text="Export", height=36, width=96, corner_radius=10,
                       fg_color="#3b82f6", hover_color="#2563eb",
                       font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
                       text_color="#ffffff",
                       command=self._export).pack(side="right", padx=(6, 0))
 
         # Save As button
-        ctk.CTkButton(right, text="Save As", height=32, width=72, corner_radius=8,
+        ctk.CTkButton(right, text="Save As", height=32, width=68, corner_radius=8,
                       fg_color=PANEL_MID, hover_color=PANEL_HOV,
                       font=ctk.CTkFont(size=10, weight="bold"), command=self._save_as
                       ).pack(side="right", padx=3)
 
         # Save button — overwrites current file, shows Save As dialog if no file yet
-        ctk.CTkButton(right, text="Save", height=32, width=58, corner_radius=8,
+        ctk.CTkButton(right, text="Save", height=32, width=54, corner_radius=8,
                       fg_color=PANEL_LIGHT, hover_color=PANEL_HOV,
                       font=ctk.CTkFont(size=10, weight="bold"), command=self._save
                       ).pack(side="right", padx=3)
@@ -1310,6 +1453,183 @@ class EditorPage(ctk.CTkFrame):
     def _open_settings(self):
         from shortcut_manager import ShortcutSettingsDialog
         ShortcutSettingsDialog(self.master)
+
+    def _toggle_theme(self):
+        """Toggle Dark/Light mode — repaint every major widget in the editor."""
+        curr = ctk.get_appearance_mode()
+        new_mode = "Light" if curr == "Dark" else "Dark"
+        ctk.set_appearance_mode(new_mode)
+        import settings_manager as sm
+        sm.set_setting("theme", new_mode)
+
+        is_light = (new_mode == "Light")
+
+        # ── Redefine all color tokens for the new mode ────────────────────────
+        if is_light:
+            bg_deep    = "#f8fafc"
+            bg_dark    = "#f1f5f9"
+            panel_dark = "#e2e8f0"
+            panel_mid  = "#cbd5e1"
+            panel_hov  = "#94a3b8"
+            txt_w      = "#0f172a"
+            txt_l      = "#334155"
+            txt_g      = "#64748b"
+            bord       = "#cbd5e1"
+            tl_bg      = "#e8edf2"
+        else:
+            bg_deep    = BG_DEEP
+            bg_dark    = BG_DARK
+            panel_dark = PANEL_DARK
+            panel_mid  = PANEL_MID
+            panel_hov  = PANEL_HOV
+            txt_w      = TXT_W
+            txt_l      = TXT_L
+            txt_g      = TXT_G
+            bord       = BORD
+            tl_bg      = TL_BG
+
+        # ── Repaint main EditorPage frame ─────────────────────────────────────
+        try: self.configure(fg_color=bg_deep)
+        except Exception: pass
+
+        # ── Repaint header bar ────────────────────────────────────────────────
+        try:
+            hdr = self._header_bar
+            hdr.configure(fg_color=panel_dark)
+        except Exception: pass
+
+        # ── Repaint sidebar panels (media/properties) ─────────────────────────
+        for attr in ("media_panel", "preview_panel", "properties_panel"):
+            try: getattr(self, attr).configure(fg_color=bg_dark)
+            except Exception: pass
+
+        # ── Repaint timeline panel ────────────────────────────────────────────
+        try:
+            tp = getattr(self, "timeline_panel", None)
+            if tp:
+                tp.configure(fg_color=bg_dark)
+                if hasattr(tp, "_c"):
+                    tp._c.configure(bg=tl_bg)
+                if hasattr(tp, "_ruler"):
+                    tp._ruler.configure(bg=tl_bg)
+        except Exception: pass
+
+        # ── Update theme button icon ──────────────────────────────────────────
+        if hasattr(self, "_theme_btn"):
+            self._theme_btn.configure(text="🌙" if is_light else "☀️")
+
+        # ── Redraw timeline ───────────────────────────────────────────────────
+        try: self._draw_tl()
+        except Exception: pass
+
+        self._status(f"{'☀️' if is_light else '🌙'} เปลี่ยนเป็น {'Light' if is_light else 'Dark'} Mode")
+
+
+    def _one_click_ai_auto(self):
+        """
+        1-Click AI Auto-Edit:
+        1. Analyzes timeline audio for Dead Air silences (>500ms)
+        2. Automatically cuts all dead air with ripple delete (preserving speech)
+        3. Generates high-accuracy Whisper AI subtitles for all remaining speech
+        4. Populates subtitle track and updates transcript panel in one single operation!
+        """
+        main_clips = self.tracks.get("main", [])
+        if not main_clips:
+            from tkinter import messagebox
+            messagebox.showinfo("1-Click AI Auto-Edit", "กรุณานำเข้าวิดีโอหรือคลิปลงในไทม์ไลน์ก่อนเริ่ม AI Auto-Edit")
+            return
+
+        from tkinter import messagebox
+        if not messagebox.askyesno(
+            "1-Click AI Auto-Edit",
+            "✨ ระบบ 1-Click AI จะทำงานดังนี้อัตโนมัติ:\n\n"
+            "1. ตรวจจับและตัด Dead Air (ช่วงเงียบเกิน 0.5s) ออกทั้งหมด\n"
+            "2. ถอดเสียงและสร้างคำบรรยายภาษาไทยอัตโนมัติด้วย AI Whisper\n"
+            "3. วางซับไตเติลลงบนไทม์ไลน์พร้อมจัดรูปแบบทันที\n\n"
+            "ต้องการเริ่มดำเนินการทันทีหรือไม่?"
+        ):
+            return
+
+        self._status("⏳ [1-Click AI] ขั้นตอนที่ 1/2: กำลังวิเคราะห์และตัด Dead Air...")
+
+        def _ai_worker():
+            try:
+                # Step 1: Render audio for analysis
+                audio_path = self._render_main_track_audio()
+                if not audio_path or not os.path.exists(audio_path):
+                    raise RuntimeError("ไม่สามารถเรนเดอร์เสียงสำหรับการวิเคราะห์ได้")
+
+                # Step 2: Detect dead air
+                deadair = detect_deadair_segments(
+                    audio_path,
+                    min_silence_ms=500,
+                    sample_rate=16000,
+                    progress_cb=lambda pct_or_msg, msg="": self.after(
+                        0, lambda: self._status(str(pct_or_msg) if not msg else f"[{pct_or_msg}%] {msg}")
+                    )
+                )
+
+                cut_count = len(deadair)
+                total_deadair_sec = sum(d.get("duration", 0) for d in deadair)
+
+                # Step 3: Cut dead air if found
+                if cut_count > 0:
+                    self.after(0, lambda: self._cut_all_deadair(deadair))
+                    time.sleep(0.5)
+
+                # Step 4: Transcribe clean speech
+                self.after(0, lambda: self._status("⏳ [1-Click AI] ขั้นตอนที่ 2/2: กำลังถอดเสียงสร้างคำบรรยาย..."))
+                clean_audio_path = self._render_main_track_audio()
+                import settings_manager as sm
+                model_folder = sm.get_model_folder()
+
+                subs = transcribe_video(
+                    clean_audio_path,
+                    model_size=model_folder,
+                    words_per_line=8,
+                    progress_cb=lambda m: self.after(0, lambda ms=m: self._status(f"[AI Transcribe] {ms}")),
+                )
+
+                def _apply_all():
+                    self._push_undo()
+                    self.segments = subs
+                    self.tracks["subtitle"] = []
+                    for seg in subs:
+                        self.tracks["subtitle"].append({
+                            "path": "",
+                            "name": seg["text"][:24],
+                            "start": 0,
+                            "end": max(seg["end"] - seg["start"], 0.05),
+                            "speed": 1.0,
+                            "volume": 1.0,
+                            "tl": seg["start"],
+                            "fps": TARGET_FPS,
+                            "sub_text": seg["text"],
+                        })
+                    if hasattr(self, "transcript_panel"):
+                        self.transcript_panel.set_segments(self.segments)
+                    self._tab("Captions")
+                    self._draw_tl()
+                    self._refresh_preview()
+                    msg = (
+                        f"✨ 1-Click AI Auto-Edit สำเร็จสมบูรณ์!\n\n"
+                        f"✂ ตัด Dead Air: {cut_count} จุด (ตัดเวลาเงียบออก {total_deadair_sec:.2f} วินาที)\n"
+                        f"💬 สร้างคำบรรยาย: {len(subs)} บรรทัด\n\n"
+                        f"พร้อมเล่นพรีวิวหรือกด Export ได้ทันที!"
+                    )
+                    self._status(f"✨ 1-Click AI เสร็จสมบูรณ์ (ตัดเงียบ {total_deadair_sec:.1f}s, ซับ {len(subs)} บรรทัด)")
+                    messagebox.showinfo("1-Click AI Auto-Edit สำเร็จ", msg)
+
+                self.after(0, _apply_all)
+
+            except Exception as ex:
+                err_text = str(ex)
+                self.after(0, lambda: (
+                    self._status(f"1-Click AI Error: {err_text}"),
+                    messagebox.showerror("1-Click AI Error", err_text)
+                ))
+
+        threading.Thread(target=_ai_worker, daemon=True).start()
 
     # ── Bridge Component Methods ──────────────────────────────────────────────
     def _rebuild_label_column(self):
@@ -2532,7 +2852,7 @@ class EditorPage(ctk.CTkFrame):
         dur = 5.0
 
         if is_image:
-            dur = 5.0  # default 5s for images, user can trim
+            dur = 10.0  # default 10s for images
         elif is_audio:
             # Read real audio duration
             real_dur = self._get_media_duration(asset["path"])
@@ -2571,7 +2891,7 @@ class EditorPage(ctk.CTkFrame):
             tk = self._find_free_layer(tl_start, tl_end)
             clip_obj = self._clip(asset["path"], asset["name"], 0, dur, tl=tl_start, fps=fps)
             clip_obj["source_dur"] = 999999.0
-            clip_obj["end"] = 999999.0
+            clip_obj["end"] = dur  # exactly 10s initial duration
             self.tracks[tk].append(clip_obj)
             self.sel_track = tk
             self.sel_idx = len(self.tracks[tk]) - 1
@@ -2951,7 +3271,7 @@ class EditorPage(ctk.CTkFrame):
             for ov in media_overlays:
                 ov["_export_idx"] = cmd.count("-i")
                 ext_ov = os.path.splitext(ov["path"])[1].lower()
-                is_img_ov = ext_ov in (".jpg", ".jpeg", ".png")
+                is_img_ov = ext_ov in (".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif")
                 if is_img_ov:
                     cmd += ["-i", ov["path"]]
                 else:
@@ -3018,10 +3338,26 @@ class EditorPage(ctk.CTkFrame):
                 tl_start = ov.get("tl", 0.0)
                 dur = (ov["end"] - ov["start"]) / max(ov.get("speed", 1.0), 0.01)
                 tl_end = tl_start + dur
-                rot = ov.get("rotate", 0.0)
-                sc  = ov.get("scale", 1.0)
-                cx  = ov.get("custom_x", 0.5)
-                cy  = ov.get("custom_y", 0.5)
+                rot = float(ov.get("rotate", 0.0))
+                sc  = float(ov.get("scale", 1.0))
+                cx  = float(ov.get("custom_x", 0.5))
+                cy  = float(ov.get("custom_y", 0.5))
+
+                # Measure original overlay dimensions to match preview scaling exactly
+                ow, oh = target_w, target_h
+                try:
+                    cap_ov = cv2.VideoCapture(ov["path"])
+                    w_t = int(cap_ov.get(cv2.CAP_PROP_FRAME_WIDTH))
+                    h_t = int(cap_ov.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                    cap_ov.release()
+                    if w_t > 0 and h_t > 0:
+                        ow, oh = w_t, h_t
+                except Exception:
+                    pass
+
+                base_s = min(target_w / max(ow, 1), target_h / max(oh, 1)) * 0.5
+                nw = max(2, int(round(ow * base_s * sc)) // 2 * 2)
+                nh = max(2, int(round(oh * base_s * sc)) // 2 * 2)
 
                 if rot != 0.0:
                     rad = rot * 3.14159265 / 180.0
@@ -3030,10 +3366,14 @@ class EditorPage(ctk.CTkFrame):
                     ov_in = next_ov
 
                 ov_scaled = f"[ovs{idx_ov}]"
-                fc.append(f"{ov_in}scale=iw*0.5*{sc:.3f}:-1{ov_scaled}")
+                fc.append(f"{ov_in}scale={nw}:{nh}{ov_scaled}")
+
+                # Exact center positioning matching preview
+                x_pos = int(round(target_w * cx - nw / 2))
+                y_pos = int(round(target_h * cy - nh / 2))
 
                 next_v = f"[ov_out{idx_ov}]"
-                fc.append(f"{curr_v}{ov_scaled}overlay=x=(W-w)*{cx:.3f}:y=(H-h)*{cy:.3f}:enable='between(t,{tl_start:.3f},{tl_end:.3f})'{next_v}")
+                fc.append(f"{curr_v}{ov_scaled}overlay=x={x_pos}:y={y_pos}:eof_action=repeat:enable='between(t,{tl_start:.3f},{tl_end:.3f})'{next_v}")
                 curr_v = next_v
 
                 out_v = curr_v
