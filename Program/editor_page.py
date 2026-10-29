@@ -3147,371 +3147,356 @@ class EditorPage(ctk.CTkFrame):
         ).start()
 
     def _export_worker(self, out, crf=20, resolution="Original", burn_subs=False):
-        temp_out = None
-        try:
-            ff    = imageio_ffmpeg.get_ffmpeg_exe()
-            clips = sorted(self.tracks["main"], key=lambda c: c.get("tl", 0))
-            n     = len(clips)
-            if n == 0:
-                self.after(0, lambda: messagebox.showwarning("Export", "No clips on main track!"))
-                return
-
-            # Determine target resolution & aspect ratio
-            target_w, target_h = 1920, 1080
-            if clips:
-                try:
-                    cap_t = cv2.VideoCapture(clips[0]["path"])
-                    ok, fr = cap_t.read()
-                    if ok:
-                        target_h, target_w = fr.shape[:2]
-                    else:
-                        w_opt = int(cap_t.get(cv2.CAP_PROP_FRAME_WIDTH))
-                        h_opt = int(cap_t.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                        if w_opt > 0 and h_opt > 0:
-                            target_w, target_h = w_opt, h_opt
-                    cap_t.release()
-                except:
-                    pass
-
-            ratio_name = getattr(self.v_ratio, "get", lambda: "16:9")()
-            rm = {"16:9": 16 / 9, "9:16": 9 / 16, "1:1": 1.0, "4:3": 4 / 3, "3:4": 3 / 4, "2.35:1": 2.35}
-            r = rm.get(ratio_name, 16 / 9)
-
-            _RES_VALS = {"1080p": (1920, 1080), "720p": (1280, 720), "480p": (854, 480)}
-            if resolution in _RES_VALS:
-                bw, bh = _RES_VALS[resolution]
-            else:
-                bw, bh = target_w, target_h
-
-            if r >= 1.0:
-                target_h = bh
-                target_w = int(round(bh * r))
-            else:
-                target_w = bh if bw >= bh else bw
-                target_h = int(round(target_w / r))
-
-            target_w = (max(2, target_w) // 2) * 2
-            target_h = (max(2, target_h) // 2) * 2
-
-            export_segs = self.get_export_segments()
-            
-            all_layer_clips = []
-            for lk in self._layer_keys():
-                all_layer_clips.extend(self.tracks.get(lk, []))
-            overlays = sorted(all_layer_clips, key=lambda c: c.get("tl", 0))
-            # Separate video/audio/image overlays from text overlays
-            media_overlays = [ov for ov in overlays if ov.get("path", "") != ""]
-            text_overlays = [ov for ov in overlays if ov.get("path", "") == ""]
-
-            # Merge text overlays and subtitles into all_export_subs for flawless burning
-            all_export_subs = []
-            if burn_subs and export_segs:
-                all_export_subs.extend(export_segs)
-
-            for ov in text_overlays:
-                txt = ov.get("name", "Text").strip()
-                if not txt:
-                    continue
-                tl_start = ov.get("tl", 0.0)
-                dur = (ov["end"] - ov["start"]) / max(ov.get("speed", 1.0), 0.01)
-                all_export_subs.append({
-                    "start": tl_start,
-                    "end": tl_start + dur,
-                    "text": txt,
-                    "font_name": ov.get("font_name", "Tahoma"),
-                    "font_size": ov.get("font_size", 44),
-                    "font_color": ov.get("font_color", "#ffffff"),
-                    "bold": bool(ov.get("bold", False)),
-                    "italic": bool(ov.get("italic", False)),
-                    "decoration": ov.get("decoration", "shadow"),
-                    "decoration_color": ov.get("decoration_color", "#000000"),
-                    "letter_spacing": ov.get("letter_spacing", 0),
-                    "align": ov.get("align", "center"),
-                    "custom_x": ov.get("custom_x", 0.5),
-                    "custom_y": ov.get("custom_y", 0.2),
-                })
-            all_export_subs.sort(key=lambda x: x["start"])
-
-            need_burn = bool(all_export_subs)
-            target_out = out
-            temp_out = None
+            temp_merged_video = None
+            tmp_fc_script = None
             tmp_ass = None
+            tmp_p1_script = None
+            try:
+                ff    = imageio_ffmpeg.get_ffmpeg_exe()
+                clips = sorted(self.tracks["main"], key=lambda c: c.get("tl", 0))
+                n     = len(clips)
+                if n == 0:
+                    self.after(0, lambda: messagebox.showwarning("Export", "No clips on main track!"))
+                    return
 
-            def _has_audio(path):
-                try:
-                    import subprocess
-                    r = subprocess.run([ff, "-i", path], capture_output=True, text=True,
-                                       encoding="utf-8", errors="ignore", timeout=3)
-                    info = (r.stderr or "") + (r.stdout or "")
-                    return "Audio:" in info
-                except Exception:
-                    return False
+                # ─────────────────────────────────────────────────────────────────
+                # 1. คำนวณ Resolution & Aspect Ratio
+                # ─────────────────────────────────────────────────────────────────
+                target_w, target_h = 1920, 1080
+                export_fps = TARGET_FPS
+                if clips:
+                    try:
+                        cap_t = cv2.VideoCapture(clips[0]["path"])
+                        ok, fr = cap_t.read()
+                        if ok:
+                            target_h, target_w = fr.shape[:2]
+                        else:
+                            w_opt = int(cap_t.get(cv2.CAP_PROP_FRAME_WIDTH))
+                            h_opt = int(cap_t.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                            if w_opt > 0 and h_opt > 0:
+                                target_w, target_h = w_opt, h_opt
 
-            cmd = [ff, "-y"]
-            for cl in clips:
-                cmd += ["-ss", str(cl["start"]), "-to", str(cl["end"]),
-                        "-i", cl["path"]]
+                        src_fps = cap_t.get(cv2.CAP_PROP_FPS)
+                        if src_fps and src_fps > 0:
+                            export_fps = round(src_fps, 2)
 
-            def _clip_has_audio(c):
-                if self._is_muted("main"):
-                    return False
-                if c.get("audio_muted") or c.get("video_only") or c.get("muted"):
-                    return False
-                if c.get("volume", 1.0) <= 0.001:
-                    return False
-                return _has_audio(c.get("path", ""))
+                        cap_t.release()
+                    except:
+                        pass
 
-            has_main_audio = any(_clip_has_audio(cl) for cl in clips)
-            has_silent = has_main_audio and any(not _clip_has_audio(cl) for cl in clips)
-            silent_idx = None
-            if has_silent:
-                silent_idx = cmd.count("-i")
-                cmd += ["-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100"]
+                ratio_name = getattr(self.v_ratio, "get", lambda: "16:9")()
+                rm = {"16:9": 16 / 9, "9:16": 9 / 16, "1:1": 1.0, "4:3": 4 / 3, "3:4": 3 / 4, "2.35:1": 2.35}
+                r = rm.get(ratio_name, 16 / 9)
 
-            for ov in media_overlays:
-                ov["_export_idx"] = cmd.count("-i")
-                ext_ov = os.path.splitext(ov["path"])[1].lower()
-                is_img_ov = ext_ov in (".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif")
-                if is_img_ov:
-                    cmd += ["-i", ov["path"]]
+                _RES_VALS = {"1080p": (1920, 1080), "720p": (1280, 720), "480p": (854, 480)}
+                if resolution in _RES_VALS:
+                    bw, bh = _RES_VALS[resolution]
                 else:
-                    cmd += ["-ss", str(ov["start"]), "-to", str(ov["end"]),
-                            "-i", ov["path"]]
+                    bw, bh = target_w, target_h
 
-            _EFF = {
-                "blur_soft": ",boxblur=3:1",
-                "vignette":  ",vignette",
-                "warm":      ",colorchannelmixer=rr=1.1:gg=1.0:bb=0.85",
-                "cold":      ",colorchannelmixer=rr=0.85:gg=1.0:bb=1.15",
-                "bw":        ",hue=s=0",
-            }
+                if r >= 1.0:
+                    target_h = bh
+                    target_w = int(round(bh * r))
+                else:
+                    target_w = bh if bw >= bh else bw
+                    target_h = int(round(target_w / r))
 
-            fc = []; vp = []; ap = []
-            for idx, cl in enumerate(clips):
-                sp  = max(cl.get("speed", 1.0), 0.01)
-                bri = cl.get("brightness", 0.0)
-                con = cl.get("contrast",   1.0)
-                sat = cl.get("saturation", 1.0)
-                eff = cl.get("effect", "none")
-                rot = cl.get("rotate", 0.0)
-                sc  = cl.get("scale", 1.0)
-                cx  = cl.get("custom_x", 0.5)
-                cy  = cl.get("custom_y", 0.5)
+                target_w = (max(2, target_w) // 2) * 2
+                target_h = (max(2, target_h) // 2) * 2
 
-                vf = f"[{idx}:v]setpts={1/sp}*PTS"
-                if rot != 0.0:
-                    rad = rot * 3.14159265 / 180.0
-                    vf += f",rotate={rad:.4f}:c=black@0:ow=rotw({rad:.4f}):oh=roth({rad:.4f})"
-                if sc != 1.0 and sc > 0.01:
-                    vf += f",scale=iw*{sc:.3f}:ih*{sc:.3f}"
+                total_dur = self._dur()
+                cflags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
-                crop_filter = f"crop='if(gt(iw/ih,{r:.4f}),ih*{r:.4f},iw)':'if(gt(iw/ih,{r:.4f}),ih,iw/{r:.4f})'"
-                vf += f",{crop_filter},scale={target_w}:{target_h}"
+                # ─────────────────────────────────────────────────────────────────
+                # 2. PASS 1: รวมภาพจาก Main Track (ปิดเสียง -an ทั้งหมด 100%)
+                # ─────────────────────────────────────────────────────────────────
+                self.after(0, lambda: self._status("⏳ กำลังรวมภาพวิดีโอ Main Track (Pass 1)..."))
+                
+                fd_merge, temp_merged_video = tempfile.mkstemp(suffix="_timeline_merged.mp4")
+                os.close(fd_merge)
 
-                if bri != 0.0 or con != 1.0 or sat != 1.0:
-                    vf += (f",eq=brightness={bri:.3f}"
-                           f":contrast={con:.3f}"
-                           f":saturation={sat:.3f}")
-                vf += _EFF.get(eff, "")
-                vf += f"[v{idx}]"
-                fc.append(vf)
-                vp.append(f"[v{idx}]")
+                cmd_p1 = [ff, "-y"]
+                fc_p1, vp_p1 = [], []
 
-                if has_main_audio:
-                    at = _build_atempo_filter(sp)
-                    duration = max(0.01, cl["end"] - cl["start"])
-                    if _clip_has_audio(cl):
-                        vol_val = max(0.0, cl.get("volume", 1.0))
-                        vol_f = f",volume={vol_val:.3f}" if abs(vol_val - 1.0) > 0.01 else ""
-                        fc.append(f"[{idx}:a]{at}{vol_f}[a{idx}]")
+                _EFF = {
+                    "blur_soft": ",boxblur=3:1",
+                    "vignette":  ",vignette",
+                    "warm":      ",colorchannelmixer=rr=1.1:gg=1.0:bb=0.85",
+                    "cold":      ",colorchannelmixer=rr=0.85:gg=1.0:bb=1.15",
+                    "bw":        ",hue=s=0",
+                }
+
+                for idx, cl in enumerate(clips):
+                    cmd_p1 += ["-ss", str(cl["start"]), "-to", str(cl["end"]), "-i", cl["path"]]
+
+                    sp  = max(cl.get("speed", 1.0), 0.01)
+                    bri = cl.get("brightness", 0.0)
+                    con = cl.get("contrast",   1.0)
+                    sat = cl.get("saturation", 1.0)
+                    eff = cl.get("effect", "none")
+                    rot = cl.get("rotate", 0.0)
+                    sc  = cl.get("scale", 1.0)
+
+                    vf = f"[{idx}:v]setpts=(PTS-STARTPTS)/{sp:.4f}"
+                    if rot != 0.0:
+                        rad = rot * 3.14159265 / 180.0
+                        vf += f",rotate={rad:.4f}:c=black@0:ow=rotw({rad:.4f}):oh=roth({rad:.4f})"
+                    if sc != 1.0 and sc > 0.01:
+                        vf += f",scale=iw*{sc:.3f}:ih*{sc:.3f}"
+
+                    crop_filter = f"crop='if(gt(iw/ih,{r:.4f}),ih*{r:.4f},iw)':'if(gt(iw/ih,{r:.4f}),ih,iw/{r:.4f})'"
+                    vf += f",{crop_filter},scale={target_w}:{target_h},fps={export_fps}"
+
+                    if bri != 0.0 or con != 1.0 or sat != 1.0:
+                        vf += f",eq=brightness={bri:.3f}:contrast={con:.3f}:saturation={sat:.3f}"
+                    vf += _EFF.get(eff, "")
+                    vf += f"[v{idx}]"
+                    fc_p1.append(vf)
+                    vp_p1.append(f"[v{idx}]")
+
+                fc_p1.append("".join(vp_p1) + f"concat=n={n}:v=1:a=0[vcat]")
+
+                fd_p1_script, tmp_p1_script = tempfile.mkstemp(suffix="_p1_script.txt", text=True)
+                with os.fdopen(fd_p1_script, "w", encoding="utf-8") as f_s:
+                    f_s.write(";".join(fc_p1))
+
+                cmd_p1 += [
+                    "-filter_complex_script", tmp_p1_script,
+                    "-map", "[vcat]",
+                    "-an",  # บังคับไม่เอาเสียงใน Pass 1 ป้องกันเสียงซ้ำซ้อน
+                    "-c:v", "libx264", "-preset", "ultrafast", "-crf", "15",
+                    temp_merged_video
+                ]
+
+                proc_p1 = subprocess.run(cmd_p1, capture_output=True, text=True, creationflags=cflags)
+                if os.path.exists(tmp_p1_script):
+                    try: os.remove(tmp_p1_script)
+                    except: pass
+                if proc_p1.returncode != 0:
+                    raise RuntimeError(f"Pass 1 Video Concat Failed: {proc_p1.stderr[-500:]}")
+
+                # ─────────────────────────────────────────────────────────────────
+                # 3. PASS 2: ผสม Overlays, ซับไตเติล และ แทร็กเสียงที่ตัดแล้ว
+                # ─────────────────────────────────────────────────────────────────
+                self.after(0, lambda: self._status("🎬 กำลังผสมเสียงและเรนเดอร์ Final Output (Pass 2)..."))
+
+                cmd = [ff, "-y", "-i", temp_merged_video]  # Input 0: ภาพล้วนจาก Pass 1
+
+                export_segs = self.get_export_segments()
+                all_layer_clips = []
+                for lk in self._layer_keys():
+                    all_layer_clips.extend(self.tracks.get(lk, []))
+                overlays = sorted(all_layer_clips, key=lambda c: c.get("tl", 0))
+
+                media_overlays = [ov for ov in overlays if ov.get("path", "") != ""]
+                text_overlays  = [ov for ov in overlays if ov.get("path", "") == ""]
+
+                all_export_subs = []
+                if burn_subs and export_segs:
+                    all_export_subs.extend(export_segs)
+
+                for ov in text_overlays:
+                    txt = ov.get("name", "Text").strip()
+                    if not txt: continue
+                    tl_start = ov.get("tl", 0.0)
+                    dur = (ov["end"] - ov["start"]) / max(ov.get("speed", 1.0), 0.01)
+                    all_export_subs.append({
+                        "start": tl_start,
+                        "end": tl_start + dur,
+                        "text": txt,
+                        "font_name": ov.get("font_name", "Tahoma"),
+                        "font_size": ov.get("font_size", 44),
+                        "font_color": ov.get("font_color", "#ffffff"),
+                        "bold": bool(ov.get("bold", False)),
+                        "italic": bool(ov.get("italic", False)),
+                        "decoration": ov.get("decoration", "shadow"),
+                        "decoration_color": ov.get("decoration_color", "#000000"),
+                        "letter_spacing": ov.get("letter_spacing", 0),
+                        "align": ov.get("align", "center"),
+                        "custom_x": ov.get("custom_x", 0.5),
+                        "custom_y": ov.get("custom_y", 0.2),
+                    })
+                all_export_subs.sort(key=lambda x: x["start"])
+
+                for ov in media_overlays:
+                    ov["_export_idx"] = cmd.count("-i")
+                    ext_ov = os.path.splitext(ov["path"])[1].lower()
+                    if ext_ov in (".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif"):
+                        cmd += ["-i", ov["path"]]
                     else:
-                        fc.append(f"[{silent_idx}:a]atrim=duration={duration},asetpts=PTS-STARTPTS,{at}[a{idx}]")
-                    ap.append(f"[a{idx}]")
+                        cmd += ["-ss", str(ov["start"]), "-to", str(ov["end"]), "-i", ov["path"]]
 
-            fc.append("".join(vp) + f"concat=n={n}:v=1:a=0[vcat]")
-            if has_main_audio:
-                fc.append("".join(ap) + f"concat=n={n}:v=0:a=1[aout]")
+                fc = []
+                curr_v = "[0:v]"
 
-            curr_v = "[vcat]"
-            for idx_ov, ov in enumerate(media_overlays):
-                ov_in = f"[{ov['_export_idx']}:v]"
-                tl_start = ov.get("tl", 0.0)
-                dur = (ov["end"] - ov["start"]) / max(ov.get("speed", 1.0), 0.01)
-                tl_end = tl_start + dur
-                rot = float(ov.get("rotate", 0.0))
-                sc  = float(ov.get("scale", 1.0))
-                cx  = float(ov.get("custom_x", 0.5))
-                cy  = float(ov.get("custom_y", 0.5))
+                for idx_ov, ov in enumerate(media_overlays):
+                    ov_in = f"[{ov['_export_idx']}:v]"
+                    tl_start = ov.get("tl", 0.0)
+                    dur = (ov["end"] - ov["start"]) / max(ov.get("speed", 1.0), 0.01)
+                    tl_end = tl_start + dur
+                    rot = float(ov.get("rotate", 0.0))
+                    sc  = float(ov.get("scale", 1.0))
+                    cx  = float(ov.get("custom_x", 0.5))
+                    cy  = float(ov.get("custom_y", 0.5))
 
-                # Measure original overlay dimensions to match preview scaling exactly
-                ow, oh = target_w, target_h
-                try:
-                    cap_ov = cv2.VideoCapture(ov["path"])
-                    w_t = int(cap_ov.get(cv2.CAP_PROP_FRAME_WIDTH))
-                    h_t = int(cap_ov.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                    cap_ov.release()
-                    if w_t > 0 and h_t > 0:
-                        ow, oh = w_t, h_t
-                except Exception:
-                    pass
+                    ow, oh = target_w, target_h
+                    try:
+                        cap_ov = cv2.VideoCapture(ov["path"])
+                        w_t = int(cap_ov.get(cv2.CAP_PROP_FRAME_WIDTH))
+                        h_t = int(cap_ov.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                        cap_ov.release()
+                        if w_t > 0 and h_t > 0: ow, oh = w_t, h_t
+                    except: pass
 
-                base_s = min(target_w / max(ow, 1), target_h / max(oh, 1)) * 0.5
-                nw = max(2, int(round(ow * base_s * sc)) // 2 * 2)
-                nh = max(2, int(round(oh * base_s * sc)) // 2 * 2)
+                    base_s = min(target_w / max(ow, 1), target_h / max(oh, 1)) * 0.5
+                    nw = max(2, int(round(ow * base_s * sc)) // 2 * 2)
+                    nh = max(2, int(round(oh * base_s * sc)) // 2 * 2)
 
-                if rot != 0.0:
-                    rad = rot * 3.14159265 / 180.0
-                    next_ov = f"[ov_rot_{idx_ov}]"
-                    fc.append(f"{ov_in}rotate={rad:.4f}:c=black@0:ow=rotw({rad:.4f}):oh=roth({rad:.4f}){next_ov}")
-                    ov_in = next_ov
+                    if rot != 0.0:
+                        rad = rot * 3.14159265 / 180.0
+                        next_ov = f"[ov_rot_{idx_ov}]"
+                        fc.append(f"{ov_in}rotate={rad:.4f}:c=black@0:ow=rotw({rad:.4f}):oh=roth({rad:.4f}){next_ov}")
+                        ov_in = next_ov
 
-                ov_scaled = f"[ovs{idx_ov}]"
-                fc.append(f"{ov_in}scale={nw}:{nh}{ov_scaled}")
+                    ov_scaled = f"[ovs{idx_ov}]"
+                    fc.append(f"{ov_in}scale={nw}:{nh}{ov_scaled}")
 
-                # Exact center positioning matching preview
-                x_pos = int(round(target_w * cx - nw / 2))
-                y_pos = int(round(target_h * cy - nh / 2))
-
-                next_v = f"[ov_out{idx_ov}]"
-                fc.append(f"{curr_v}{ov_scaled}overlay=x={x_pos}:y={y_pos}:eof_action=repeat:enable='between(t,{tl_start:.3f},{tl_end:.3f})'{next_v}")
-                curr_v = next_v
+                    x_pos = int(round(target_w * cx - nw / 2))
+                    y_pos = int(round(target_h * cy - nh / 2))
+                    next_v = f"[ov_out{idx_ov}]"
+                    fc.append(f"{curr_v}{ov_scaled}overlay=x={x_pos}:y={y_pos}:eof_action=repeat:enable='between(t,{tl_start:.3f},{tl_end:.3f})'{next_v}")
+                    curr_v = next_v
 
                 out_v = curr_v
-            else:
-                out_v = curr_v
 
-            # ── Burn subtitles directly into filtergraph (ultra-fast single pass) ──
-            if need_burn and all_export_subs:
-                try:
-                    from video_exporter import generate_ass_file
-                    tmp_ass = out + "_tmp_subs.ass"
-                    generate_ass_file(all_export_subs, self.style, tmp_ass, target_w=target_w, target_h=target_h)
-                    ass_path_escaped = tmp_ass.replace("\\", "/").replace(":", "\\:")
-                    fonts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "fonts"))
-                    fonts_dir_escaped = fonts_dir.replace("\\", "/").replace(":", "\\:")
-                    if os.path.exists(fonts_dir):
-                        fc.append(f"{out_v}ass='{ass_path_escaped}':fontsdir='{fonts_dir_escaped}'[vsub]")
-                    else:
-                        fc.append(f"{out_v}ass='{ass_path_escaped}'[vsub]")
-                    out_v = "[vsub]"
-                except Exception as ass_err:
-                    print(f"[ASS Subtitle Burn Direct Warning] {ass_err}")
+                if all_export_subs:
+                    try:
+                        from video_exporter import generate_ass_file
+                        tmp_ass = out + "_tmp_subs.ass"
+                        generate_ass_file(all_export_subs, self.style, tmp_ass, target_w=target_w, target_h=target_h)
+                        ass_path_escaped = tmp_ass.replace("\\", "/").replace(":", "\\:")
+                        fonts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "fonts"))
+                        if os.path.exists(fonts_dir):
+                            fonts_dir_escaped = fonts_dir.replace("\\", "/").replace(":", "\\:")
+                            fc.append(f"{out_v}ass='{ass_path_escaped}':fontsdir='{fonts_dir_escaped}'[vsub]")
+                        else:
+                            fc.append(f"{out_v}ass='{ass_path_escaped}'[vsub]")
+                        out_v = "[vsub]"
+                    except Exception as ass_err:
+                        print(f"[ASS Burn Direct Warning] {ass_err}")
 
-            # ── Mix in separate audio tracks (audio_0, audio_1, …) ───────────
-            extra_audio_labels: list[str] = []
-            for ak in self._audio_keys():
-                if not self._is_active(ak):
-                    continue
-                for ac in self.tracks.get(ak, []):
-                    if ac.get("audio_muted") or ac.get("muted") or ac.get("volume", 1.0) <= 0.001:
-                        continue
-                    ap_path = ac.get("path", "")
-                    if not ap_path or not os.path.exists(ap_path):
-                        continue
-                    ac_start = ac.get("start", 0.0)
-                    ac_end   = ac.get("end", ac.get("source_dur", ac_start + 5.0))
-                    ac_tl    = ac.get("tl", 0.0)
-                    ac_speed = max(ac.get("speed", 1.0), 0.01)
-                    ac_vol   = ac.get("volume", 1.0)
-                    
-                    ext_idx = cmd.count("-i")
-                    cmd.extend(["-ss", str(ac_start), "-to", str(ac_end), "-i", ap_path])
-                    delay_ms = max(0, int(ac_tl * 1000))
-                    atempo_f = _build_atempo_filter(ac_speed)
-                    vol_f = f",volume={ac_vol:.3f}" if abs(ac_vol - 1.0) > 0.01 else ""
-                    lbl = f"xa{len(extra_audio_labels)}"
-                    fc.append(f"[{ext_idx}:a]{atempo_f}{vol_f},adelay={delay_ms}|{delay_ms}[{lbl}]")
-                    extra_audio_labels.append(f"[{lbl}]")
+                # ── รวมเสียงทั้งหมดจาก Audio Tracks (audio_0, audio_1, ...) ──────
+                extra_audio_labels = []
+                for ak in self._audio_keys():
+                    if not self._is_active(ak): continue
+                    for ac in self.tracks.get(ak, []):
+                        if ac.get("audio_muted") or ac.get("muted") or ac.get("volume", 1.0) <= 0.001:
+                            continue
+                        ap_path = ac.get("path", "")
+                        if not ap_path or not os.path.exists(ap_path): continue
 
-            if extra_audio_labels:
-                if has_main_audio:
-                    mix_in = "[aout]" + "".join(extra_audio_labels)
-                    n_mix = 1 + len(extra_audio_labels)
-                    fc.append(f"{mix_in}amix=inputs={n_mix}:normalize=0[amixed]")
-                    final_aout = "[amixed]"
-                else:
+                        ac_start = ac.get("start", 0.0)
+                        ac_end   = ac.get("end", ac.get("source_dur", ac_start + 5.0))
+                        ac_tl    = ac.get("tl", 0.0)
+                        ac_speed = max(ac.get("speed", 1.0), 0.01)
+                        ac_vol   = ac.get("volume", 1.0)
+
+                        ext_idx = cmd.count("-i")
+                        cmd.extend(["-ss", str(ac_start), "-to", str(ac_end), "-i", ap_path])
+                        delay_ms = max(0, int(round(ac_tl * 1000)))
+                        atempo_f = _build_atempo_filter(ac_speed)
+                        vol_f = f",volume={ac_vol:.3f}" if abs(ac_vol - 1.0) > 0.01 else ""
+                        lbl = f"xa{len(extra_audio_labels)}"
+                        fc.append(f"[{ext_idx}:a]asetpts=PTS-STARTPTS,{atempo_f}{vol_f},adelay={delay_ms}|{delay_ms}[{lbl}]")
+                        extra_audio_labels.append(f"[{lbl}]")
+
+                if extra_audio_labels:
                     if len(extra_audio_labels) == 1:
                         final_aout = extra_audio_labels[0]
                     else:
                         mix_in = "".join(extra_audio_labels)
                         n_mix = len(extra_audio_labels)
-                        fc.append(f"{mix_in}amix=inputs={n_mix}:normalize=0[amixed]")
+                        fc.append(f"{mix_in}amix=inputs={n_mix}:normalize=0:dropout_transition=0[amixed]")
                         final_aout = "[amixed]"
-            else:
-                if has_main_audio:
-                    final_aout = "[aout]"
                 else:
-                    total_dur = max(0.1, self._dur())
+                    # กรณีคลิปไม่มีเสียงหรือไม่ได้แยกแทร็ก ให้ใส่เสียงเงียบ
                     silent_idx = cmd.count("-i")
                     cmd += ["-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100"]
                     fc.append(f"[{silent_idx}:a]atrim=duration={total_dur:.3f},asetpts=PTS-STARTPTS[aout]")
                     final_aout = "[aout]"
 
-            from video_exporter import _detect_gpu_encoder
-            enc_name, enc_args = _detect_gpu_encoder()
-            gpu_msg = f"GPU ({enc_name})" if enc_name != "libx264" else "CPU (libx264)"
-            v_codec_args = enc_args if enc_name != "libx264" else ["-c:v", "libx264", "-crf", str(crf), "-preset", "fast"]
+                from video_exporter import _detect_gpu_encoder
+                enc_name, enc_args = _detect_gpu_encoder()
+                gpu_msg = f"GPU ({enc_name})" if enc_name != "libx264" else "CPU (libx264)"
+                v_codec_args = enc_args if enc_name != "libx264" else ["-c:v", "libx264", "-crf", str(crf), "-preset", "fast"]
 
-            cmd += ["-filter_complex", ";".join(fc),
-                    "-map", out_v, "-map", final_aout,
+                if fc:
+                    fd_script, tmp_fc_script = tempfile.mkstemp(suffix="_fc_script.txt", text=True)
+                    with os.fdopen(fd_script, "w", encoding="utf-8") as f_script:
+                        f_script.write(";".join(fc))
+                    cmd += ["-filter_complex_script", tmp_fc_script]
+                    out_v_map = out_v if out_v != "[0:v]" else "0:v"
+                else:
+                    out_v_map = "0:v"
+
+                aout_map = final_aout if (final_aout.startswith("[") and final_aout.endswith("]")) else f"[{final_aout}]"
+
+                cmd += [
+                    "-map", out_v_map,
+                    "-map", aout_map,
                     *v_codec_args,
-                    "-c:a", "aac", "-b:a", "192k", target_out]
+                    "-c:a", "aac", "-b:a", "192k",
+                    "-shortest",
+                    out
+                ]
 
-            self.after(0, lambda: self._status(f"Rendering ({gpu_msg})… 0%"))
+                self.after(0, lambda: self._status(f"Rendering ({gpu_msg})… 0%"))
 
-            total_dur = self._dur()
-            import re as _re
-            
-            # บังคับ UTF-8 และ errors="replace" เพื่อตัดปัญหา cp874 decoding crash
-            proc = subprocess.Popen(
-                cmd,
-                stderr=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                text=True,
-                encoding="utf-8",
-                errors="replace"
-            )
-            stderr_lines = []
-            while True:
-                line = proc.stderr.readline()
-                if not line and proc.poll() is not None:
-                    break
-                if line:
-                    stderr_lines.append(line)
-                    m = _re.search(r'time=(\d+):(\d+):([\d.]+)', line)
-                    if m and total_dur > 0:
-                        h, mi, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
-                        elapsed = h * 3600 + mi * 60 + s
-                        pct = min(99, int(elapsed / total_dur * 100))
-                        self.after(0, lambda p=pct: self._status(f"Rendering ({gpu_msg})… {p}%"))
-            ret = proc.wait()
+                import re as _re
+                proc = subprocess.Popen(
+                    cmd,
+                    stderr=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    creationflags=cflags
+                )
+                stderr_lines = []
+                while True:
+                    line = proc.stderr.readline()
+                    if not line and proc.poll() is not None:
+                        break
+                    if line:
+                        stderr_lines.append(line)
+                        m = _re.search(r'time=(\d+):(\d+):([\d.]+)', line)
+                        if m and total_dur > 0:
+                            h, mi, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
+                            elapsed = h * 3600 + mi * 60 + s
+                            pct = min(99, int(elapsed / total_dur * 100))
+                            self.after(0, lambda p=pct: self._status(f"Rendering ({gpu_msg})… {p}%"))
+                ret = proc.wait()
 
-            # Clean up temp ASS if created
-            if tmp_ass and os.path.exists(tmp_ass):
-                try: os.remove(tmp_ass)
-                except: pass
+                if ret != 0:
+                    full_err = "".join(stderr_lines)
+                    err = full_err[-1200:] if len(full_err) > 1200 else full_err
+                    raise RuntimeError(f"FFmpeg error: {err}")
 
-            if ret != 0:
-                full_err = "".join(stderr_lines)
-                err = full_err[-1200:] if len(full_err) > 1200 else full_err
-                raise RuntimeError(f"FFmpeg error: {err}")
-
-            self.after(0, lambda: (
-                self._status(f"Exported: {os.path.basename(out)}"),
-                messagebox.showinfo("Done", f"Saved:\n{out}")))
-        except Exception as ex:
-            err_msg = str(ex)
-            if tmp_ass and os.path.exists(tmp_ass):
-                try: os.remove(tmp_ass)
-                except: pass
-            if temp_out and os.path.exists(temp_out):
-                try: os.remove(temp_out)
-                except: pass
-            # Bind err_msg เข้ากับ Lambda เพื่อป้องกัน NameError
-            self.after(0, lambda msg=err_msg: (
-                self._status("Export failed"),
-                messagebox.showerror("Export Error", msg)
-            ))
+                self.after(0, lambda: (
+                    self._status(f"Exported: {os.path.basename(out)}"),
+                    messagebox.showinfo("Done", f"Saved:\n{out}")
+                ))
+            except Exception as ex:
+                err_msg = str(ex)
+                self.after(0, lambda msg=err_msg: (
+                    self._status("Export failed"),
+                    messagebox.showerror("Export Error", msg)
+                ))
+            finally:
+                for temp_f in [temp_merged_video, tmp_fc_script, tmp_ass, tmp_p1_script]:
+                    if temp_f and os.path.exists(temp_f):
+                        try: os.remove(temp_f)
+                        except: pass
     # ── Subtitles ─────────────────────────────────────────────────────────────
     def _sub_dialog(self):
         if not HAS_SUBTITLES:
