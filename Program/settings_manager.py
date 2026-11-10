@@ -43,6 +43,7 @@ def _load_settings():
                 data = json.load(f)
                 if isinstance(data, dict):
                     _cache.update(data)
+                    _cache["theme"] = "Dark"
         except Exception as e:
             print(f"[SettingsManager] Load error: {e}")
 

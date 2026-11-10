@@ -57,6 +57,7 @@ class TranscriptPanel(ctk.CTkFrame):
             corner_radius=6,
             fg_color=PANEL_MID,
             hover_color=PANEL_HOV,
+            text_color=TXT_W,
             font=ctk.CTkFont(size=9, weight="bold"),
             command=self.controller._import_srt
         )
@@ -71,6 +72,7 @@ class TranscriptPanel(ctk.CTkFrame):
             corner_radius=6,
             fg_color=C_RED,
             hover_color="#dc2626",
+            text_color="#ffffff",
             font=ctk.CTkFont(size=9, weight="bold"),
             command=self.controller._delete_all_subtitles
         )
@@ -205,6 +207,7 @@ class TranscriptPanel(ctk.CTkFrame):
             text="🎙  Generate Subtitles",
             fg_color=C_BLUE,
             hover_color="#1d4ed8",
+            text_color="#ffffff",
             height=32,
             font=ctk.CTkFont(size=10, weight="bold"),
             command=self.controller._sub_dialog
@@ -216,6 +219,7 @@ class TranscriptPanel(ctk.CTkFrame):
                 text="📂  Import SRT...",
                 fg_color=PANEL_MID,
                 hover_color=PANEL_LIGHT,
+                text_color=TXT_W,
                 height=32,
                 font=ctk.CTkFont(size=10),
                 command=self.controller._import_srt

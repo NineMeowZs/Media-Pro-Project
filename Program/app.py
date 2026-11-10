@@ -35,8 +35,8 @@ from PIL import Image, ImageTk, ImageDraw
 import last_dirs as _ld
 import settings_manager as _sm
 
-_saved_theme = _sm.get_setting("theme", "Dark")
-ctk.set_appearance_mode(_saved_theme)
+_sm.set_setting("theme", "Dark")
+ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
 # ── Design Tokens — matches editor_utils.py palette ───────────────────────────

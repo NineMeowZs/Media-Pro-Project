@@ -91,7 +91,8 @@ class ColorWheelDialog(BaseModal):
         self._hex_var = tk.StringVar(value=self._result)
         self._hex_ent = ctk.CTkEntry(hex_row, textvariable=self._hex_var,
                                       width=90, height=28, corner_radius=6,
-                                      fg_color=PANEL_MID)
+                                      fg_color=PANEL_MID, border_color=BORD,
+                                      text_color=TXT_W)
         self._hex_ent.pack(side="left", padx=4)
         self._hex_ent.bind("<Return>", self._on_hex_enter)
         self._hex_ent.bind("<FocusOut>", self._on_hex_enter)
@@ -270,6 +271,7 @@ class GlobalTextStyleDialog(BaseModal):
             frow, values=all_fonts, variable=self._fv,
             width=220, height=26, corner_radius=6,
             fg_color=PANEL_MID, button_color=PANEL_HOV,
+            text_color=TXT_W, dropdown_fg_color=PANEL_MID, dropdown_text_color=TXT_W,
             font=ctk.CTkFont(size=9),
             command=self._preview_font
         )
@@ -277,7 +279,7 @@ class GlobalTextStyleDialog(BaseModal):
 
         ctk.CTkButton(
             sc, text="+ Import Font", height=22, corner_radius=6,
-            fg_color=PANEL_MID, hover_color=PANEL_HOV,
+            fg_color=PANEL_MID, hover_color=PANEL_HOV, text_color=TXT_W,
             font=ctk.CTkFont(size=8, weight="bold"),
             command=self._import_font
         ).pack(fill="x", pady=(2, 2))
@@ -340,10 +342,10 @@ class GlobalTextStyleDialog(BaseModal):
         except Exception:
             pass
         ctk.CTkButton(crow, text="🎨", width=30, height=26, corner_radius=6,
-                      fg_color=PANEL_MID, hover_color=PANEL_HOV,
+                      fg_color=PANEL_MID, hover_color=PANEL_HOV, text_color=TXT_W,
                       command=self._open_color_wheel).pack(side="left", padx=(0, 4))
         ce = ctk.CTkEntry(crow, textvariable=self._cv, width=90, height=26,
-                          corner_radius=6, fg_color=PANEL_MID)
+                          corner_radius=6, fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W)
         ce.pack(side="left")
         ce.bind("<Return>", lambda e: self._update_swatch())
         ce.bind("<FocusOut>", lambda e: self._update_swatch())
@@ -353,7 +355,9 @@ class GlobalTextStyleDialog(BaseModal):
         self._dv = tk.StringVar(value=style.decoration)
         ctk.CTkOptionMenu(sc, values=DECORATION_CHOICES, variable=self._dv,
                           height=26, corner_radius=6, fg_color=PANEL_MID,
-                          button_color=PANEL_HOV, font=ctk.CTkFont(size=9)
+                          button_color=PANEL_HOV, text_color=TXT_W,
+                          dropdown_fg_color=PANEL_MID, dropdown_text_color=TXT_W,
+                          font=ctk.CTkFont(size=9)
                           ).pack(fill="x", pady=(0, 4))
 
         # ── ANIMATION ─────────────────────────────────────────────────────────
@@ -361,7 +365,9 @@ class GlobalTextStyleDialog(BaseModal):
         self._av = tk.StringVar(value=style.animation)
         ctk.CTkOptionMenu(sc, values=ANIMATION_CHOICES, variable=self._av,
                           height=26, corner_radius=6, fg_color=PANEL_MID,
-                          button_color=PANEL_HOV, font=ctk.CTkFont(size=9)
+                          button_color=PANEL_HOV, text_color=TXT_W,
+                          dropdown_fg_color=PANEL_MID, dropdown_text_color=TXT_W,
+                          font=ctk.CTkFont(size=9)
                           ).pack(fill="x", pady=(0, 4))
 
         # ── POSITION ──────────────────────────────────────────────────────────
@@ -369,7 +375,9 @@ class GlobalTextStyleDialog(BaseModal):
         self._pv = tk.StringVar(value=style.position)
         ctk.CTkOptionMenu(sc, values=POSITION_CHOICES, variable=self._pv,
                           height=26, corner_radius=6, fg_color=PANEL_MID,
-                          button_color=PANEL_HOV, font=ctk.CTkFont(size=9)
+                          button_color=PANEL_HOV, text_color=TXT_W,
+                          dropdown_fg_color=PANEL_MID, dropdown_text_color=TXT_W,
+                          font=ctk.CTkFont(size=9)
                           ).pack(fill="x", pady=(0, 4))
 
         # ── ALIGN ────────────────────────────────────────────────────────────
@@ -377,7 +385,9 @@ class GlobalTextStyleDialog(BaseModal):
         self._alv = tk.StringVar(value=getattr(style, "align", "center"))
         ctk.CTkOptionMenu(sc, values=["left", "center", "right"], variable=self._alv,
                           height=26, corner_radius=6, fg_color=PANEL_MID,
-                          button_color=PANEL_HOV, font=ctk.CTkFont(size=9)
+                          button_color=PANEL_HOV, text_color=TXT_W,
+                          dropdown_fg_color=PANEL_MID, dropdown_text_color=TXT_W,
+                          font=ctk.CTkFont(size=9)
                           ).pack(fill="x", pady=(0, 4))
 
         # ── Apply to ALL Subtitle Clips ───────────────────────────────────────
@@ -574,6 +584,7 @@ class PropertiesPanel(ctk.CTkFrame):
                      text_color=TXT_L).pack(side="left")
 
         sc_ent = ctk.CTkEntry(sc_row, width=54, height=24, corner_radius=6,
+                               fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W,
                                font=ctk.CTkFont(size=10, weight="bold"))
         sc_ent.insert(0, str(scale_val))
         sc_ent.pack(side="right")
@@ -613,6 +624,7 @@ class PropertiesPanel(ctk.CTkFrame):
                      text_color=TXT_L).pack(side="left")
 
         rot_ent = ctk.CTkEntry(rot_row, width=54, height=24, corner_radius=6,
+                               fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W,
                                font=ctk.CTkFont(size=10, weight="bold"))
         rot_ent.insert(0, str(int(rot_val)))
         rot_ent.pack(side="right")
@@ -657,6 +669,7 @@ class PropertiesPanel(ctk.CTkFrame):
                      text_color=TXT_L).pack(side="left")
 
         spd_ent = ctk.CTkEntry(spd_row, width=54, height=24, corner_radius=6,
+                                fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W,
                                 font=ctk.CTkFont(size=10, weight="bold"))
         spd_ent.insert(0, f"{cur_spd:.2f}")
         spd_ent.pack(side="right")
@@ -698,6 +711,7 @@ class PropertiesPanel(ctk.CTkFrame):
                      text_color=TXT_L).pack(side="left")
 
         vol_ent = ctk.CTkEntry(vol_row, width=54, height=24, corner_radius=6,
+                                fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W,
                                 font=ctk.CTkFont(size=10, weight="bold"))
         vol_ent.insert(0, str(int(cur_vol * 100)))
         vol_ent.pack(side="right")
@@ -742,6 +756,7 @@ class PropertiesPanel(ctk.CTkFrame):
                      text_color=TXT_L).pack(side="left")
 
         vol_ent = ctk.CTkEntry(vol_row, width=54, height=24, corner_radius=6,
+                                fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W,
                                 font=ctk.CTkFont(size=10, weight="bold"))
         vol_ent.insert(0, str(int(cur_vol * 100)))
         vol_ent.pack(side="right")
@@ -784,6 +799,7 @@ class PropertiesPanel(ctk.CTkFrame):
                      text_color=TXT_L).pack(side="left")
 
         spd_ent = ctk.CTkEntry(spd_row, width=54, height=24, corner_radius=6,
+                                fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W,
                                 font=ctk.CTkFont(size=10, weight="bold"))
         spd_ent.insert(0, f"{cur_spd:.2f}")
         spd_ent.pack(side="right")
@@ -849,7 +865,7 @@ class PropertiesPanel(ctk.CTkFrame):
             txt_box.bind("<FocusOut>", lambda e: _save_sub())
             ctk.CTkButton(
                 sc, text="✓ บันทึก", height=22, corner_radius=6,
-                fg_color=accent, hover_color=_dark(accent),
+                fg_color=accent, hover_color=_dark(accent), text_color="#ffffff",
                 font=ctk.CTkFont(size=9, weight="bold"), command=_save_sub
             ).pack(fill="x", padx=4, pady=(0, 6))
         else:
@@ -863,7 +879,7 @@ class PropertiesPanel(ctk.CTkFrame):
 
             tv.trace_add("write", _on_txt_edit)
             e = ctk.CTkEntry(sc, textvariable=tv, height=28, corner_radius=6,
-                             fg_color=PANEL_MID, border_color=accent)
+                             fg_color=PANEL_MID, border_color=accent, text_color=TXT_W)
             e.pack(fill="x", padx=4, pady=(0, 6))
             e.bind("<FocusOut>", lambda ev: self.controller._push_undo())
             e.bind("<Return>", lambda ev: (self.controller._push_undo(), sc.focus_set()))
@@ -887,6 +903,7 @@ class PropertiesPanel(ctk.CTkFrame):
             font_row, values=all_fonts, variable=font_var,
             width=220, height=26, corner_radius=6,
             fg_color=PANEL_MID, button_color=PANEL_HOV,
+            text_color=TXT_W, dropdown_fg_color=PANEL_MID, dropdown_text_color=TXT_W,
             font=ctk.CTkFont(size=9), command=_on_font,
         ).pack(fill="x")
 
@@ -915,7 +932,8 @@ class PropertiesPanel(ctk.CTkFrame):
         bold_btn = ctk.CTkButton(
             style_row, text="B", width=42, height=26, corner_radius=6,
             fg_color=accent if bold_val.get() else PANEL_MID,
-            hover_color=PANEL_HOV, font=ctk.CTkFont(size=11, weight="bold"),
+            hover_color=PANEL_HOV, text_color=TXT_W,
+            font=ctk.CTkFont(size=11, weight="bold"),
             command=_toggle_bold
         )
         bold_btn.pack(side="left", padx=(0, 4))
@@ -923,7 +941,8 @@ class PropertiesPanel(ctk.CTkFrame):
         italic_btn = ctk.CTkButton(
             style_row, text="I", width=42, height=26, corner_radius=6,
             fg_color=accent if italic_val.get() else PANEL_MID,
-            hover_color=PANEL_HOV, font=ctk.CTkFont(family="Georgia", size=11),
+            hover_color=PANEL_HOV, text_color=TXT_W,
+            font=ctk.CTkFont(family="Georgia", size=11),
             command=_toggle_italic
         )
         italic_btn.pack(side="left")
@@ -935,6 +954,7 @@ class PropertiesPanel(ctk.CTkFrame):
                      font=ctk.CTkFont(size=10), text_color=TXT_L, width=64).pack(side="left")
         default_sz = getattr(self.controller.style, "font_size", 44) if is_subtitle else 44
         sz_ent = ctk.CTkEntry(sz_row, width=60, height=26, corner_radius=6,
+                               fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W,
                                font=ctk.CTkFont(size=10, weight="bold"))
         sz_ent.insert(0, str(clip.get("font_size", default_sz)))
         sz_ent.pack(side="right")
@@ -961,6 +981,7 @@ class PropertiesPanel(ctk.CTkFrame):
                      font=ctk.CTkFont(size=10), text_color=TXT_L, width=80).pack(side="left")
         default_lsp = getattr(self.controller.style, "letter_spacing", 0) if is_subtitle else 0
         lsp_ent = ctk.CTkEntry(lsp_row, width=60, height=26, corner_radius=6,
+                               fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W,
                                font=ctk.CTkFont(size=10, weight="bold"))
         lsp_ent.insert(0, str(clip.get("letter_spacing", default_lsp)))
         lsp_ent.pack(side="right")
@@ -1012,14 +1033,14 @@ class PropertiesPanel(ctk.CTkFrame):
 
         ctk.CTkButton(
             color_row, text="🎨", width=28, height=26, corner_radius=6,
-            fg_color=PANEL_MID, hover_color=PANEL_HOV,
+            fg_color=PANEL_MID, hover_color=PANEL_HOV, text_color=TXT_W,
             command=lambda: ColorWheelDialog(
                 self.winfo_toplevel(), initial_color=cv.get(), on_pick=_apply_color_from_val
             )
         ).pack(side="left", padx=(0, 4))
 
         ce = ctk.CTkEntry(color_row, textvariable=cv, height=26, corner_radius=6,
-                          fg_color=PANEL_MID, width=120)
+                          fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W, width=120)
         ce.pack(side="left")
         ce.bind("<Return>", lambda e: _apply_color_from_val(cv.get()))
         ce.bind("<FocusOut>", lambda e: _apply_color_from_val(cv.get()))
@@ -1046,7 +1067,8 @@ class PropertiesPanel(ctk.CTkFrame):
         btn_l = ctk.CTkButton(
             align_row, text="⬅ Left", width=68, height=26, corner_radius=6,
             fg_color=accent if cur_align == "left" else PANEL_MID,
-            hover_color=PANEL_HOV, font=ctk.CTkFont(size=9, weight="bold"),
+            hover_color=PANEL_HOV, text_color=TXT_W,
+            font=ctk.CTkFont(size=9, weight="bold"),
             command=lambda: _set_align("left")
         )
         btn_l.pack(side="left", padx=(0, 3), fill="x", expand=True)
@@ -1054,7 +1076,8 @@ class PropertiesPanel(ctk.CTkFrame):
         btn_c = ctk.CTkButton(
             align_row, text="☰ Center", width=68, height=26, corner_radius=6,
             fg_color=accent if cur_align == "center" else PANEL_MID,
-            hover_color=PANEL_HOV, font=ctk.CTkFont(size=9, weight="bold"),
+            hover_color=PANEL_HOV, text_color=TXT_W,
+            font=ctk.CTkFont(size=9, weight="bold"),
             command=lambda: _set_align("center")
         )
         btn_c.pack(side="left", padx=3, fill="x", expand=True)
@@ -1062,7 +1085,8 @@ class PropertiesPanel(ctk.CTkFrame):
         btn_r = ctk.CTkButton(
             align_row, text="➡ Right", width=68, height=26, corner_radius=6,
             fg_color=accent if cur_align == "right" else PANEL_MID,
-            hover_color=PANEL_HOV, font=ctk.CTkFont(size=9, weight="bold"),
+            hover_color=PANEL_HOV, text_color=TXT_W,
+            font=ctk.CTkFont(size=9, weight="bold"),
             command=lambda: _set_align("right")
         )
         btn_r.pack(side="left", padx=(3, 0), fill="x", expand=True)
@@ -1076,7 +1100,9 @@ class PropertiesPanel(ctk.CTkFrame):
         ctk.CTkLabel(pos_x_row, text="X (0-100%)", font=ctk.CTkFont(size=10), text_color=TXT_L, width=70).pack(side="left")
 
         cur_x_pct = int(round(float(clip.get("custom_x", 0.5)) * 100))
-        x_ent = ctk.CTkEntry(pos_x_row, width=45, height=24, corner_radius=5, font=ctk.CTkFont(size=9, weight="bold"))
+        x_ent = ctk.CTkEntry(pos_x_row, width=45, height=24, corner_radius=5,
+                             fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W,
+                             font=ctk.CTkFont(size=9, weight="bold"))
         x_ent.insert(0, str(cur_x_pct))
         x_ent.pack(side="right")
 
@@ -1106,7 +1132,9 @@ class PropertiesPanel(ctk.CTkFrame):
 
         default_y = 0.85 if is_subtitle else 0.2
         cur_y_pct = int(round(float(clip.get("custom_y", default_y)) * 100))
-        y_ent = ctk.CTkEntry(pos_y_row, width=45, height=24, corner_radius=5, font=ctk.CTkFont(size=9, weight="bold"))
+        y_ent = ctk.CTkEntry(pos_y_row, width=45, height=24, corner_radius=5,
+                             fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W,
+                             font=ctk.CTkFont(size=9, weight="bold"))
         y_ent.insert(0, str(cur_y_pct))
         y_ent.pack(side="right")
 

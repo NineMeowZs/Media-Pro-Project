@@ -279,6 +279,7 @@ class MediaPanel(ctk.CTkFrame):
             text="เลือกทั้งหมด",
             variable=select_all_var,
             command=_on_toggle_all,
+            text_color=TXT_W,
             font=ctk.CTkFont(family="Segoe UI", size=9, weight="bold"),
             checkbox_width=18, checkbox_height=18, corner_radius=4,
             fg_color=C_BLUE, hover_color="#2563eb"
@@ -696,7 +697,7 @@ class MediaPanel(ctk.CTkFrame):
 
         ctk.CTkButton(
             lbl_row, text="⚙", width=24, height=22, corner_radius=6,
-            fg_color=PANEL_MID, hover_color=PANEL_HOV,
+            fg_color=PANEL_MID, hover_color=PANEL_HOV, text_color=TXT_W,
             font=ctk.CTkFont(size=11),
             command=self._open_text_style_settings
         ).pack(side="right")
@@ -706,12 +707,13 @@ class MediaPanel(ctk.CTkFrame):
             self._pscroll, placeholder_text="Enter text…",
             height=32, corner_radius=6,
             fg_color=PANEL_MID, border_color=BORD,
+            text_color=TXT_W, placeholder_text_color=TXT_G,
             textvariable=self.controller.v_text
         ).pack(fill="x", pady=(0, 6))
 
         ctk.CTkButton(
             self._pscroll, text="Add Text Clip",
-            height=34, corner_radius=8, fg_color=C_PINK,
+            height=34, corner_radius=8, fg_color=C_PINK, text_color="#ffffff",
             font=ctk.CTkFont(size=11, weight="bold"),
             command=self.controller._add_text
         ).pack(fill="x")
@@ -1056,7 +1058,7 @@ class MediaPanel(ctk.CTkFrame):
         # 1. Auto Sub button inside Captions tab
         ctk.CTkButton(
             self._pscroll, text="🎙 Auto Generate Subtitles", height=34, corner_radius=10,
-            fg_color="#3b82f6", hover_color="#2563eb",
+            fg_color="#3b82f6", hover_color="#2563eb", text_color="#ffffff",
             font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
             command=self.controller._sub_dialog
         ).pack(fill="x", pady=(2, 6))

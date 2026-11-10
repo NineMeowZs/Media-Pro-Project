@@ -2,1094 +2,552 @@
   "tracks": {
     "main": [
       {
-        "path": "C:/Users/User/Downloads/\u0e1a\u0e23\u0e2b\u0e32\u0e23\u0e40\u0e07\u0e19 \u0e1a\u0e23\u0e2b\u0e32\u0e23\u0e2d\u0e32\u0e23\u0e21\u0e13  bigboung.mp4",
-        "name": "\u0e1a\u0e23\u0e2b\u0e32\u0e23\u0e40\u0e07\u0e19 \u0e1a\u0e23\u0e2b\u0e32\u0e23\u0e2d\u0e32\u0e23\u0e21\u0e13  bigboung.mp4",
+        "path": "D:/Folder_For_Work/Year4_1/Test Vid/podcast/\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e40\u0e07\u0e34\u0e19 bigboung.mp4",
+        "name": "\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e40\u0e07\u0e34\u0e19 bigboung.mp4",
         "start": 0,
         "end": 69.5,
-        "speed": 0.5278688524590164,
-        "volume": 1.459016393442623,
+        "speed": 1.0,
+        "volume": 1.0,
         "tl": 0.0,
         "fps": 30.0,
         "fade_in": 0.0,
         "fade_out": 0.0,
         "source_dur": 69.5,
-        "rotate": -63,
-        "scale": 1.51
+        "audio_muted": true,
+        "link_id": "link_d01be53e"
       }
     ],
     "subtitle": [
       {
         "path": "",
-        "name": "\u0e01\u0e32\u0e23\u0e17\u0e35\u0e48\u0e40\u0e23\u0e32\u0e44\u0e14\u0e49\u0e40\u0e1f\u0e25\u0e25\u0e4c\u0e41\u0e25\u0e30\u0e41\u0e25\u0e49\u0e2d",
+        "name": "\u0e01\u0e32\u0e23\u0e17\u0e35\u0e48\u0e40\u0e23\u0e32\u0e44\u0e14\u0e49\u0e40\u0e1f\u0e25\u0e25\u0e4c\u0e2d\u0e30\u0e44\u0e23\u0e2d\u0e22\u0e48",
         "start": 0,
-        "end": 2.5116279069767447,
+        "end": 1.9153846153846157,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 0.33,
+        "tl": 0.0,
         "fps": 30,
-        "sub_text": "\u0e01\u0e32\u0e23\u0e17\u0e35\u0e48\u0e40\u0e23\u0e32\u0e44\u0e14\u0e49\u0e40\u0e1f\u0e25\u0e25\u0e4c\u0e41\u0e25\u0e30\u0e41\u0e25\u0e49\u0e2d\u0e22",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e01\u0e32\u0e23\u0e17\u0e35\u0e48\u0e40\u0e23\u0e32\u0e44\u0e14\u0e49\u0e40\u0e1f\u0e25\u0e25\u0e4c\u0e2d\u0e30\u0e44\u0e23\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e41\u0e25\u0e49\u0e27"
       },
       {
         "path": "",
-        "name": "\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e41\u0e25\u0e49\u0e27\u0e1a\u0e35\u0e1a\u0e15\u0e31\u0e27\u0e40\u0e2d\u0e07",
+        "name": "\u0e1a\u0e35\u0e1a\u0e15\u0e31\u0e27\u0e40\u0e2d\u0e07",
         "start": 0,
-        "end": 1.8083720930232556,
+        "end": 0.5746153846153845,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 2.8416279069767447,
+        "tl": 1.9153846153846157,
         "fps": 30,
-        "sub_text": "\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e41\u0e25\u0e49\u0e27\u0e1a\u0e35\u0e1a\u0e15\u0e31\u0e27\u0e40\u0e2d\u0e07",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e1a\u0e35\u0e1a\u0e15\u0e31\u0e27\u0e40\u0e2d\u0e07"
       },
       {
         "path": "",
         "name": "\u0e40\u0e1e\u0e23\u0e32\u0e30\u0e40\u0e23\u0e32\u0e23\u0e39\u0e49\u0e27\u0e48\u0e32\u0e40\u0e23\u0e32\u0e43\u0e0a\u0e49\u0e0a\u0e35\u0e27\u0e34",
         "start": 0,
-        "end": 3.578285714285715,
+        "end": 1.9496954314720818,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 5.3,
+        "tl": 2.82,
         "fps": 30,
-        "sub_text": "\u0e40\u0e1e\u0e23\u0e32\u0e30\u0e40\u0e23\u0e32\u0e23\u0e39\u0e49\u0e27\u0e48\u0e32\u0e40\u0e23\u0e32\u0e43\u0e0a\u0e49\u0e0a\u0e35\u0e27\u0e34\u0e15\u0e2d\u0e22\u0e39\u0e48\u0e1a\u0e19",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e40\u0e1e\u0e23\u0e32\u0e30\u0e40\u0e23\u0e32\u0e23\u0e39\u0e49\u0e27\u0e48\u0e32\u0e40\u0e23\u0e32\u0e43\u0e0a\u0e49\u0e0a\u0e35\u0e27\u0e34\u0e15\u0e2d\u0e22\u0e39\u0e48\u0e1a\u0e19"
       },
       {
         "path": "",
-        "name": "\u0e17\u0e23\u0e31\u0e1e\u0e22\u0e32\u0e01\u0e23\u0e17\u0e35\u0e48\u0e08\u0e33\u0e01\u0e31\u0e14\u0e41\u0e25\u0e30\u0e25\u0e49\u0e2d\u0e22\u0e40",
+        "name": "\u0e17\u0e23\u0e31\u0e1e\u0e22\u0e32\u0e01\u0e23\u0e17\u0e35\u0e48\u0e08\u0e33\u0e01\u0e31\u0e14\u0e41\u0e25\u0e30\u0e25\u0e49\u0e2d\u0e22\u0e25",
         "start": 0,
-        "end": 3.4628571428571444,
+        "end": 1.7610152284263965,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 8.878285714285715,
+        "tl": 4.769695431472082,
         "fps": 30,
-        "sub_text": "\u0e17\u0e23\u0e31\u0e1e\u0e22\u0e32\u0e01\u0e23\u0e17\u0e35\u0e48\u0e08\u0e33\u0e01\u0e31\u0e14\u0e41\u0e25\u0e30\u0e25\u0e49\u0e2d\u0e22\u0e40\u0e2b\u0e25\u0e48\u0e32\u0e25\u0e07",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e17\u0e23\u0e31\u0e1e\u0e22\u0e32\u0e01\u0e23\u0e17\u0e35\u0e48\u0e08\u0e33\u0e01\u0e31\u0e14\u0e41\u0e25\u0e30\u0e25\u0e49\u0e2d\u0e22\u0e25\u0e48\u0e2d\u0e25\u0e07"
       },
       {
         "path": "",
-        "name": "\u0e44\u0e1b\u0e40\u0e25\u0e48\u0e19\u0e40\u0e25\u0e48",
+        "name": "\u0e44\u0e1b\u0e40\u0e23\u0e37\u0e48\u0e2d\u0e22\u0e40\u0e23\u0e37\u0e48\u0e2d\u0e22\u0e40\u0e21\u0e37\u0e48\u0e2d\u0e23\u0e30\u0e22\u0e30\u0e40",
         "start": 0,
-        "end": 1.0388571428571431,
+        "end": 2.327055837563453,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 12.34114285714286,
+        "tl": 6.530710659898478,
         "fps": 30,
-        "sub_text": "\u0e44\u0e1b\u0e40\u0e25\u0e48\u0e19\u0e40\u0e25\u0e48",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e44\u0e1b\u0e40\u0e23\u0e37\u0e48\u0e2d\u0e22\u0e40\u0e23\u0e37\u0e48\u0e2d\u0e22\u0e40\u0e21\u0e37\u0e48\u0e2d\u0e23\u0e30\u0e22\u0e30\u0e40\u0e27\u0e25\u0e32\u0e40\u0e27\u0e25\u0e32\u0e1c\u0e48\u0e32\u0e19\u0e44\u0e1b"
       },
       {
         "path": "",
-        "name": "\u0e40\u0e21\u0e37\u0e48\u0e2d\u0e23\u0e30\u0e22\u0e30\u0e40\u0e27\u0e25\u0e32\u0e21\u0e31\u0e19\u0e1c\u0e48\u0e32\u0e19\u0e44\u0e1b\u0e19\u0e32",
+        "name": "\u0e19\u0e32\u0e19\u0e21\u0e31\u0e19\u0e04\u0e48\u0e2d\u0e22\u0e04\u0e48\u0e2d\u0e22\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e27\u0e34\u0e18",
         "start": 0,
-        "end": 3.6470588235294095,
+        "end": 2.1383756345177662,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 13.73,
+        "tl": 8.857766497461931,
         "fps": 30,
-        "sub_text": "\u0e40\u0e21\u0e37\u0e48\u0e2d\u0e23\u0e30\u0e22\u0e30\u0e40\u0e27\u0e25\u0e32\u0e21\u0e31\u0e19\u0e1c\u0e48\u0e32\u0e19\u0e44\u0e1b\u0e19\u0e32\u0e19\u0e21\u0e31\u0e19\u0e04\u0e48\u0e30",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e19\u0e32\u0e19\u0e21\u0e31\u0e19\u0e04\u0e48\u0e2d\u0e22\u0e04\u0e48\u0e2d\u0e22\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e27\u0e34\u0e18\u0e35\u0e0a\u0e35\u0e27\u0e34\u0e15\u0e2a\u0e34\u0e48\u0e07"
       },
       {
         "path": "",
-        "name": "\u0e04\u0e48\u0e2d\u0e22\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e27\u0e34\u0e18\u0e35\u0e0a\u0e35\u0e27\u0e34\u0e15",
+        "name": "\u0e17\u0e35\u0e48\u0e1c\u0e21\u0e40\u0e23\u0e35\u0e22\u0e19\u0e23\u0e39\u0e49\u0e01\u0e47\u0e04\u0e37\u0e2d\u0e27\u0e48\u0e32\u0e40\u0e23\u0e35",
         "start": 0,
-        "end": 2.3529411764705905,
+        "end": 2.0125888324873102,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 17.37705882352941,
+        "tl": 10.996142131979697,
         "fps": 30,
-        "sub_text": "\u0e04\u0e48\u0e2d\u0e22\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e27\u0e34\u0e18\u0e35\u0e0a\u0e35\u0e27\u0e34\u0e15",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e17\u0e35\u0e48\u0e1c\u0e21\u0e40\u0e23\u0e35\u0e22\u0e19\u0e23\u0e39\u0e49\u0e01\u0e47\u0e04\u0e37\u0e2d\u0e27\u0e48\u0e32\u0e40\u0e23\u0e35\u0e22\u0e19\u0e23\u0e39\u0e1b\u0e41\u0e1a\u0e1a"
       },
       {
         "path": "",
-        "name": "\u0e2a\u0e34\u0e48\u0e07\u0e2b\u0e19\u0e36\u0e48\u0e07\u0e17\u0e35\u0e48\u0e1c\u0e21\u0e40\u0e23\u0e35\u0e22\u0e19\u0e23\u0e39\u0e49\u0e01\u0e47",
+        "name": "\u0e01\u0e32\u0e23\u0e40\u0e1a\u0e25\u0e2b\u0e32\u0e13\u0e40\u0e07\u0e34\u0e19\u0e01\u0e32\u0e23\u0e17\u0e33\u0e1a\u0e31\u0e0d\u0e0a\u0e35",
         "start": 0,
-        "end": 3.5769230769230766,
+        "end": 1.4465482233502538,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 19.48,
+        "tl": 13.008730964467007,
         "fps": 30,
-        "sub_text": "\u0e2a\u0e34\u0e48\u0e07\u0e2b\u0e19\u0e36\u0e48\u0e07\u0e17\u0e35\u0e48\u0e1c\u0e21\u0e40\u0e23\u0e35\u0e22\u0e19\u0e23\u0e39\u0e49\u0e01\u0e47\u0e04\u0e37\u0e2d\u0e27\u0e48\u0e32",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e01\u0e32\u0e23\u0e40\u0e1a\u0e25\u0e2b\u0e32\u0e13\u0e40\u0e07\u0e34\u0e19\u0e01\u0e32\u0e23\u0e17\u0e33\u0e1a\u0e31\u0e0d\u0e0a\u0e35"
       },
       {
         "path": "",
-        "name": "\u0e40\u0e23\u0e34\u0e22\u0e19\u0e25\u0e39\u0e01\u0e41\u0e1a\u0e1a\u0e01\u0e32\u0e23\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e40\u0e07\u0e34\u0e19",
+        "name": "\u0e40\u0e22\u0e48\u0e41\u0e22\u0e30\u0e21\u0e32\u0e01\u0e21\u0e32\u0e22",
         "start": 0,
-        "end": 4.053846153846155,
+        "end": 0.7547208121827396,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 23.056923076923077,
+        "tl": 14.455279187817261,
         "fps": 30,
-        "sub_text": "\u0e40\u0e23\u0e34\u0e22\u0e19\u0e25\u0e39\u0e01\u0e41\u0e1a\u0e1a\u0e01\u0e32\u0e23\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e40\u0e07\u0e34\u0e19\u0e01\u0e32\u0e23\u0e17\u0e33\u0e1a\u0e31\u0e0d\u0e0a\u0e35",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e40\u0e22\u0e48\u0e41\u0e22\u0e30\u0e21\u0e32\u0e01\u0e21\u0e32\u0e22"
       },
       {
         "path": "",
-        "name": "\u0e40\u0e22\u0e37\u0e48\u0e2d\u0e41\u0e22\u0e30\u0e21\u0e32\u0e01\u0e21\u0e48\u0e32",
+        "name": "\u0e2d\u0e31\u0e19\u0e19\u0e31\u0e49\u0e19\u0e01\u0e47\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e07\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e17\u0e35",
         "start": 0,
-        "end": 1.6692307692307686,
+        "end": 3.3589010989010983,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 27.110769230769233,
+        "tl": 15.6,
         "fps": 30,
-        "sub_text": "\u0e40\u0e22\u0e37\u0e48\u0e2d\u0e41\u0e22\u0e30\u0e21\u0e32\u0e01\u0e21\u0e48\u0e32",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e2d\u0e31\u0e19\u0e19\u0e31\u0e49\u0e19\u0e01\u0e47\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e07\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e17\u0e35\u0e48\u0e43\u0e0a\u0e49\u0e44\u0e14\u0e49\u0e41\u0e25\u0e30"
       },
       {
         "path": "",
-        "name": "\u0e2d\u0e31\u0e19\u0e19\u0e31\u0e49\u0e19\u0e01\u0e47\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e07\u0e04\u0e4c\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49",
+        "name": "\u0e15\u0e49\u0e2d\u0e07\u0e43\u0e0a\u0e49\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e01\u0e23\u0e30\u0e40\u0e1b\u0e4b\u0e32\u0e2a\u0e48\u0e27\u0e19",
         "start": 0,
-        "end": 6.302040816326535,
+        "end": 3.852857142857143,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 29.52,
+        "tl": 18.958901098901098,
         "fps": 30,
-        "sub_text": "\u0e2d\u0e31\u0e19\u0e19\u0e31\u0e49\u0e19\u0e01\u0e47\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e07\u0e04\u0e4c\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e17\u0e35\u0e48\u0e43\u0e0a\u0e49\u0e44\u0e14\u0e49\u0e41\u0e25\u0e30\u0e15\u0e49\u0e2d\u0e07",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e15\u0e49\u0e2d\u0e07\u0e43\u0e0a\u0e49\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e01\u0e23\u0e30\u0e40\u0e1b\u0e4b\u0e32\u0e2a\u0e48\u0e27\u0e19\u0e15\u0e31\u0e27\u0e44\u0e2d\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e01\u0e31\u0e19"
       },
       {
         "path": "",
-        "name": "\u0e43\u0e0a\u0e49\u0e42\u0e1a\u0e23\u0e18\u0e32\u0e13",
+        "name": "\u0e08\u0e14\u0e1a\u0e31\u0e19\u0e0a\u0e35\u0e17\u0e33\u0e44\u0e21\u0e25\u0e31\u0e1a\u0e44\u0e2b\u0e23\u0e08\u0e31\u0e22",
         "start": 0,
-        "end": 1.4179591836734673,
+        "end": 1.975824175824176,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 35.822040816326535,
+        "tl": 22.81175824175824,
         "fps": 30,
-        "sub_text": "\u0e43\u0e0a\u0e49\u0e42\u0e1a\u0e23\u0e18\u0e32\u0e13",
-        "font_name": "Leelawadee",
-        "bold": true,
-        "italic": true,
-        "font_size": 8,
-        "font_color": "#ffffff"
+        "sub_text": "\u0e08\u0e14\u0e1a\u0e31\u0e19\u0e0a\u0e35\u0e17\u0e33\u0e44\u0e21\u0e25\u0e31\u0e1a\u0e44\u0e2b\u0e23\u0e08\u0e31\u0e22"
       },
       {
         "path": "",
-        "name": "\u0e01\u0e23\u0e30\u0e40\u0e1b\u0e4b\u0e32\u0e2a\u0e37\u0e48\u0e19\u0e15\u0e31\u0e27",
+        "name": "\u0e1f\u0e32\u0e01\u0e23\u0e43\u0e0a\u0e49\u0e2d\u0e49\u0e2d\u0e21\u0e01\u0e23\u0e2a\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e30\u0e44\u0e23",
         "start": 0,
-        "end": 2.0,
+        "end": 2.173406593406593,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 37.66,
+        "tl": 24.787582417582417,
         "fps": 30,
-        "sub_text": "\u0e01\u0e23\u0e30\u0e40\u0e1b\u0e4b\u0e32\u0e2a\u0e37\u0e48\u0e19\u0e15\u0e31\u0e27",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e1f\u0e32\u0e01\u0e23\u0e43\u0e0a\u0e49\u0e2d\u0e49\u0e2d\u0e21\u0e01\u0e23\u0e2a\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e30\u0e44\u0e23"
       },
       {
         "path": "",
-        "name": "\u0e43\u0e2b\u0e49\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e01\u0e31\u0e19\u0e08\u0e14\u0e1a\u0e31\u0e19\u0e0a\u0e35\u0e17\u0e33\u0e43\u0e2b",
+        "name": "\u0e40\u0e2e\u0e35\u0e22\u0e04\u0e27\u0e32\u0e21\u0e08\u0e19\u0e21\u0e31\u0e19\u0e1a\u0e35\u0e1a\u0e43\u0e2b\u0e49\u0e40\u0e23\u0e32\u0e23\u0e35",
         "start": 0,
-        "end": 6.939999999999998,
+        "end": 2.5685714285714276,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 39.71,
+        "tl": 26.96098901098901,
         "fps": 30,
-        "sub_text": "\u0e43\u0e2b\u0e49\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e01\u0e31\u0e19\u0e08\u0e14\u0e1a\u0e31\u0e19\u0e0a\u0e35\u0e17\u0e33\u0e43\u0e2b\u0e49\u0e25\u0e31\u0e14\u0e44\u0e2b\u0e23\u0e48\u0e44\u0e14\u0e49",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e40\u0e2e\u0e35\u0e22\u0e04\u0e27\u0e32\u0e21\u0e08\u0e19\u0e21\u0e31\u0e19\u0e1a\u0e35\u0e1a\u0e43\u0e2b\u0e49\u0e40\u0e23\u0e32\u0e23\u0e35\u0e22\u0e19"
       },
       {
         "path": "",
-        "name": "\u0e1f\u0e32\u0e01\u0e48\u0e2d\u0e19\u0e43\u0e0a\u0e49\u0e2d\u0e2d\u0e21\u0e01\u0e48\u0e2d\u0e19\u0e0b\u0e30\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e30",
+        "name": "\u0e23\u0e39\u0e49\u0e17\u0e35\u0e48\u0e08\u0e30\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e08\u0e31\u0e14\u0e01\u0e32\u0e23\u0e2d\u0e32\u0e23\u0e21",
         "start": 0,
-        "end": 4.875,
+        "end": 3.3589010989010966,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 57.6900445048302,
+        "tl": 29.529560439560438,
         "fps": 30,
-        "sub_text": "\u0e1f\u0e32\u0e01\u0e48\u0e2d\u0e19\u0e43\u0e0a\u0e49\u0e2d\u0e2d\u0e21\u0e01\u0e48\u0e2d\u0e19\u0e0b\u0e30\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e30\u0e44\u0e23",
-        "font_name": "Impact",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e23\u0e39\u0e49\u0e17\u0e35\u0e48\u0e08\u0e30\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e08\u0e31\u0e14\u0e01\u0e32\u0e23\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c\u0e41\u0e25\u0e30\u0e1c\u0e21\u0e04\u0e34\u0e14"
       },
       {
         "path": "",
-        "name": "\u0e40\u0e2e\u0e49\u0e22\u0e48\u0e30",
+        "name": "\u0e27\u0e48\u0e32\u0e40\u0e1b\u0e47\u0e19",
         "start": 0,
-        "end": 1.125,
+        "end": 0.6915384615384639,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 51.765,
+        "tl": 32.888461538461534,
         "fps": 30,
-        "sub_text": "\u0e40\u0e2e\u0e49\u0e22\u0e48\u0e30",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e27\u0e48\u0e32\u0e40\u0e1b\u0e47\u0e19"
       },
       {
         "path": "",
-        "name": "\u0e04\u0e27\u0e32\u0e21\u0e08\u0e23\u0e21\u0e31\u0e19\u0e1a\u0e35\u0e1a\u0e43\u0e2b\u0e49\u0e40\u0e23\u0e32\u0e40\u0e23\u0e35\u0e22\u0e19\u0e23",
+        "name": "\u0e2a\u0e34\u0e48\u0e07\u0e17\u0e35\u0e48\u0e42\u0e04\u0e15\u0e23\u0e2a\u0e33\u0e04\u0e31\u0e0d\u0e40\u0e25\u0e22",
         "start": 0,
-        "end": 6.342857142857142,
+        "end": 1.2556521739130417,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 53.16,
+        "tl": 33.92,
         "fps": 30,
-        "sub_text": "\u0e04\u0e27\u0e32\u0e21\u0e08\u0e23\u0e21\u0e31\u0e19\u0e1a\u0e35\u0e1a\u0e43\u0e2b\u0e49\u0e40\u0e23\u0e32\u0e40\u0e23\u0e35\u0e22\u0e19\u0e23\u0e39\u0e49\u0e17\u0e35\u0e48\u0e08\u0e30\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e2a\u0e34\u0e48\u0e07\u0e17\u0e35\u0e48\u0e42\u0e04\u0e15\u0e23\u0e2a\u0e33\u0e04\u0e31\u0e0d\u0e40\u0e25\u0e22"
       },
       {
         "path": "",
-        "name": "\u0e08\u0e31\u0e14\u0e01\u0e32\u0e23\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c",
+        "name": "\u0e1e\u0e30\u0e27\u0e30",
         "start": 0,
-        "end": 2.057142857142857,
+        "end": 0.2643478260869543,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 59.50285714285714,
+        "tl": 35.17565217391304,
         "fps": 30,
-        "sub_text": "\u0e08\u0e31\u0e14\u0e01\u0e32\u0e23\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e1e\u0e30\u0e27\u0e30"
       },
       {
         "path": "",
-        "name": "\u0e41\u0e25\u0e49\u0e27\u0e1c\u0e21\u0e04\u0e34\u0e14\u0e27\u0e48\u0e32\u0e40\u0e1b\u0e47\u0e19",
+        "name": "\u0e17\u0e32\u0e22\u0e17\u0e35\u0e48\u0e2a\u0e38\u0e14\u0e41\u0e25\u0e49\u0e27\u0e1e\u0e2d\u0e21\u0e37\u0e2d\u0e40\u0e04\u0e22\u0e44\u0e21\u0e48",
         "start": 0,
-        "end": 2.0,
+        "end": 3.6577405857740573,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 61.64,
+        "tl": 35.71,
         "fps": 30,
-        "sub_text": "\u0e41\u0e25\u0e49\u0e27\u0e1c\u0e21\u0e04\u0e34\u0e14\u0e27\u0e48\u0e32\u0e40\u0e1b\u0e47\u0e19",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e17\u0e32\u0e22\u0e17\u0e35\u0e48\u0e2a\u0e38\u0e14\u0e41\u0e25\u0e49\u0e27\u0e1e\u0e2d\u0e21\u0e37\u0e2d\u0e40\u0e04\u0e22\u0e44\u0e21\u0e48\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e08\u0e30"
       },
       {
         "path": "",
-        "name": "\u0e2a\u0e34\u0e48\u0e07\u0e17\u0e35\u0e48\u0e42\u0e04\u0e49\u0e14\u0e2a\u0e33\u0e04\u0e31\u0e0d\u0e40\u0e25\u0e22",
+        "name": "\u0e41\u0e14\u0e48\u0e07\u0e08\u0e23\u0e34\u0e07\u0e2b\u0e23\u0e37\u0e2d\u0e41\u0e25\u0e30\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e43\u0e19\u0e0a\u0e35",
         "start": 0,
-        "end": 2.026666666666671,
+        "end": 3.185774058577408,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 64.24,
+        "tl": 39.36774058577406,
         "fps": 30,
-        "sub_text": "\u0e2a\u0e34\u0e48\u0e07\u0e17\u0e35\u0e48\u0e42\u0e04\u0e49\u0e14\u0e2a\u0e33\u0e04\u0e31\u0e0d\u0e40\u0e25\u0e22",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e41\u0e14\u0e48\u0e07\u0e08\u0e23\u0e34\u0e07\u0e2b\u0e23\u0e37\u0e2d\u0e41\u0e25\u0e30\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e43\u0e19\u0e0a\u0e35\u0e27\u0e34\u0e15"
       },
       {
         "path": "",
-        "name": "\u0e40\u0e1e\u0e23\u0e32\u0e30\u0e27\u0e48\u0e32",
+        "name": "\u0e15\u0e49\u0e2d\u0e07\u0e1e\u0e36\u0e48\u0e07\u0e1e\u0e32\u0e04\u0e19\u0e2d\u0e37\u0e48\u0e19\u0e2d\u0e32\u0e14\u0e2d\u0e07\u0e41\u0e1a\u0e1a",
         "start": 0,
-        "end": 0.8533333333333388,
+        "end": 3.539748953974893,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 66.26666666666667,
+        "tl": 42.553514644351466,
         "fps": 30,
-        "sub_text": "\u0e40\u0e1e\u0e23\u0e32\u0e30\u0e27\u0e48\u0e32",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e15\u0e49\u0e2d\u0e07\u0e1e\u0e36\u0e48\u0e07\u0e1e\u0e32\u0e04\u0e19\u0e2d\u0e37\u0e48\u0e19\u0e2d\u0e32\u0e14\u0e2d\u0e07\u0e41\u0e1a\u0e1a\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
       },
       {
         "path": "",
-        "name": "\u0e17\u0e49\u0e32\u0e19\u0e17\u0e35\u0e48\u0e2a\u0e38\u0e14\u0e41\u0e25\u0e49\u0e27\u0e04\u0e2d\u0e21\u0e21\u0e37\u0e2d\u0e40\u0e04\u0e22\u0e44",
+        "name": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32",
         "start": 0,
-        "end": 3.406000000000006,
+        "end": 2.831799163179916,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 67.63,
+        "tl": 46.09326359832636,
         "fps": 30,
-        "sub_text": "\u0e17\u0e49\u0e32\u0e19\u0e17\u0e35\u0e48\u0e2a\u0e38\u0e14\u0e41\u0e25\u0e49\u0e27\u0e04\u0e2d\u0e21\u0e21\u0e37\u0e2d\u0e40\u0e04\u0e22\u0e44\u0e21\u0e48",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
       },
       {
         "path": "",
-        "name": "\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e08\u0e30\u0e41\u0e14\u0e07\u0e08\u0e23\u0e34\u0e07",
+        "name": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32",
         "start": 0,
-        "end": 1.8340000000000032,
+        "end": 2.831799163179916,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 71.036,
+        "tl": 48.925062761506275,
         "fps": 30,
-        "sub_text": "\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e08\u0e30\u0e41\u0e14\u0e07\u0e08\u0e23\u0e34\u0e07",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
       },
       {
         "path": "",
-        "name": "\u0e41\u0e25\u0e30\u0e41\u0e25\u0e30\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e43\u0e19\u0e0a\u0e35\u0e27\u0e34\u0e15\u0e15\u0e49\u0e2d\u0e07\u0e1e\u0e36",
+        "name": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32",
         "start": 0,
-        "end": 4.607809523809522,
+        "end": 2.831799163179916,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 73.14,
+        "tl": 51.75686192468619,
         "fps": 30,
-        "sub_text": "\u0e41\u0e25\u0e30\u0e41\u0e25\u0e30\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e43\u0e19\u0e0a\u0e35\u0e27\u0e34\u0e15\u0e15\u0e49\u0e2d\u0e07\u0e1e\u0e36\u0e48\u0e07\u0e1e\u0e32\u0e04\u0e19\u0e2d\u0e37\u0e48\u0e19",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
       },
       {
         "path": "",
-        "name": "\u0e2d\u0e32\u0e08\u0e23\u0e07\u0e41\u0e1a\u0e1a\u0e27\u0e48\u0e32\u0e44\u0e1b\u0e22\u0e37\u0e21\u0e04\u0e19\u0e19\u0e35\u0e49",
+        "name": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32",
         "start": 0,
-        "end": 2.8460000000000036,
+        "end": 2.831799163179916,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 77.74780952380952,
+        "tl": 54.58866108786611,
         "fps": 30,
-        "sub_text": "\u0e2d\u0e32\u0e08\u0e23\u0e07\u0e41\u0e1a\u0e1a\u0e27\u0e48\u0e32\u0e44\u0e1b\u0e22\u0e37\u0e21\u0e04\u0e19\u0e19\u0e35\u0e49",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
       },
       {
         "path": "",
-        "name": "\u0e44\u0e1b\u0e01\u0e39\u0e49\u0e04\u0e19\u0e19\u0e49\u0e19\u0e21\u0e31\u0e19\u0e01\u0e47\u0e04\u0e48\u0e2d\u0e19\u0e02\u0e49\u0e32\u0e07\u0e41",
+        "name": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32",
         "start": 0,
-        "end": 3.52361904761905,
+        "end": 2.831799163179916,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 80.59380952380953,
+        "tl": 57.42046025104602,
         "fps": 30,
-        "sub_text": "\u0e44\u0e1b\u0e01\u0e39\u0e49\u0e04\u0e19\u0e19\u0e49\u0e19\u0e21\u0e31\u0e19\u0e01\u0e47\u0e04\u0e48\u0e2d\u0e19\u0e02\u0e49\u0e32\u0e07\u0e41\u0e2a\u0e14",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
       },
       {
         "path": "",
-        "name": "\u0e41\u0e25\u0e49\u0e27\u0e01\u0e47\u0e23\u0e39\u0e49\u0e2a\u0e36\u0e01\u0e41\u0e22\u0e01\u0e01\u0e31\u0e1a\u0e15\u0e31\u0e27\u0e40\u0e2d\u0e07",
+        "name": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32",
         "start": 0,
-        "end": 3.2525714285714287,
+        "end": 2.831799163179916,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 84.11742857142858,
+        "tl": 60.25225941422594,
         "fps": 30,
-        "sub_text": "\u0e41\u0e25\u0e49\u0e27\u0e01\u0e47\u0e23\u0e39\u0e49\u0e2a\u0e36\u0e01\u0e41\u0e22\u0e01\u0e01\u0e31\u0e1a\u0e15\u0e31\u0e27\u0e40\u0e2d\u0e07",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
       },
       {
         "path": "",
-        "name": "\u0e41\u0e15\u0e48\u0e21\u0e36\u0e01\u0e01\u0e47\u0e15\u0e49\u0e2d\u0e07\u0e04\u0e19\u0e2d\u0e22\u0e39\u0e48\u0e44\u0e1b\u0e08\u0e32\u0e01",
+        "name": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27",
         "start": 0,
-        "end": 2.853703703703701,
+        "end": 0.8259414225941413,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 87.79,
+        "tl": 63.084058577405855,
         "fps": 30,
-        "sub_text": "\u0e41\u0e15\u0e48\u0e21\u0e36\u0e01\u0e01\u0e47\u0e15\u0e49\u0e2d\u0e07\u0e04\u0e19\u0e2d\u0e22\u0e39\u0e48\u0e44\u0e1b\u0e08\u0e32\u0e01",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27"
       },
       {
         "path": "",
-        "name": "\u0e17\u0e35\u0e48\u0e40\u0e04\u0e22\u0e21\u0e35\u0e2d\u0e19\u0e38\u0e0d\u0e32\u0e15\u0e4c\u0e2d\u0e31\u0e19\u0e19\u0e35\u0e49\u0e01\u0e47\u0e21",
+        "name": "\u0e2a\u0e33\u0e04\u0e31\u0e0d\u0e21\u0e32\u0e01\u0e01\u0e27\u0e48\u0e32\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e43\u0e19\u0e01\u0e32\u0e23",
         "start": 0,
-        "end": 3.1018518518518476,
+        "end": 3.3500000000000085,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 90.64370370370371,
+        "tl": 64.3,
         "fps": 30,
-        "sub_text": "\u0e17\u0e35\u0e48\u0e40\u0e04\u0e22\u0e21\u0e35\u0e2d\u0e19\u0e38\u0e0d\u0e32\u0e15\u0e4c\u0e2d\u0e31\u0e19\u0e19\u0e35\u0e49\u0e01\u0e47\u0e21\u0e35",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e2a\u0e33\u0e04\u0e31\u0e0d\u0e21\u0e32\u0e01\u0e01\u0e27\u0e48\u0e32\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e43\u0e19\u0e01\u0e32\u0e23\u0e08\u0e30\u0e17\u0e33\u0e1a\u0e32\u0e17\u0e0a\u0e35\u0e4a"
       },
       {
         "path": "",
-        "name": "\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49",
+        "name": "\u0e2d\u0e30\u0e44\u0e23\u0e1e\u0e23\u0e38\u0e48\u0e07\u0e19\u0e35\u0e49\u0e14\u0e49\u0e27\u0e22\u0e0b\u0e49\u0e33",
         "start": 0,
-        "end": 0.7444444444444542,
+        "end": 1.1099999999999994,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 93.74555555555555,
+        "tl": 68.23,
         "fps": 30,
-        "sub_text": "\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e40\u0e23\u0e32\u0e08\u0e30\u0e44\u0e21\u0e48\u0e21\u0e35\u0e2a\u0e34\u0e48\u0e07\u0e19\u0e35\u0e49\u0e41\u0e25\u0e49\u0e27\u0e19\u0e30",
-        "start": 0,
-        "end": 2.0,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 94.86,
-        "fps": 30,
-        "sub_text": "\u0e40\u0e23\u0e32\u0e08\u0e30\u0e44\u0e21\u0e48\u0e21\u0e35\u0e2a\u0e34\u0e48\u0e07\u0e19\u0e35\u0e49\u0e41\u0e25\u0e49\u0e27\u0e19\u0e30",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e23\u0e31\u0e1a\u0e21\u0e32\u0e43\u0e2b\u0e49\u0e44\u0e14\u0e49",
-        "start": 0,
-        "end": 2.0,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 96.98,
-        "fps": 30,
-        "sub_text": "\u0e23\u0e31\u0e1a\u0e21\u0e32\u0e43\u0e2b\u0e49\u0e44\u0e14\u0e49",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e44\u0e21\u0e48\u0e40\u0e1b\u0e25\u0e48\u0e32\u0e2b\u0e23\u0e2d\u0e01\u0e21\u0e31\u0e19\u0e44\u0e21\u0e48\u0e08\u0e33\u0e40\u0e1b\u0e47\u0e19",
-        "start": 0,
-        "end": 3.8054545454545377,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 98.55,
-        "fps": 30,
-        "sub_text": "\u0e44\u0e21\u0e48\u0e40\u0e1b\u0e25\u0e48\u0e32\u0e2b\u0e23\u0e2d\u0e01\u0e21\u0e31\u0e19\u0e44\u0e21\u0e48\u0e08\u0e33\u0e40\u0e1b\u0e47\u0e19\u0e21\u0e35\u0e04\u0e27\u0e32\u0e21\u0e2a\u0e38\u0e02\u0e41\u0e04\u0e48\u0e19\u0e35\u0e49",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e01\u0e47\u0e44\u0e14\u0e49\u0e2d\u0e31\u0e19\u0e19\u0e35\u0e49\u0e15\u0e31\u0e14\u0e17\u0e34\u0e49\u0e07\u0e44\u0e27\u0e49\u0e01\u0e31\u0e19",
-        "start": 0,
-        "end": 2.63454545454546,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 102.35545454545453,
-        "fps": 30,
-        "sub_text": "\u0e01\u0e47\u0e44\u0e14\u0e49\u0e2d\u0e31\u0e19\u0e19\u0e35\u0e49\u0e15\u0e31\u0e14\u0e17\u0e34\u0e49\u0e07\u0e44\u0e27\u0e49\u0e01\u0e31\u0e19\u0e44\u0e14\u0e49",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e1e\u0e2d\u0e40\u0e23\u0e32\u0e1c\u0e48\u0e32\u0e19\u0e0a\u0e48\u0e27\u0e07\u0e19\u0e31\u0e49\u0e19\u0e21\u0e32\u0e44\u0e14\u0e49\u0e41\u0e19",
-        "start": 0,
-        "end": 3.450000000000003,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 105.28,
-        "fps": 30,
-        "sub_text": "\u0e1e\u0e2d\u0e40\u0e23\u0e32\u0e1c\u0e48\u0e32\u0e19\u0e0a\u0e48\u0e27\u0e07\u0e19\u0e31\u0e49\u0e19\u0e21\u0e32\u0e44\u0e14\u0e49\u0e41\u0e19\u0e48\u0e30",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e04\u0e27\u0e32\u0e21\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e43\u0e19\u0e01\u0e32\u0e23\u0e08\u0e31\u0e14\u0e01\u0e32\u0e23\u0e2d\u0e32\u0e23",
-        "start": 0,
-        "end": 4.302040816326539,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 109.0,
-        "fps": 30,
-        "sub_text": "\u0e04\u0e27\u0e32\u0e21\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e43\u0e19\u0e01\u0e32\u0e23\u0e08\u0e31\u0e14\u0e01\u0e32\u0e23\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c\u0e43\u0e19\u0e15\u0e4c\u0e01\u0e32\u0e23",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e43\u0e2b\u0e49\u0e08\u0e30\u0e40\u0e25\u0e37\u0e2d\u0e01\u0e0b\u0e37\u0e49\u0e2d\u0e02\u0e2d\u0e07\u0e2b\u0e23\u0e37\u0e2d\u0e40\u0e25\u0e37",
-        "start": 0,
-        "end": 3.9224489795918345,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 113.30204081632654,
-        "fps": 30,
-        "sub_text": "\u0e43\u0e2b\u0e49\u0e08\u0e30\u0e40\u0e25\u0e37\u0e2d\u0e01\u0e0b\u0e37\u0e49\u0e2d\u0e02\u0e2d\u0e07\u0e2b\u0e23\u0e37\u0e2d\u0e40\u0e25\u0e37\u0e2d\u0e14\u0e17\u0e35\u0e48\u0e08\u0e30",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e44\u0e21\u0e48\u0e0b\u0e36\u0e49\u0e2d\u0e44\u0e21\u0e48\u0e08\u0e30\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e30\u0e44\u0e23\u0e1a\u0e32\u0e07\u0e2d",
-        "start": 0,
-        "end": 4.1755102040816325,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 117.22448979591837,
-        "fps": 30,
-        "sub_text": "\u0e44\u0e21\u0e48\u0e0b\u0e36\u0e49\u0e2d\u0e44\u0e21\u0e48\u0e08\u0e30\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e30\u0e44\u0e23\u0e1a\u0e32\u0e07\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e40\u0e19\u0e35\u0e48\u0e22",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e2a\u0e33\u0e04\u0e31\u0e0d",
-        "start": 0,
-        "end": 1.0,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 121.8,
-        "fps": 30,
-        "sub_text": "\u0e2a\u0e33\u0e04\u0e31\u0e0d",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e21\u0e32\u0e01\u0e01\u0e27\u0e48\u0e32",
-        "start": 0,
-        "end": 2.0,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 123.34,
-        "fps": 30,
-        "sub_text": "\u0e21\u0e32\u0e01\u0e01\u0e27\u0e48\u0e32",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e09\u0e31\u0e19\u0e04\u0e34\u0e14\u0e27\u0e48\u0e32\u0e04\u0e38\u0e13\u0e15\u0e49\u0e2d\u0e07\u0e01\u0e32\u0e23\u0e04\u0e27\u0e32\u0e21\u0e2a",
-        "start": 0,
-        "end": 0.05,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 125.96000000000001,
-        "fps": 30,
-        "sub_text": "\u0e09\u0e31\u0e19\u0e04\u0e34\u0e14\u0e27\u0e48\u0e32\u0e04\u0e38\u0e13\u0e15\u0e49\u0e2d\u0e07\u0e01\u0e32\u0e23\u0e04\u0e27\u0e32\u0e21\u0e2a\u0e33\u0e04\u0e31\u0e0d\u0e02\u0e2d\u0e07\u0e40\u0e18\u0e2d",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e17\u0e35\u0e48\u0e04\u0e38\u0e49\u0e21\u0e02\u0e2d\u0e07\u0e40\u0e02\u0e32\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e40\u0e01\u0e34\u0e14\u0e02\u0e36",
-        "start": 0,
-        "end": 0.05,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 125.98111801242237,
-        "fps": 30,
-        "sub_text": "\u0e17\u0e35\u0e48\u0e04\u0e38\u0e49\u0e21\u0e02\u0e2d\u0e07\u0e40\u0e02\u0e32\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e40\u0e01\u0e34\u0e14\u0e02\u0e36\u0e49\u0e19\u0e02\u0e49\u0e32\u0e07\u0e01\u0e31\u0e1a",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e40\u0e18\u0e2d\u0e01\u0e25\u0e31\u0e01\u0e29\u0e13\u0e4c\u0e2d\u0e31\u0e19\u0e17\u0e35\u0e48\u0e2a\u0e38\u0e14\u0e17\u0e35\u0e48\u0e08\u0e30",
-        "start": 0,
-        "end": 0.05,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 126.00161490683232,
-        "fps": 30,
-        "sub_text": "\u0e40\u0e18\u0e2d\u0e01\u0e25\u0e31\u0e01\u0e29\u0e13\u0e4c\u0e2d\u0e31\u0e19\u0e17\u0e35\u0e48\u0e2a\u0e38\u0e14\u0e17\u0e35\u0e48\u0e08\u0e30\u0e01\u0e25\u0e31\u0e1a\u0e43\u0e2b\u0e49",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e04\u0e38\u0e21\u0e2b\u0e23\u0e37\u0e2d\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e02\u0e2d\u0e07\u0e09\u0e31\u0e19\u0e19\u0e48\u0e32\u0e2a",
-        "start": 0,
-        "end": 0.05,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 126.02086956521741,
-        "fps": 30,
-        "sub_text": "\u0e04\u0e38\u0e21\u0e2b\u0e23\u0e37\u0e2d\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e02\u0e2d\u0e07\u0e09\u0e31\u0e19\u0e19\u0e48\u0e32\u0e2a\u0e32\u0e27\u0e34\u0e17\u0e22\u0e32",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e28\u0e32\u0e2a\u0e34\u0e17\u0e18\u0e34\u0e4c\u0e43\u0e19\u0e01\u0e32\u0e23\u0e2a\u0e48\u0e27\u0e19\u0e02\u0e31\u0e1a\u0e2a\u0e34\u0e48\u0e07",
-        "start": 0,
-        "end": 0.05,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 126.03950310559009,
-        "fps": 30,
-        "sub_text": "\u0e28\u0e32\u0e2a\u0e34\u0e17\u0e18\u0e34\u0e4c\u0e43\u0e19\u0e01\u0e32\u0e23\u0e2a\u0e48\u0e27\u0e19\u0e02\u0e31\u0e1a\u0e2a\u0e34\u0e48\u0e07\u0e02\u0e2d\u0e07\u0e1b\u0e23\u0e30\u0e40\u0e17\u0e28",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e43\u0e19\u0e01\u0e32\u0e23\u0e08\u0e30\u0e17\u0e33\u0e1a\u0e31\u0e0d\u0e0a\u0e35",
-        "start": 0,
-        "end": 2.780000000000001,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 125.35,
-        "fps": 30,
-        "sub_text": "\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e43\u0e19\u0e01\u0e32\u0e23\u0e08\u0e30\u0e17\u0e33\u0e1a\u0e31\u0e0d\u0e0a\u0e35",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
-      },
-      {
-        "path": "",
-        "name": "\u0e2d\u0e30\u0e44\u0e23\u0e1e\u0e23\u0e38\u0e48\u0e07\u0e19\u0e35\u0e49\u0e14\u0e49\u0e27\u0e22\u0e2a\u0e32\u0e21",
-        "start": 0,
-        "end": 2.0999999999999943,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 129.22,
-        "fps": 30,
-        "sub_text": "\u0e2d\u0e30\u0e44\u0e23\u0e1e\u0e23\u0e38\u0e48\u0e07\u0e19\u0e35\u0e49\u0e14\u0e49\u0e27\u0e22\u0e2a\u0e32\u0e21",
-        "font_name": "Leelawadee",
-        "font_size": 8,
-        "font_color": "#ffffff",
-        "bold": true,
-        "italic": true
+        "sub_text": "\u0e2d\u0e30\u0e44\u0e23\u0e1e\u0e23\u0e38\u0e48\u0e07\u0e19\u0e35\u0e49\u0e14\u0e49\u0e27\u0e22\u0e0b\u0e49\u0e33"
       }
     ],
     "audio_0": [
       {
-        "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e2d\u0e31\u0e14/1SoundEffect SFX/New Donk City - Super Mario Odyssey OST.mp3",
-        "name": "New Donk City - Super Mario Odyssey OST.mp3",
+        "path": "D:/Folder_For_Work/Year4_1/Test Vid/podcast/\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e40\u0e07\u0e34\u0e19 bigboung.mp4",
+        "name": "[Audio] \u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e40\u0e07\u0e34\u0e19 bigboung.mp4",
         "start": 0,
-        "end": 187.12,
+        "end": 69.5,
         "speed": 1.0,
         "volume": 1.0,
-        "tl": 17.37705882352941,
-        "fps": 30,
+        "tl": 0.0,
+        "fps": 30.0,
         "fade_in": 0.0,
         "fade_out": 0.0,
-        "source_dur": 187.12
+        "source_dur": 69.5,
+        "link_id": "link_d01be53e"
       }
     ],
-    "layer_0": [
-      {
-        "path": "",
-        "name": "bigbound \u0e04\u0e27\u0e07\u0e01\u0e23\u0e30\u0e40\u0e08\u0e35\u0e4a\u0e22\u0e27",
-        "start": 0,
-        "end": 131.39084767441085,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 0.0,
-        "fps": 30,
-        "custom_x": 0.5003249720727125,
-        "custom_y": 0.10628782964728826,
-        "font_name": "TH Sarabun New",
-        "font_size": 18,
-        "font_color": "#ffffff",
-        "decoration": "shadow",
-        "source_dur": 999999.0,
-        "scale": 0.24,
-        "rotate": 128.66
-      }
-    ],
-    "audio_1": [],
-    "layer_1": [
-      {
-        "path": "",
-        "name": "\u0e15\u0e2d\u0e19 \u0e04\u0e27\u0e32\u0e21\u0e08\u0e19\u0e21\u0e31\u0e19\u0e19\u0e48\u0e32\u0e01\u0e31\u0e27",
-        "start": 0,
-        "end": 131.74508944313988,
-        "speed": 1.0,
-        "volume": 1.0,
-        "tl": 0.0,
-        "fps": 30,
-        "custom_x": 0.5003249720727125,
-        "custom_y": 0.17589644644044966,
-        "font_name": "Tahoma",
-        "font_size": 18,
-        "font_color": "#ffffff",
-        "decoration": "shadow",
-        "source_dur": 999999.0,
-        "scale": 0.19,
-        "rotate": -1.4
-      }
-    ],
-    "layer_2": [],
-    "layer_3": []
+    "audio_1": []
   },
   "assets": [
     {
-      "path": "C:/Users/User/Downloads/\u0e1a\u0e23\u0e2b\u0e32\u0e23\u0e40\u0e07\u0e19 \u0e1a\u0e23\u0e2b\u0e32\u0e23\u0e2d\u0e32\u0e23\u0e21\u0e13  bigboung.mp4",
-      "name": "\u0e1a\u0e23\u0e2b\u0e32\u0e23\u0e40\u0e07\u0e19 \u0e1a\u0e23\u0e2b\u0e32\u0e23\u0e2d\u0e32\u0e23\u0e21\u0e13  bigboung.mp4",
+      "path": "D:/Folder_For_Work/Year4_1/Test Vid/podcast/\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e40\u0e07\u0e34\u0e19 bigboung.mp4",
+      "name": "\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e40\u0e07\u0e34\u0e19 bigboung.mp4",
       "type": "video"
-    },
-    {
-      "path": "D:/\u0e27\u0e34\u0e14\u0e35\u0e42\u0e2d\u0e17\u0e35\u0e48\u0e2d\u0e31\u0e14/1SoundEffect SFX/New Donk City - Super Mario Odyssey OST.mp3",
-      "name": "New Donk City - Super Mario Odyssey OST.mp3",
-      "type": "audio"
     }
   ],
   "muted": {},
   "segments": [
     {
-      "start": 0.33,
-      "end": 2.8416279069767447,
-      "text": "\u0e01\u0e32\u0e23\u0e17\u0e35\u0e48\u0e40\u0e23\u0e32\u0e44\u0e14\u0e49\u0e40\u0e1f\u0e25\u0e25\u0e4c\u0e41\u0e25\u0e30\u0e41\u0e25\u0e49\u0e2d\u0e22"
+      "start": 0.0,
+      "end": 1.9153846153846157,
+      "text": "\u0e01\u0e32\u0e23\u0e17\u0e35\u0e48\u0e40\u0e23\u0e32\u0e44\u0e14\u0e49\u0e40\u0e1f\u0e25\u0e25\u0e4c\u0e2d\u0e30\u0e44\u0e23\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e41\u0e25\u0e49\u0e27"
     },
     {
-      "start": 2.8416279069767447,
-      "end": 4.65,
-      "text": "\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e41\u0e25\u0e49\u0e27\u0e1a\u0e35\u0e1a\u0e15\u0e31\u0e27\u0e40\u0e2d\u0e07"
+      "start": 1.9153846153846157,
+      "end": 2.49,
+      "text": "\u0e1a\u0e35\u0e1a\u0e15\u0e31\u0e27\u0e40\u0e2d\u0e07"
     },
     {
-      "start": 5.3,
-      "end": 8.878285714285715,
+      "start": 2.82,
+      "end": 4.769695431472082,
       "text": "\u0e40\u0e1e\u0e23\u0e32\u0e30\u0e40\u0e23\u0e32\u0e23\u0e39\u0e49\u0e27\u0e48\u0e32\u0e40\u0e23\u0e32\u0e43\u0e0a\u0e49\u0e0a\u0e35\u0e27\u0e34\u0e15\u0e2d\u0e22\u0e39\u0e48\u0e1a\u0e19"
     },
     {
-      "start": 8.878285714285715,
-      "end": 12.34114285714286,
-      "text": "\u0e17\u0e23\u0e31\u0e1e\u0e22\u0e32\u0e01\u0e23\u0e17\u0e35\u0e48\u0e08\u0e33\u0e01\u0e31\u0e14\u0e41\u0e25\u0e30\u0e25\u0e49\u0e2d\u0e22\u0e40\u0e2b\u0e25\u0e48\u0e32\u0e25\u0e07"
+      "start": 4.769695431472082,
+      "end": 6.530710659898478,
+      "text": "\u0e17\u0e23\u0e31\u0e1e\u0e22\u0e32\u0e01\u0e23\u0e17\u0e35\u0e48\u0e08\u0e33\u0e01\u0e31\u0e14\u0e41\u0e25\u0e30\u0e25\u0e49\u0e2d\u0e22\u0e25\u0e48\u0e2d\u0e25\u0e07"
     },
     {
-      "start": 12.34114285714286,
-      "end": 13.380000000000003,
-      "text": "\u0e44\u0e1b\u0e40\u0e25\u0e48\u0e19\u0e40\u0e25\u0e48"
+      "start": 6.530710659898478,
+      "end": 8.857766497461931,
+      "text": "\u0e44\u0e1b\u0e40\u0e23\u0e37\u0e48\u0e2d\u0e22\u0e40\u0e23\u0e37\u0e48\u0e2d\u0e22\u0e40\u0e21\u0e37\u0e48\u0e2d\u0e23\u0e30\u0e22\u0e30\u0e40\u0e27\u0e25\u0e32\u0e40\u0e27\u0e25\u0e32\u0e1c\u0e48\u0e32\u0e19\u0e44\u0e1b"
     },
     {
-      "start": 13.73,
-      "end": 17.37705882352941,
-      "text": "\u0e40\u0e21\u0e37\u0e48\u0e2d\u0e23\u0e30\u0e22\u0e30\u0e40\u0e27\u0e25\u0e32\u0e21\u0e31\u0e19\u0e1c\u0e48\u0e32\u0e19\u0e44\u0e1b\u0e19\u0e32\u0e19\u0e21\u0e31\u0e19\u0e04\u0e48\u0e30"
+      "start": 8.857766497461931,
+      "end": 10.996142131979697,
+      "text": "\u0e19\u0e32\u0e19\u0e21\u0e31\u0e19\u0e04\u0e48\u0e2d\u0e22\u0e04\u0e48\u0e2d\u0e22\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e27\u0e34\u0e18\u0e35\u0e0a\u0e35\u0e27\u0e34\u0e15\u0e2a\u0e34\u0e48\u0e07"
     },
     {
-      "start": 17.37705882352941,
-      "end": 19.73,
-      "text": "\u0e04\u0e48\u0e2d\u0e22\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e27\u0e34\u0e18\u0e35\u0e0a\u0e35\u0e27\u0e34\u0e15"
+      "start": 10.996142131979697,
+      "end": 13.008730964467007,
+      "text": "\u0e17\u0e35\u0e48\u0e1c\u0e21\u0e40\u0e23\u0e35\u0e22\u0e19\u0e23\u0e39\u0e49\u0e01\u0e47\u0e04\u0e37\u0e2d\u0e27\u0e48\u0e32\u0e40\u0e23\u0e35\u0e22\u0e19\u0e23\u0e39\u0e1b\u0e41\u0e1a\u0e1a"
     },
     {
-      "start": 19.48,
-      "end": 23.056923076923077,
-      "text": "\u0e2a\u0e34\u0e48\u0e07\u0e2b\u0e19\u0e36\u0e48\u0e07\u0e17\u0e35\u0e48\u0e1c\u0e21\u0e40\u0e23\u0e35\u0e22\u0e19\u0e23\u0e39\u0e49\u0e01\u0e47\u0e04\u0e37\u0e2d\u0e27\u0e48\u0e32"
+      "start": 13.008730964467007,
+      "end": 14.455279187817261,
+      "text": "\u0e01\u0e32\u0e23\u0e40\u0e1a\u0e25\u0e2b\u0e32\u0e13\u0e40\u0e07\u0e34\u0e19\u0e01\u0e32\u0e23\u0e17\u0e33\u0e1a\u0e31\u0e0d\u0e0a\u0e35"
     },
     {
-      "start": 23.056923076923077,
-      "end": 27.110769230769233,
-      "text": "\u0e40\u0e23\u0e34\u0e22\u0e19\u0e25\u0e39\u0e01\u0e41\u0e1a\u0e1a\u0e01\u0e32\u0e23\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e40\u0e07\u0e34\u0e19\u0e01\u0e32\u0e23\u0e17\u0e33\u0e1a\u0e31\u0e0d\u0e0a\u0e35"
+      "start": 14.455279187817261,
+      "end": 15.21,
+      "text": "\u0e40\u0e22\u0e48\u0e41\u0e22\u0e30\u0e21\u0e32\u0e01\u0e21\u0e32\u0e22"
     },
     {
-      "start": 27.110769230769233,
-      "end": 28.78,
-      "text": "\u0e40\u0e22\u0e37\u0e48\u0e2d\u0e41\u0e22\u0e30\u0e21\u0e32\u0e01\u0e21\u0e48\u0e32"
+      "start": 15.6,
+      "end": 18.958901098901098,
+      "text": "\u0e2d\u0e31\u0e19\u0e19\u0e31\u0e49\u0e19\u0e01\u0e47\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e07\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e17\u0e35\u0e48\u0e43\u0e0a\u0e49\u0e44\u0e14\u0e49\u0e41\u0e25\u0e30"
     },
     {
-      "start": 29.52,
-      "end": 35.822040816326535,
-      "text": "\u0e2d\u0e31\u0e19\u0e19\u0e31\u0e49\u0e19\u0e01\u0e47\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e07\u0e04\u0e4c\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e17\u0e35\u0e48\u0e43\u0e0a\u0e49\u0e44\u0e14\u0e49\u0e41\u0e25\u0e30\u0e15\u0e49\u0e2d\u0e07"
+      "start": 18.958901098901098,
+      "end": 22.81175824175824,
+      "text": "\u0e15\u0e49\u0e2d\u0e07\u0e43\u0e0a\u0e49\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e01\u0e23\u0e30\u0e40\u0e1b\u0e4b\u0e32\u0e2a\u0e48\u0e27\u0e19\u0e15\u0e31\u0e27\u0e44\u0e2d\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e01\u0e31\u0e19"
     },
     {
-      "start": 35.822040816326535,
-      "end": 37.24,
-      "text": "\u0e43\u0e0a\u0e49\u0e42\u0e1a\u0e23\u0e18\u0e32\u0e13"
+      "start": 22.81175824175824,
+      "end": 24.787582417582417,
+      "text": "\u0e08\u0e14\u0e1a\u0e31\u0e19\u0e0a\u0e35\u0e17\u0e33\u0e44\u0e21\u0e25\u0e31\u0e1a\u0e44\u0e2b\u0e23\u0e08\u0e31\u0e22"
     },
     {
-      "start": 37.66,
-      "end": 39.66,
-      "text": "\u0e01\u0e23\u0e30\u0e40\u0e1b\u0e4b\u0e32\u0e2a\u0e37\u0e48\u0e19\u0e15\u0e31\u0e27"
+      "start": 24.787582417582417,
+      "end": 26.96098901098901,
+      "text": "\u0e1f\u0e32\u0e01\u0e23\u0e43\u0e0a\u0e49\u0e2d\u0e49\u0e2d\u0e21\u0e01\u0e23\u0e2a\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e30\u0e44\u0e23"
     },
     {
-      "start": 39.71,
-      "end": 46.65,
-      "text": "\u0e43\u0e2b\u0e49\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e01\u0e31\u0e19\u0e08\u0e14\u0e1a\u0e31\u0e19\u0e0a\u0e35\u0e17\u0e33\u0e43\u0e2b\u0e49\u0e25\u0e31\u0e14\u0e44\u0e2b\u0e23\u0e48\u0e44\u0e14\u0e49"
+      "start": 26.96098901098901,
+      "end": 29.529560439560438,
+      "text": "\u0e40\u0e2e\u0e35\u0e22\u0e04\u0e27\u0e32\u0e21\u0e08\u0e19\u0e21\u0e31\u0e19\u0e1a\u0e35\u0e1a\u0e43\u0e2b\u0e49\u0e40\u0e23\u0e32\u0e23\u0e35\u0e22\u0e19"
     },
     {
-      "start": 46.89,
-      "end": 51.765,
-      "text": "\u0e1f\u0e32\u0e01\u0e48\u0e2d\u0e19\u0e43\u0e0a\u0e49\u0e2d\u0e2d\u0e21\u0e01\u0e48\u0e2d\u0e19\u0e0b\u0e30\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e30\u0e44\u0e23"
+      "start": 29.529560439560438,
+      "end": 32.888461538461534,
+      "text": "\u0e23\u0e39\u0e49\u0e17\u0e35\u0e48\u0e08\u0e30\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23\u0e08\u0e31\u0e14\u0e01\u0e32\u0e23\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c\u0e41\u0e25\u0e30\u0e1c\u0e21\u0e04\u0e34\u0e14"
     },
     {
-      "start": 51.765,
-      "end": 52.89,
-      "text": "\u0e40\u0e2e\u0e49\u0e22\u0e48\u0e30"
+      "start": 32.888461538461534,
+      "end": 33.58,
+      "text": "\u0e27\u0e48\u0e32\u0e40\u0e1b\u0e47\u0e19"
     },
     {
-      "start": 53.16,
-      "end": 59.50285714285714,
-      "text": "\u0e04\u0e27\u0e32\u0e21\u0e08\u0e23\u0e21\u0e31\u0e19\u0e1a\u0e35\u0e1a\u0e43\u0e2b\u0e49\u0e40\u0e23\u0e32\u0e40\u0e23\u0e35\u0e22\u0e19\u0e23\u0e39\u0e49\u0e17\u0e35\u0e48\u0e08\u0e30\u0e1a\u0e23\u0e34\u0e2b\u0e32\u0e23"
+      "start": 33.92,
+      "end": 35.17565217391304,
+      "text": "\u0e2a\u0e34\u0e48\u0e07\u0e17\u0e35\u0e48\u0e42\u0e04\u0e15\u0e23\u0e2a\u0e33\u0e04\u0e31\u0e0d\u0e40\u0e25\u0e22"
     },
     {
-      "start": 59.50285714285714,
-      "end": 61.559999999999995,
-      "text": "\u0e08\u0e31\u0e14\u0e01\u0e32\u0e23\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c"
+      "start": 35.17565217391304,
+      "end": 35.44,
+      "text": "\u0e1e\u0e30\u0e27\u0e30"
     },
     {
-      "start": 61.64,
-      "end": 63.64,
-      "text": "\u0e41\u0e25\u0e49\u0e27\u0e1c\u0e21\u0e04\u0e34\u0e14\u0e27\u0e48\u0e32\u0e40\u0e1b\u0e47\u0e19"
+      "start": 35.71,
+      "end": 39.36774058577406,
+      "text": "\u0e17\u0e32\u0e22\u0e17\u0e35\u0e48\u0e2a\u0e38\u0e14\u0e41\u0e25\u0e49\u0e27\u0e1e\u0e2d\u0e21\u0e37\u0e2d\u0e40\u0e04\u0e22\u0e44\u0e21\u0e48\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e08\u0e30"
     },
     {
-      "start": 64.24,
-      "end": 66.26666666666667,
-      "text": "\u0e2a\u0e34\u0e48\u0e07\u0e17\u0e35\u0e48\u0e42\u0e04\u0e49\u0e14\u0e2a\u0e33\u0e04\u0e31\u0e0d\u0e40\u0e25\u0e22"
+      "start": 39.36774058577406,
+      "end": 42.553514644351466,
+      "text": "\u0e41\u0e14\u0e48\u0e07\u0e08\u0e23\u0e34\u0e07\u0e2b\u0e23\u0e37\u0e2d\u0e41\u0e25\u0e30\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e43\u0e19\u0e0a\u0e35\u0e27\u0e34\u0e15"
     },
     {
-      "start": 66.26666666666667,
-      "end": 67.12,
-      "text": "\u0e40\u0e1e\u0e23\u0e32\u0e30\u0e27\u0e48\u0e32"
+      "start": 42.553514644351466,
+      "end": 46.09326359832636,
+      "text": "\u0e15\u0e49\u0e2d\u0e07\u0e1e\u0e36\u0e48\u0e07\u0e1e\u0e32\u0e04\u0e19\u0e2d\u0e37\u0e48\u0e19\u0e2d\u0e32\u0e14\u0e2d\u0e07\u0e41\u0e1a\u0e1a\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
     },
     {
-      "start": 67.63,
-      "end": 71.036,
-      "text": "\u0e17\u0e49\u0e32\u0e19\u0e17\u0e35\u0e48\u0e2a\u0e38\u0e14\u0e41\u0e25\u0e49\u0e27\u0e04\u0e2d\u0e21\u0e21\u0e37\u0e2d\u0e40\u0e04\u0e22\u0e44\u0e21\u0e48"
+      "start": 46.09326359832636,
+      "end": 48.925062761506275,
+      "text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
     },
     {
-      "start": 71.036,
-      "end": 72.87,
-      "text": "\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e08\u0e30\u0e41\u0e14\u0e07\u0e08\u0e23\u0e34\u0e07"
+      "start": 48.925062761506275,
+      "end": 51.75686192468619,
+      "text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
     },
     {
-      "start": 73.14,
-      "end": 77.74780952380952,
-      "text": "\u0e41\u0e25\u0e30\u0e41\u0e25\u0e30\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e43\u0e19\u0e0a\u0e35\u0e27\u0e34\u0e15\u0e15\u0e49\u0e2d\u0e07\u0e1e\u0e36\u0e48\u0e07\u0e1e\u0e32\u0e04\u0e19\u0e2d\u0e37\u0e48\u0e19"
+      "start": 51.75686192468619,
+      "end": 54.58866108786611,
+      "text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
     },
     {
-      "start": 77.74780952380952,
-      "end": 80.59380952380953,
-      "text": "\u0e2d\u0e32\u0e08\u0e23\u0e07\u0e41\u0e1a\u0e1a\u0e27\u0e48\u0e32\u0e44\u0e1b\u0e22\u0e37\u0e21\u0e04\u0e19\u0e19\u0e35\u0e49"
+      "start": 54.58866108786611,
+      "end": 57.42046025104602,
+      "text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
     },
     {
-      "start": 80.59380952380953,
-      "end": 84.11742857142858,
-      "text": "\u0e44\u0e1b\u0e01\u0e39\u0e49\u0e04\u0e19\u0e19\u0e49\u0e19\u0e21\u0e31\u0e19\u0e01\u0e47\u0e04\u0e48\u0e2d\u0e19\u0e02\u0e49\u0e32\u0e07\u0e41\u0e2a\u0e14"
+      "start": 57.42046025104602,
+      "end": 60.25225941422594,
+      "text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
     },
     {
-      "start": 84.11742857142858,
-      "end": 87.37,
-      "text": "\u0e41\u0e25\u0e49\u0e27\u0e01\u0e47\u0e23\u0e39\u0e49\u0e2a\u0e36\u0e01\u0e41\u0e22\u0e01\u0e01\u0e31\u0e1a\u0e15\u0e31\u0e27\u0e40\u0e2d\u0e07"
+      "start": 60.25225941422594,
+      "end": 63.084058577405855,
+      "text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32"
     },
     {
-      "start": 87.79,
-      "end": 90.64370370370371,
-      "text": "\u0e41\u0e15\u0e48\u0e21\u0e36\u0e01\u0e01\u0e47\u0e15\u0e49\u0e2d\u0e07\u0e04\u0e19\u0e2d\u0e22\u0e39\u0e48\u0e44\u0e1b\u0e08\u0e32\u0e01"
+      "start": 63.084058577405855,
+      "end": 63.91,
+      "text": "\u0e27\u0e48\u0e32\u0e27\u0e48\u0e32\u0e27"
     },
     {
-      "start": 90.64370370370371,
-      "end": 93.74555555555555,
-      "text": "\u0e17\u0e35\u0e48\u0e40\u0e04\u0e22\u0e21\u0e35\u0e2d\u0e19\u0e38\u0e0d\u0e32\u0e15\u0e4c\u0e2d\u0e31\u0e19\u0e19\u0e35\u0e49\u0e01\u0e47\u0e21\u0e35"
+      "start": 64.3,
+      "end": 67.65,
+      "text": "\u0e2a\u0e33\u0e04\u0e31\u0e0d\u0e21\u0e32\u0e01\u0e01\u0e27\u0e48\u0e32\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e43\u0e19\u0e01\u0e32\u0e23\u0e08\u0e30\u0e17\u0e33\u0e1a\u0e32\u0e17\u0e0a\u0e35\u0e4a"
     },
     {
-      "start": 93.74555555555555,
-      "end": 94.49000000000001,
-      "text": "\u0e44\u0e21\u0e48\u0e44\u0e14\u0e49"
-    },
-    {
-      "start": 94.86,
-      "end": 96.86,
-      "text": "\u0e40\u0e23\u0e32\u0e08\u0e30\u0e44\u0e21\u0e48\u0e21\u0e35\u0e2a\u0e34\u0e48\u0e07\u0e19\u0e35\u0e49\u0e41\u0e25\u0e49\u0e27\u0e19\u0e30"
-    },
-    {
-      "start": 96.98,
-      "end": 98.98,
-      "text": "\u0e23\u0e31\u0e1a\u0e21\u0e32\u0e43\u0e2b\u0e49\u0e44\u0e14\u0e49"
-    },
-    {
-      "start": 98.55,
-      "end": 102.35545454545453,
-      "text": "\u0e44\u0e21\u0e48\u0e40\u0e1b\u0e25\u0e48\u0e32\u0e2b\u0e23\u0e2d\u0e01\u0e21\u0e31\u0e19\u0e44\u0e21\u0e48\u0e08\u0e33\u0e40\u0e1b\u0e47\u0e19\u0e21\u0e35\u0e04\u0e27\u0e32\u0e21\u0e2a\u0e38\u0e02\u0e41\u0e04\u0e48\u0e19\u0e35\u0e49"
-    },
-    {
-      "start": 102.35545454545453,
-      "end": 104.99,
-      "text": "\u0e01\u0e47\u0e44\u0e14\u0e49\u0e2d\u0e31\u0e19\u0e19\u0e35\u0e49\u0e15\u0e31\u0e14\u0e17\u0e34\u0e49\u0e07\u0e44\u0e27\u0e49\u0e01\u0e31\u0e19\u0e44\u0e14\u0e49"
-    },
-    {
-      "start": 105.28,
-      "end": 108.73,
-      "text": "\u0e1e\u0e2d\u0e40\u0e23\u0e32\u0e1c\u0e48\u0e32\u0e19\u0e0a\u0e48\u0e27\u0e07\u0e19\u0e31\u0e49\u0e19\u0e21\u0e32\u0e44\u0e14\u0e49\u0e41\u0e19\u0e48\u0e30"
-    },
-    {
-      "start": 109.0,
-      "end": 113.30204081632654,
-      "text": "\u0e04\u0e27\u0e32\u0e21\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e43\u0e19\u0e01\u0e32\u0e23\u0e08\u0e31\u0e14\u0e01\u0e32\u0e23\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c\u0e43\u0e19\u0e15\u0e4c\u0e01\u0e32\u0e23"
-    },
-    {
-      "start": 113.30204081632654,
-      "end": 117.22448979591837,
-      "text": "\u0e43\u0e2b\u0e49\u0e08\u0e30\u0e40\u0e25\u0e37\u0e2d\u0e01\u0e0b\u0e37\u0e49\u0e2d\u0e02\u0e2d\u0e07\u0e2b\u0e23\u0e37\u0e2d\u0e40\u0e25\u0e37\u0e2d\u0e14\u0e17\u0e35\u0e48\u0e08\u0e30"
-    },
-    {
-      "start": 117.22448979591837,
-      "end": 121.4,
-      "text": "\u0e44\u0e21\u0e48\u0e0b\u0e36\u0e49\u0e2d\u0e44\u0e21\u0e48\u0e08\u0e30\u0e40\u0e1b\u0e47\u0e19\u0e2d\u0e30\u0e44\u0e23\u0e1a\u0e32\u0e07\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e40\u0e19\u0e35\u0e48\u0e22"
-    },
-    {
-      "start": 121.8,
-      "end": 122.8,
-      "text": "\u0e2a\u0e33\u0e04\u0e31\u0e0d"
-    },
-    {
-      "start": 123.34,
-      "end": 125.34,
-      "text": "\u0e21\u0e32\u0e01\u0e01\u0e27\u0e48\u0e32"
-    },
-    {
-      "start": 125.96000000000001,
-      "end": 125.98111801242237,
-      "text": "\u0e09\u0e31\u0e19\u0e04\u0e34\u0e14\u0e27\u0e48\u0e32\u0e04\u0e38\u0e13\u0e15\u0e49\u0e2d\u0e07\u0e01\u0e32\u0e23\u0e04\u0e27\u0e32\u0e21\u0e2a\u0e33\u0e04\u0e31\u0e0d\u0e02\u0e2d\u0e07\u0e40\u0e18\u0e2d"
-    },
-    {
-      "start": 125.98111801242237,
-      "end": 126.00161490683232,
-      "text": "\u0e17\u0e35\u0e48\u0e04\u0e38\u0e49\u0e21\u0e02\u0e2d\u0e07\u0e40\u0e02\u0e32\u0e2d\u0e22\u0e48\u0e32\u0e07\u0e40\u0e01\u0e34\u0e14\u0e02\u0e36\u0e49\u0e19\u0e02\u0e49\u0e32\u0e07\u0e01\u0e31\u0e1a"
-    },
-    {
-      "start": 126.00161490683232,
-      "end": 126.02086956521741,
-      "text": "\u0e40\u0e18\u0e2d\u0e01\u0e25\u0e31\u0e01\u0e29\u0e13\u0e4c\u0e2d\u0e31\u0e19\u0e17\u0e35\u0e48\u0e2a\u0e38\u0e14\u0e17\u0e35\u0e48\u0e08\u0e30\u0e01\u0e25\u0e31\u0e1a\u0e43\u0e2b\u0e49"
-    },
-    {
-      "start": 126.02086956521741,
-      "end": 126.03950310559009,
-      "text": "\u0e04\u0e38\u0e21\u0e2b\u0e23\u0e37\u0e2d\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e02\u0e2d\u0e07\u0e09\u0e31\u0e19\u0e19\u0e48\u0e32\u0e2a\u0e32\u0e27\u0e34\u0e17\u0e22\u0e32"
-    },
-    {
-      "start": 126.03950310559009,
-      "end": 125.0,
-      "text": "\u0e28\u0e32\u0e2a\u0e34\u0e17\u0e18\u0e34\u0e4c\u0e43\u0e19\u0e01\u0e32\u0e23\u0e2a\u0e48\u0e27\u0e19\u0e02\u0e31\u0e1a\u0e2a\u0e34\u0e48\u0e07\u0e02\u0e2d\u0e07\u0e1b\u0e23\u0e30\u0e40\u0e17\u0e28"
-    },
-    {
-      "start": 125.35,
-      "end": 128.13,
-      "text": "\u0e04\u0e27\u0e32\u0e21\u0e23\u0e39\u0e49\u0e43\u0e19\u0e01\u0e32\u0e23\u0e08\u0e30\u0e17\u0e33\u0e1a\u0e31\u0e0d\u0e0a\u0e35"
-    },
-    {
-      "start": 129.22,
-      "end": 131.32,
-      "text": "\u0e2d\u0e30\u0e44\u0e23\u0e1e\u0e23\u0e38\u0e48\u0e07\u0e19\u0e35\u0e49\u0e14\u0e49\u0e27\u0e22\u0e2a\u0e32\u0e21"
+      "start": 68.23,
+      "end": 69.34,
+      "text": "\u0e2d\u0e30\u0e44\u0e23\u0e1e\u0e23\u0e38\u0e48\u0e07\u0e19\u0e35\u0e49\u0e14\u0e49\u0e27\u0e22\u0e0b\u0e49\u0e33"
     }
   ],
   "ratio": "9:16",
   "style": {
     "font_name": "Tahoma",
-    "font_size": 28,
-    "font_color": "#f0f0f0",
-    "decoration": "box",
-    "animation": "slide_up",
-    "position": "custom"
+    "font_size": 44,
+    "font_color": "#FFFFFF",
+    "bold": false,
+    "italic": false,
+    "decoration": "outline",
+    "decoration_color": "#000000",
+    "animation": "fade_in",
+    "position": "bottom_center",
+    "align": "center",
+    "max_chars_per_line": 40,
+    "max_lines": 2,
+    "margin_x": 40,
+    "margin_y": 40,
+    "custom_x": 0.5,
+    "custom_y": 0.85,
+    "line_spacing": 8,
+    "letter_spacing": 0,
+    "bg_opacity": 0.5
   },
   "version": 5
 }

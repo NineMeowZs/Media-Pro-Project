@@ -31,6 +31,8 @@ except Exception:
     pass
 
 import customtkinter as ctk
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
 from tkinter import messagebox, filedialog
 import tkinter as tk
 import threading
@@ -3862,6 +3864,7 @@ class _ExportDialog(BaseModal):
         for r in ["Original", "1080p", "720p", "480p"]:
             ctk.CTkRadioButton(rf, text=r, value=r, variable=self._res_v,
                                 font=ctk.CTkFont(size=10),
+                                text_color=TXT_W,
                                 radiobutton_width=16, radiobutton_height=16
                                 ).pack(side="left", padx=8)
 
@@ -3871,6 +3874,7 @@ class _ExportDialog(BaseModal):
         for q in self._CRF_MAP:
             ctk.CTkRadioButton(sc, text=q, value=q, variable=self._q_v,
                                 font=ctk.CTkFont(size=10),
+                                text_color=TXT_W,
                                 radiobutton_width=16, radiobutton_height=16
                                 ).pack(anchor="w", padx=4, pady=2)
 
@@ -3881,6 +3885,8 @@ class _ExportDialog(BaseModal):
             sc, text="Burn subtitles into video",
             variable=self._sub_v,
             font=ctk.CTkFont(size=10),
+            text_color=TXT_W,
+            text_color_disabled=TXT_L,
             state="normal" if self._has_subs else "disabled")
         self._sub_cb.pack(anchor="w", padx=4)
         if not self._has_subs:
@@ -3894,12 +3900,14 @@ class _ExportDialog(BaseModal):
         row = ctk.CTkFrame(sc, fg_color="transparent")
         row.pack(fill="x", pady=(0, 4))
         ctk.CTkEntry(row, textvariable=self._path_v, height=28,
-                     corner_radius=6, fg_color=PANEL_MID,
+                     corner_radius=6, fg_color=PANEL_MID, border_color=BORD,
+                     text_color=TXT_W, placeholder_text_color=TXT_G,
                      placeholder_text="Choose output path…"
                      ).pack(side="left", fill="x", expand=True, padx=(0, 4))
         ctk.CTkButton(row, text="Browse", width=70, height=28,
                       corner_radius=6, fg_color=PANEL_LIGHT,
-                      hover_color=PANEL_HOV, font=ctk.CTkFont(size=9),
+                      hover_color=PANEL_HOV, text_color=TXT_W,
+                      font=ctk.CTkFont(size=9),
                       command=self._browse).pack(side="left")
 
         # Action buttons in footer
@@ -3975,7 +3983,8 @@ class _SubtitleDialog(BaseModal):
         _mrow = ctk.CTkFrame(sc, fg_color="transparent")
         _mrow.pack(fill="x", pady=(0, 2))
         self._cm = ctk.CTkEntry(_mrow, placeholder_text="Path to model folder…",
-                                height=28, corner_radius=6, fg_color=PANEL_MID)
+                                height=28, corner_radius=6, fg_color=PANEL_MID, border_color=BORD,
+                                text_color=TXT_W, placeholder_text_color=TXT_G)
         self._cm.pack(side="left", fill="x", expand=True)
         self._cm.insert(0, active_model_dir)
 
@@ -3989,7 +3998,7 @@ class _SubtitleDialog(BaseModal):
 
         ctk.CTkButton(
             _mrow, text="…", width=28, height=28,
-            fg_color=PANEL_MID, hover_color="#334155",
+            fg_color=PANEL_MID, hover_color="#334155", text_color=TXT_W,
             font=ctk.CTkFont(size=12, weight="bold"),
             command=_browse_model,
         ).pack(side="left", padx=(4, 0))
@@ -4000,6 +4009,7 @@ class _SubtitleDialog(BaseModal):
         mf = ctk.CTkFrame(sc, fg_color="transparent"); mf.pack(fill="x", pady=(0, 6))
         for m in ["tiny", "base", "small", "medium"]:
             ctk.CTkRadioButton(mf, text=m, value=m, variable=self._mv,
+                                text_color=TXT_W,
                                 font=ctk.CTkFont(size=9)).pack(side="left", padx=6)
 
         sec("จำนวนคำต่อซับ (Words per subtitle)")
@@ -4020,7 +4030,7 @@ class _SubtitleDialog(BaseModal):
             pf=ctk.CTkFrame(sc,fg_color="transparent"); pf.pack(fill="x",pady=(0,6))
             for pi,p in enumerate(PRESETS):
                 ctk.CTkButton(pf,text=p["name"],width=108,height=26,corner_radius=6,
-                              fg_color=PANEL_MID,hover_color=PANEL_LIGHT,
+                              fg_color=PANEL_MID,hover_color=PANEL_LIGHT,text_color=TXT_W,
                               font=ctk.CTkFont(size=9),
                               command=lambda pp=p:self._preset(pp)
                               ).grid(row=pi//4,column=pi%4,padx=2,pady=2)
@@ -4029,36 +4039,40 @@ class _SubtitleDialog(BaseModal):
         self._fv=tk.StringVar(value=self._style.font_name)
         fonts=FONT_CHOICES or ["Arial","Tahoma","Courier New"]
         ctk.CTkOptionMenu(sc,values=fonts,variable=self._fv,height=28,
-                          corner_radius=6,fg_color=PANEL_MID).pack(fill="x",pady=(0,4))
+                          corner_radius=6,fg_color=PANEL_MID,button_color=PANEL_HOV,
+                          text_color=TXT_W,dropdown_fg_color=PANEL_MID,dropdown_text_color=TXT_W).pack(fill="x",pady=(0,4))
         r=ctk.CTkFrame(sc,fg_color="transparent"); r.pack(fill="x",pady=(0,6))
         ctk.CTkLabel(r,text="Size:",font=ctk.CTkFont(size=9),text_color=TXT_G,width=38).pack(side="left")
         self._sv=tk.IntVar(value=self._style.font_size)
         ctk.CTkSlider(r,from_=14,to=60,variable=self._sv,width=180).pack(side="left",padx=6)
-        ctk.CTkLabel(r,textvariable=self._sv,font=ctk.CTkFont(size=9),text_color=TXT_G).pack(side="left")
+        ctk.CTkLabel(r,textvariable=self._sv,font=ctk.CTkFont(size=9),text_color=TXT_W).pack(side="left")
 
         cr=ctk.CTkFrame(sc,fg_color="transparent"); cr.pack(fill="x",pady=(0,6))
         ctk.CTkLabel(cr,text="Color:",font=ctk.CTkFont(size=9),text_color=TXT_G).pack(side="left")
         self._cv=tk.StringVar(value=self._style.font_color)
         ctk.CTkEntry(cr,textvariable=self._cv,width=80,height=26,
-                     corner_radius=6,fg_color=PANEL_MID).pack(side="left",padx=6)
+                     corner_radius=6,fg_color=PANEL_MID,border_color=BORD,text_color=TXT_W).pack(side="left",padx=6)
 
         sec("Decoration")
         self._dv=tk.StringVar(value=self._style.decoration)
         ctk.CTkOptionMenu(sc,values=DECORATION_CHOICES or["none","outline","shadow","box"],
                           variable=self._dv,height=28,corner_radius=6,
-                          fg_color=PANEL_MID).pack(fill="x",pady=(0,6))
+                          fg_color=PANEL_MID,button_color=PANEL_HOV,
+                          text_color=TXT_W,dropdown_fg_color=PANEL_MID,dropdown_text_color=TXT_W).pack(fill="x",pady=(0,6))
 
         sec("Animation")
         self._av=tk.StringVar(value=self._style.animation)
         ctk.CTkOptionMenu(sc,values=ANIMATION_CHOICES or["none","fade_in","slide_up"],
                           variable=self._av,height=28,corner_radius=6,
-                          fg_color=PANEL_MID).pack(fill="x",pady=(0,6))
+                          fg_color=PANEL_MID,button_color=PANEL_HOV,
+                          text_color=TXT_W,dropdown_fg_color=PANEL_MID,dropdown_text_color=TXT_W).pack(fill="x",pady=(0,6))
 
         sec("Position")
         self._pv=tk.StringVar(value=self._style.position)
         ctk.CTkOptionMenu(sc,values=POSITION_CHOICES or["bottom_center","top_center"],
                           variable=self._pv,height=28,corner_radius=6,
-                          fg_color=PANEL_MID).pack(fill="x",pady=(0,6))
+                          fg_color=PANEL_MID,button_color=PANEL_HOV,
+                          text_color=TXT_W,dropdown_fg_color=PANEL_MID,dropdown_text_color=TXT_W).pack(fill="x",pady=(0,6))
 
         sec("ขอบเขตเวลาสร้างซับไตเติล (Time Range)")
         self._range_mode = tk.StringVar(value="full")
@@ -4066,20 +4080,22 @@ class _SubtitleDialog(BaseModal):
         rf.pack(fill="x", pady=(0, 4))
 
         ctk.CTkRadioButton(rf, text="ทั้งหมด (Full)", value="full", variable=self._range_mode,
+                            text_color=TXT_W,
                             font=ctk.CTkFont(size=9)).pack(side="left", padx=4)
         ctk.CTkRadioButton(rf, text="กำหนดช่วงเวลา (Custom Range)", value="custom", variable=self._range_mode,
+                            text_color=TXT_W,
                             font=ctk.CTkFont(size=9)).pack(side="left", padx=4)
 
         self._t_range_row = ctk.CTkFrame(sc, fg_color="transparent")
         self._t_range_row.pack(fill="x", pady=(0, 6))
 
         ctk.CTkLabel(self._t_range_row, text="เริ่ม (วินาที):", font=ctk.CTkFont(size=9), text_color=TXT_G).pack(side="left", padx=(0, 2))
-        self._t_start_ent = ctk.CTkEntry(self._t_range_row, width=64, height=26, corner_radius=6, fg_color=PANEL_MID)
+        self._t_start_ent = ctk.CTkEntry(self._t_range_row, width=64, height=26, corner_radius=6, fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W)
         self._t_start_ent.insert(0, "0.0")
         self._t_start_ent.pack(side="left", padx=(0, 8))
 
         ctk.CTkLabel(self._t_range_row, text="ถึง (วินาที):", font=ctk.CTkFont(size=9), text_color=TXT_G).pack(side="left", padx=(0, 2))
-        self._t_end_ent = ctk.CTkEntry(self._t_range_row, width=64, height=26, corner_radius=6, fg_color=PANEL_MID)
+        self._t_end_ent = ctk.CTkEntry(self._t_range_row, width=64, height=26, corner_radius=6, fg_color=PANEL_MID, border_color=BORD, text_color=TXT_W)
         self._t_end_ent.insert(0, "60.0")
         self._t_end_ent.pack(side="left")
 
@@ -4087,6 +4103,7 @@ class _SubtitleDialog(BaseModal):
         self._srt_var = tk.BooleanVar(value=False)
         srt_check = ctk.CTkCheckBox(sc, text="Auto-save SRT after transcription",
                                      variable=self._srt_var,
+                                     text_color=TXT_W,
                                      font=ctk.CTkFont(size=10),
                                      command=self._toggle_srt_path)
         srt_check.pack(anchor="w", pady=(0,4))
@@ -4096,11 +4113,14 @@ class _SubtitleDialog(BaseModal):
         self._srt_entry = ctk.CTkEntry(self._srt_row,
                                         placeholder_text="Output .srt path…",
                                         height=28, corner_radius=6,
-                                        fg_color=PANEL_MID, state="disabled")
+                                        fg_color=PANEL_MID, border_color=BORD,
+                                        text_color=TXT_W, placeholder_text_color=TXT_G,
+                                        state="disabled")
         self._srt_entry.pack(side="left", fill="x", expand=True, padx=(0,4))
         self._srt_browse = ctk.CTkButton(self._srt_row, text="Browse",
                                           width=62, height=28, corner_radius=6,
                                           fg_color=PANEL_LIGHT, hover_color=PANEL_HOV,
+                                          text_color=TXT_W, text_color_disabled=TXT_G,
                                           font=ctk.CTkFont(size=9),
                                           state="disabled",
                                           command=self._browse_srt)
